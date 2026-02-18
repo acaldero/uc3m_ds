@@ -1,12 +1,12 @@
 
 ## Distributed Systems: Supplementary Materials
 + **Felix García Carballeira and Alejandro Calderón Mateos** @ arcos.inf.uc3m.es
-+ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_sd/blob/main/LICENSE)
++ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
 
 ## Servicio distribuido basado en colas POSIX
 
-#### Compilar
+#### To compile
 
 Hay que introducir:
 ```
@@ -88,7 +88,7 @@ sudo mount -t mqueue none /dev/mqueue
 ls -las /dev/mqueue
 ```
 
-#### Arquitectura
+#### Architecture
 
 ```mermaid
 sequenceDiagram

@@ -13,21 +13,21 @@
       "serve": "npx honkit serve  ./materials  ../book",
       "book": "npm install; npx honkit build  ./materials  ../book"
    },
-   "name": "uc3m_sd",
+   "name": "uc3m_ds",
    "version": "1.0.0",
-   "description": "+ **Felix García Carballeira and Alejandro Calderón Mateos** @ arcos.inf.uc3m.es + [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_sd/blob/main/LICENSE)",
+   "description": "+ **Felix García Carballeira and Alejandro Calderón Mateos** @ arcos.inf.uc3m.es + [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)",
    "main": "index.js",
    "repository": {
       "type": "git",
-      "url": "git+https://github.com/acaldero/uc3m_sd.git"
+      "url": "git+https://github.com/acaldero/uc3m_ds.git"
    },
    "keywords": [],
    "author": "",
    "license": "Attribution-NonCommercial-ShareAlike 4.0 International",
    "bugs": {
-      "url": "https://github.com/acaldero/uc3m_sd/issues"
+      "url": "https://github.com/acaldero/uc3m_ds/issues"
    },
-   "homepage": "https://github.com/acaldero/uc3m_sd#readme",
+   "homepage": "https://github.com/acaldero/uc3m_ds#readme",
    "devDependencies": {
       "honkit-plugin-mermaid": "^0.1.4"
    },

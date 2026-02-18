@@ -1,7 +1,7 @@
 
 ## Distributed Systems: Supplementary Materials
 + **Felix García Carballeira and Alejandro Calderón Mateos** @ arcos.inf.uc3m.es
-+ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_sd/blob/main/LICENSE)
++ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
 
 ## Aplicación que usa un servicio distribuido basado en gSOAP/XML
@@ -107,7 +107,7 @@ $ python3 ./app-d.py
 </html>
 
 
-#### Arquitectura
+#### Architecture
 
 ```mermaid
 sequenceDiagram

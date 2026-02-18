@@ -1,34 +1,33 @@
 
 ## Distributed Systems: Supplementary Materials
 + **Felix García Carballeira and Alejandro Calderón Mateos** @ arcos.inf.uc3m.es
-+ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_sd/blob/main/LICENSE)
++ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
 
-## Servicio distribuido JSON-RPC sobre HTTP: servidor MCP de calculadora simple
+## Distributed JSON-RPC service over HTTP: simple calculator MCP server
 
- * [1. Ejecutar servidor mcp_server_calc.py y cliente mcp_client_calc.py](#-1-ejecutar-servidor-mcp_server_calcpy-y-cliente-mcp_client_calcpy)
+ * [1. To execute mcp_server_calc.py server and mcp_client_calc.py client](#-1-to-execute-mcp_server_calcpy-server-and-mcp_client_calcpy-client)
  * [2. Ejecutar servidor mcp_server_calc.py y cliente gemini cli](#-2-ejecutar-servidor-mcp_server_calcpy-y-cliente-gemini-cli)
  * [3. Ejecutar servidor mcp_server_calc.py y cliente Visual Studio Code](#-3-ejecutar-servidor-mcp_server_calcpy-y-cliente-visual-studio-code)
 
 
-## 🧪 1. Ejecutar servidor ```mcp_server_calc.py``` y cliente ```mcp_client_calc.py```
+## 🧪 1. To execute ```mcp_server_calc.py``` server and ```mcp_client_calc.py``` client
 
-* Preparación:
-  1. \[si no se tiene ya instalado\] hay que instalar los paquetes de Python de soporte MCP necesarios:
+* Preparation:
+  1. \[if not already installed\] you must install the necessary MCP support Python packages:
       ```bash
       python3 -m pip install -U fastapi fastmcp httpx starlette uvicorn --break-system-packages
       ```
 
-* Los pasos generales para ejecutar son:
-  * Ejecutar el servidor ```mcp_server_calc.py```
-  * Ejecutar el cliente  ```mcp_client_calc.py``` 
-  * Parar la ejecución del servidor<br>
-
+* The general steps to run are:
+  * Run the server ```mcp_server_calc.py```
+  * Run the client ```mcp_client_calc.py```
+  * Stop the server from running<br>
   
-* Un ejemplo de ejecución podría ser:
+* An example of execution could be:
   <html>
   <table>
-  <tr><th>Paso</th><th>Cliente</th><th>Servidor</th></tr>
+  <tr><th>Step</th><th>Client</th><th>Server</th></tr>
   <tr>
   <td>1</td>
   <td></td>
@@ -231,17 +230,17 @@ INFO:   Finished server process [171932]
      <table>
      <tr> <td>1.</td>
           <td>Hay que abrir la paleta de comandos con Ctrl-Alt-P y seleccionar "MCP: añadir servidor":<br>
-          <img src="https://raw.githubusercontent.com/acaldero/uc3m_sd/main/materials/lab-mcp-jsonrpc/images/cfg1.png" height="125"></td> </tr>
+          <img src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/lab-mcp-jsonrpc/images/cfg1.png" height="125"></td> </tr>
      <tr> <td>2.</td>
           <td>A continuación, hay que seleccionar servidor HTTP:<br>
-          <img src="https://raw.githubusercontent.com/acaldero/uc3m_sd/main/materials/lab-mcp-jsonrpc/images/cfg2.png" height="200"></td> </tr>
+          <img src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/lab-mcp-jsonrpc/images/cfg2.png" height="200"></td> </tr>
      <tr> <td>3.</td>
           <td>A continuación, hay que indicar la dirección URL:<br>
-          <img src="https://raw.githubusercontent.com/acaldero/uc3m_sd/main/materials/lab-mcp-jsonrpc/images/cfg3.png" height="100"></td> </tr>
+          <img src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/lab-mcp-jsonrpc/images/cfg3.png" height="100"></td> </tr>
      <tr> <td>4.</td>  <td>A continuación, hay que indicar el nombre:<br>
-          <img src="https://raw.githubusercontent.com/acaldero/uc3m_sd/main/materials/lab-mcp-jsonrpc/images/cfg4.png" height="125"></td> </tr>
+          <img src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/lab-mcp-jsonrpc/images/cfg4.png" height="125"></td> </tr>
      <tr> <td>5.</td>  <td>Y finalmente, hacer global (o local al espacio de trabajo):<br>
-          <img src="https://raw.githubusercontent.com/acaldero/uc3m_sd/main/materials/lab-mcp-jsonrpc/images/cfg5.png" height="125"></td> </tr>
+          <img src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/lab-mcp-jsonrpc/images/cfg5.png" height="125"></td> </tr>
      </table>
      </html>
 4. Una vez configurado, para usar el servicio en "Visual Studio Code":
@@ -249,31 +248,31 @@ INFO:   Finished server process [171932]
    <table>
    <tr> <td>1.</td>
         <td>Hay que hacer click en herramientas en el chat:<br>
-        <img src="https://raw.githubusercontent.com/acaldero/uc3m_sd/main/materials/lab-mcp-jsonrpc/images/clt1.png" height="110"></td> </tr>
+        <img src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/lab-mcp-jsonrpc/images/clt1.png" height="110"></td> </tr>
    <tr> <td>2.</td>
         <td>Hay que activar el servidor my-mcp-server (y las utilidades):<br>
-        <img src="https://raw.githubusercontent.com/acaldero/uc3m_sd/main/materials/lab-mcp-jsonrpc/images/clt2.png" height="250"></td> </tr>
+        <img src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/lab-mcp-jsonrpc/images/clt2.png" height="250"></td> </tr>
    <tr> <td>3.</td>
         <td>Hay que indicar en el chat que se quiere "add 1 and 2 with my-mcp-server":<br>
-        <img src="https://raw.githubusercontent.com/acaldero/uc3m_sd/main/materials/lab-mcp-jsonrpc/images/clt3.png" height="250"></td> </tr>
+        <img src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/lab-mcp-jsonrpc/images/clt3.png" height="250"></td> </tr>
    <tr> <td>4.</td>
         <td>Puede ser necesario dar permisos ("Allow") para usar el servicio:<br>
-        <img src="https://raw.githubusercontent.com/acaldero/uc3m_sd/main/materials/lab-mcp-jsonrpc/images/clt4.png" height="250"></td> </tr>
+        <img src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/lab-mcp-jsonrpc/images/clt4.png" height="250"></td> </tr>
    <tr> <td>5.</td>
         <td>Se tiene el resultado:<br>
-        <img src="https://raw.githubusercontent.com/acaldero/uc3m_sd/main/materials/lab-mcp-jsonrpc/images/clt5.png" height="225"></td> </tr>
+        <img src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/lab-mcp-jsonrpc/images/clt5.png" height="225"></td> </tr>
    </table>
    </html>
 
 
-## Información adicional
+## Additional information
 
-* Tutorial
+* Tutorials
   * [How to Build an MCP Server in Python: A Complete Guide](https://scrapfly.io/blog/posts/how-to-build-an-mcp-server-in-python-a-complete-guide)
   * [Building a StreamableHTTP MCP server](https://mcpcat.io/guides/building-streamablehttp-mcp-server/)
   * [Use MCP servers in VS Code](https://code.visualstudio.com/docs/copilot/customization/mcp-servers)
-* Ejemplo
-  * [Ejemplo de Servidor MCP server](https://gofastmcp.com/tutorials/create-mcp-server)
+* Examples
+  * [Example of MCP server](https://gofastmcp.com/tutorials/create-mcp-server)
   * [MCP server (SSE) for weather information for a specified location](https://github.com/justjoehere/mcp-weather-sse)
   * [Let's write a Remote MCP Server](https://shivdeepak.com/posts/lets-write-a-remote-mcp-server/)
 

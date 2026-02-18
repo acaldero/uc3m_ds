@@ -1,7 +1,7 @@
 
 # Sistemas Distribuidos: Servicios Web
 + **Felix García Carballeira and Alejandro Calderón Mateos**
-+ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_sd/blob/main/LICENSE)
++ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
 
 ## Contenidos
@@ -1556,7 +1556,7 @@ INFO: Finished server process [181555]
 
 ## Información adicional
   * Transparencias:
-    * [Tema 8: t8_web-services.pdf](https://github.com/acaldero/uc3m_sd/blob/main/materials/topic-ws/t8_web-services.pdf)
+    * [Tema 8: t8_web-services.pdf](https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-ws/t8_web-services.pdf)
   * SOAP, REST, gRPC, etc.:
     * [Know your API protocols: SOAP vs. REST vs. JSON-RPC vs. gRPC vs. GraphQL vs. Thrift](https://www.mertech.com/blog/know-your-api-protocols)
     * [A brief look at the evolution of interface protocols leading to modern APIs](https://www.soa4u.co.uk/2019/02/a-brief-look-at-evolution-of-interface.html)

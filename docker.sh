@@ -200,7 +200,7 @@ ssdd_docker_build ()
      # Check params
      if [ ! -f docker/dockerfile ]; then
          echo ": The docker/dockerfile file is not found."
-         echo ": * Did you execute git clone https://github.com/acaldero/uc3m_sd.git ?."
+         echo ": * Did you execute git clone https://github.com/acaldero/uc3m_ds.git ?."
          echo ""
          exit
      fi
@@ -269,7 +269,7 @@ ssdd_docker_start ()
                 HOST_UID=$HOST_UID_VALUE HOST_GID=$HOST_GID_VALUE docker compose -f docker/dockercompose.yml -p $DOCKER_PREFIX_NAME up -d --scale node=$N_ELTOS
                 if [ $? -gt 0 ]; then
                     echo ": The docker compose command failed to spin up containers."
-                    echo ": * Did you execute git clone https://github.com/acaldero/uc3m_sd.git ?."
+                    echo ": * Did you execute git clone https://github.com/acaldero/uc3m_ds.git ?."
                     echo ""
                     exit
                 fi
@@ -325,7 +325,7 @@ ssdd_docker_stop ()
           HOST_UID=$HOST_UID_VALUE HOST_GID=$HOST_GID_VALUE docker compose -f docker/dockercompose.yml -p $DOCKER_PREFIX_NAME down
           if [ $? -gt 0 ]; then
               echo ": The 'docker compose' command failed to stop containers."
-              echo ": * Did you execute git clone https://github.com/acaldero/uc3m_sd.git ?."
+              echo ": * Did you execute git clone https://github.com/acaldero/uc3m_ds.git ?."
               echo ""
               exit
           fi
@@ -336,7 +336,7 @@ ssdd_docker_stop ()
           docker service rm ssdd_docker_node
           if [ $? -gt 0 ]; then
               echo ": The 'docker service' command failed to stop containers."
-              echo ": * Did you execute git clone https://github.com/acaldero/uc3m_sd.git ?."
+              echo ": * Did you execute git clone https://github.com/acaldero/uc3m_ds.git ?."
               echo ""
               exit
           fi
@@ -512,7 +512,7 @@ do
                 HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose -f docker/dockercompose.yml -p $DOCKER_PREFIX_NAME kill
                 if [ $? -gt 0 ]; then
                     echo ": The docker compose command failed to stop containers."
-                    echo ": * Did you execute git clone https://github.com/acaldero/uc3m_sd.git ?."
+                    echo ": * Did you execute git clone https://github.com/acaldero/uc3m_ds.git ?."
                     echo ""
                     exit
                 fi

@@ -13,7 +13,7 @@
 
 * [POSIX message queues](/topic-messagepassing/ssdd_pq.md)
 * [Introduction to MPI](/topic-messagepassing/ssdd_mpi.md)
-  * [MPI (notebook)](https://colab.research.google.com/github/acaldero/uc3m_sd/blob/main/materials/topic-messagepassing/ssdd_mpi.ipynb)
+  * [MPI (notebook)](https://colab.research.google.com/github/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/ssdd_mpi.ipynb)
 
 # Sockets
 
@@ -37,5 +37,5 @@
 
 # Fault tolerance
 
-* [Fault tolerance (PDF)](https://github.com/acaldero/uc3m_sd/blob/main/materials/topic-ft/t9_tolerancia-a-fallos.pdf)
+* [Fault tolerance (PDF)](https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-ft/t9_tolerancia-a-fallos.pdf)
 

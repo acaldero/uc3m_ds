@@ -1,40 +1,40 @@
 
 ## Distributed Systems: Supplementary Materials
 + **Felix García Carballeira and Alejandro Calderón Mateos** @ arcos.inf.uc3m.es
-+ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_sd/blob/main/LICENSE)
++ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
 
-## Servicio centralizado monolítico
+## Monolithic centralized service
 
-### Compilar
+### To compile 
 
-Hay que introducir:
+Please execute this first:
 ```
 cd cal-centralizado-monolitico
 make
 ```
 
-Y la salida debería ser similar a:
+And the expected output should be:
 ```
 gcc -g -Wall -c app-c.c
 gcc -g -Wall app-c.o  -o app-c
 ```
 
-### Ejecutar 
+### To execute
 
-Hay que introducir:
+Please execute this:
 ```
 ./app-c
 ```
 
-Y la salida debería ser similar a:
+And the expected output should be similar to:
 ```
 0 = add(30, 20, 10)
 0 = divide(2, 20, 10)
 0 = neg(-10, 10)
 ```
 
-### Arquitectura
+### Architecture
 
 ```mermaid
 sequenceDiagram

@@ -12,7 +12,7 @@
 * Linux:
   * Docker: https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
     <details>
-    <summary>De forma abreviada para Linux/Ubuntu ... (hacer click)</summary>
+    <summary>Summary for Linux/Ubuntu ... (click here)</summary>
    
     ```bash
     : Add Docker's official GPG key:
@@ -42,8 +42,8 @@
 ## Getting ssdd-docker
 
 ```bash
-git clone https://github.com/acaldero/uc3m_sd.git
-cd uc3m_sd
+git clone https://github.com/acaldero/uc3m_ds.git
+cd uc3m_ds
 ./docker.sh build
 ```
 
@@ -118,5 +118,5 @@ cd uc3m_sd
 
 ## Example using ssdd-docker
 
-![Example of using 2 containers in Linux, and using each one with netcat](u20-example1.gif)
+![Example of using 2 containers in Linux, and using netcat in both](u20-example1.gif)
 

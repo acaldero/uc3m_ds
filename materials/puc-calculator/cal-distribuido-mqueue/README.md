@@ -1,36 +1,36 @@
 
 ## Distributed Systems: Supplementary Materials
 + **Felix García Carballeira and Alejandro Calderón Mateos** @ arcos.inf.uc3m.es
-+ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_sd/blob/main/LICENSE)
++ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
 
-## Servicio distribuido basado en colas POSIX
+## Distributed service based on POSIX queues
 
-#### Compilar
+#### To compile
 
-Hay que introducir:
+Please, first execute:
 ```
 cd cal-distribuido-mqueue
 make
 ```
 
-Y la salida debería ser similar a:
+And the output should be similar to:
 ```
 gcc -g -Wall -c app-d.c
 gcc -g -Wall -c lib-client.c
 gcc -g -Wall -c lib.c
 gcc -g -Wall -lrt app-d.o lib.o lib-client.o       -o app-d  -lrt
 gcc -g -Wall -c lib-server.c
-gcc -g -Wall            lib.o lib-client.o lib-server.o  -o lib-server  -lrt
+gcc -g -Wall    lib.o lib-client.o lib-server.o  -o lib-server  -lrt
 ```
 
-#### Ejecutar
+#### To execute
 
-*TIP: Las colas POSIX se utilizan para comunicar procesos en la misma máquina*
+*TIP: POSIX queues are used to communicate processes on the same machine*
 
 <html>
 <table>
-<tr><th>Paso</th><th>Cliente</th><th>Servidor</th></tr>
+<tr><th>Step</th><th>Client</th><th>Server</th></tr>
 <tr>
 <td>1</td>
 <td></td>
@@ -80,7 +80,7 @@ $ ./app-d
 </table>
 </html>
 
-*TIP: Las colas POSIX pueden ser visibles desde la línea de comando:*
+*TIP: POSIX queues can be viewed from the command line:*
 
 ``` bash
 sudo mkdir /dev/mqueue
@@ -88,7 +88,7 @@ sudo mount -t mqueue none /dev/mqueue
 ls -las /dev/mqueue
 ```
 
-#### Arquitectura
+#### Architecture
 
 ```mermaid
 sequenceDiagram

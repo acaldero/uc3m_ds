@@ -1,7 +1,7 @@
 
 ## Distributed Systems: Supplementary Materials
 + **Felix García Carballeira and Alejandro Calderón Mateos** @ arcos.inf.uc3m.es
-+ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_sd/blob/main/LICENSE)
++ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
 
 ## Servicio distribuido basado en RPC
@@ -98,7 +98,7 @@
        De otra forma cada vez que se haga "make clean" se borran los archivos modificados.
 
 
-### (2) Compilar
+### (2) To compile
 
 * A continuación hay que compilar:
   ```
@@ -177,7 +177,7 @@ Para parar el servidor hay que presionar Control-C:
 </html>
 
 
-#### Arquitectura
+#### Architecture
 
 ```mermaid
 sequenceDiagram

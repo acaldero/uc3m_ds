@@ -1,30 +1,30 @@
 
 ## Distributed Systems: Supplementary Materials
 + **Felix García Carballeira and Alejandro Calderón Mateos** @ arcos.inf.uc3m.es
-+ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_sd/blob/main/LICENSE)
++ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
 
-## Servicio distribuido basado en gSOAP
+## Distributed service based on gSOAP
 
-#### Compilar
+### To compile 
 
-Hay que introducir:
+Please execute this first:
 ```
 cd cal-distribuido-gsoap-standalone
 make
 ```
 
-Si no se tiene instalado gsoap, se puede instalar con:
- * Linux (Ubuntu, Debian o similar):
+If gsoap is not installed, it can be installed with:
+ * Linux (Ubuntu, Debian or similar):
    ```
    sudo apt-get install -y gsoap
    ```
- * MacOS
+ * MacOS:
    ```
    brew install gsoap
    ```
 
-Y la salida debería ser similar a:
+And the expected output should be similar to:
 ```
 soapcpp2 -cL calc.h
 
@@ -61,11 +61,11 @@ gcc -o app-d       -I/opt/homebrew/Cellar/gsoap/2.8.127/include/ -L/opt/homebrew
 gcc -o lib-server  -I/opt/homebrew/Cellar/gsoap/2.8.127/include/ -L/opt/homebrew/Cellar/gsoap/2.8.127/lib/ lib-server.c lib.c    soapC.c soapServer.c -lgsoap
 ```
 
-#### Ejecutar
+#### To execute
 
 <html>
 <table>
-<tr><th>Paso</th><th>Cliente</th><th>Servidor</th></tr>
+<tr><th>Step</th><th>Client</th><th>Server</th></tr>
 
 <tr>
 <td>1</td>
@@ -108,7 +108,7 @@ $ env SERVER_ADDR=localhost:12345 ./app-d
 </html>
 
 
-#### Arquitectura
+#### Architecture
 
 ```mermaid
 sequenceDiagram
