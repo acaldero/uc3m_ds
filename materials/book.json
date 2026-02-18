@@ -1,0 +1,14 @@
+{
+  "title": "Distributed Systems",
+  "description": "Distributed Systems (UC3M)",
+  "author": "Felix Garcia-Carballeira and Alejandro Calderon-Mateos",
+  "plugins": ["mermaid","highlight","hide-published-with","hints","chapter-fold"],
+  "pluginsConfig": {
+    "highlight": {
+      "exclude": ["mermaid"]
+    }
+  },
+  "styles": {
+    "website": "styles/website.css"
+  }
+}
