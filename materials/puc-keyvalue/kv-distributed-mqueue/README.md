@@ -4,24 +4,29 @@
 + [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
 
-## Servicio distribuido basado en sockets
+## Servicio distribuido basado en colas POSIX
 
-*NOTA: Antes de ejecutar en dos máquinas diferentes por favor actualice la dirección IP del servidor en el archivo lib-client.c*
+#### To compile
 
-### To compile
-
+Hay que introducir:
 ```
-$ cd cal-distribuido-sockets
-$ make
+cd kv-distributed-mqueue
+make
+```
+
+Y la salida debería ser similar a:
+```
 gcc -g -Wall -c app-d.c
 gcc -g -Wall -c lib-client.c
 gcc -g -Wall -c lib.c
-gcc -g -Wall  app-d.o lib.o lib-client.o       -o app-d
+gcc -g -Wall -lrt app-d.o lib.o lib-client.o       -o app-d  -lrt
 gcc -g -Wall -c lib-server.c
-gcc -g -Wall  lib.o lib-client.o lib-server.o  -o lib-server
+gcc -g -Wall            lib.o lib-client.o lib-server.o  -o lib-server  -lrt
 ```
 
-### Ejecutar
+#### Ejecutar
+
+*TIP: Las colas POSIX se utilizan para comunicar procesos en la misma máquina*
 
 <html>
 <table>
@@ -44,9 +49,8 @@ $ ./lib-server
 
 ```
 $ ./app-d
-0 = add(30, 20, 10)
--1 = divide(0, 20, 10)
-0 = neg(-10, 10)
+d_set("nombre", 1, 0x123)
+d_get("nombre", 1) -> 0x123
 ```
 
 </td>
@@ -54,9 +58,9 @@ $ ./app-d
 
 ```
 
- 0 = add(30, 20, 10);
- -1 = divide(0, 10, 0);
- 0 = neg(-10, 10);
+ 1 = init(nombre, 10);
+ 1 = set(nombre, 1, 0x123);
+ 1 = get(nombre, 1, 0x123);
 ```
 
 </td>
@@ -76,7 +80,15 @@ $ ./app-d
 </table>
 </html>
 
-### Architecture
+*TIP: Las colas POSIX pueden ser visibles desde la línea de comando:*
+
+``` bash
+sudo mkdir /dev/mqueue
+sudo mount -t mqueue none /dev/mqueue
+ls -las /dev/mqueue
+```
+
+#### Architecture
 
 ```mermaid
 sequenceDiagram
@@ -87,10 +99,4 @@ sequenceDiagram
     lib-server.c   ->> lib-client.c: return remote result
     lib-client.c   ->> app-d: return result of the distributed API call
 ```
-
-
-
-**Material adicional**:
-  * <a href="https://beej.us/guide/bgnet/html/index-wide.html">Beej's Guide to Network Programming</a>
-  * <a href="https://beej.us/guide/bgnet0/html/index-wide.html">Beej's Guide to Network Concepts (más teoría)</a>
 

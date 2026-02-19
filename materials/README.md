@@ -42,17 +42,17 @@
 ## Practical use cases
 
   * [Example of transforming a monolithic application into a distributed application: key-value storage](/materials/puc-keyvalue/#readme)
-    * [Example of centralized monolithic key-value storage](/materials/puc-keyvalue/kv-centralizado-monolitico#readme)
-    * [Example of distributed key-value storage based on POSIX queues](/materials/puc-keyvalue/kv-distribuido-mqueue#readme)
-    * [Example of distributed key-value storage based on sockets](/materials/puc-keyvalue/kv-distribuido-sockets#readme)
-    * [Example of distributed key-value storage based on RPC](/materials/puc-keyvalue/kv-distribuido-rpc#readme)
+    * [Example of centralized monolithic key-value storage](/materials/puc-keyvalue/kv-centralized-monolithic#readme)
+    * [Example of distributed key-value storage based on POSIX queues](/materials/puc-keyvalue/kv-distributed-mqueue#readme)
+    * [Example of distributed key-value storage based on sockets](/materials/puc-keyvalue/kv-distributed-sockets#readme)
+    * [Example of distributed key-value storage based on RPC](/materials/puc-keyvalue/kv-distributed-rpc#readme)
 
   * [Example of transforming a monolithic application into a distributed application: calculator](/materials/puc-calculator/#readme)
-    * [Example of a centralized monolithic calculator](/materials/puc-calculator/cal-centralizado-monolitico#readme)
-    * [Example of a distributed calculator based on POSIX queues](/materials/puc-calculator/cal-distribuido-mqueue#readme)
-    * [Example of a distributed calculator based on sockets](/materials/puc-calculator/cal-distribuido-sockets#readme)
-    * [Example of a distributed calculator based on RPC](/materials/puc-calculator/cal-distribuido-rpc#readme)
-    * [Example of a distributed calculator based on GSOAP](/materials/puc-calculator/cal-distribuido-gsoap-standalone#readme)
+    * [Example of a centralized monolithic calculator](/materials/puc-calculator/cal-centralized-monolithic#readme)
+    * [Example of a distributed calculator based on POSIX queues](/materials/puc-calculator/cal-distributed-mqueue#readme)
+    * [Example of a distributed calculator based on sockets](/materials/puc-calculator/cal-distributed-sockets#readme)
+    * [Example of a distributed calculator based on RPC](/materials/puc-calculator/cal-distributed-rpc#readme)
+    * [Example of a distributed calculator based on GSOAP](/materials/puc-calculator/cal-distributed-gsoap-standalone#readme)
 
 
 ## Exercises

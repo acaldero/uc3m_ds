@@ -4,33 +4,28 @@
 + [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
 
-## Distributed service based on POSIX queues
+## Servicio distribuido basado en sockets
 
-#### To compile
+*NOTA: Antes de ejecutar en dos máquinas diferentes por favor actualice la dirección IP del servidor en el archivo lib-client.c*
 
-Please, first execute:
-```
-cd cal-distribuido-mqueue
-make
-```
+### To compile
 
-And the output should be similar to:
 ```
+$ cd cal-distributed-sockets
+$ make
 gcc -g -Wall -c app-d.c
 gcc -g -Wall -c lib-client.c
 gcc -g -Wall -c lib.c
-gcc -g -Wall -lrt app-d.o lib.o lib-client.o       -o app-d  -lrt
+gcc -g -Wall  app-d.o lib.o lib-client.o       -o app-d
 gcc -g -Wall -c lib-server.c
-gcc -g -Wall    lib.o lib-client.o lib-server.o  -o lib-server  -lrt
+gcc -g -Wall  lib.o lib-client.o lib-server.o  -o lib-server
 ```
 
-#### To execute
-
-*TIP: POSIX queues are used to communicate processes on the same machine*
+### Ejecutar
 
 <html>
 <table>
-<tr><th>Step</th><th>Client</th><th>Server</th></tr>
+<tr><th>Paso</th><th>Cliente</th><th>Servidor</th></tr>
 <tr>
 <td>1</td>
 <td></td>
@@ -49,18 +44,19 @@ $ ./lib-server
 
 ```
 $ ./app-d
-0 = d_add(30, 20, 10)
-0 = d_divide(2, 20, 10)
-0 = d_neg(-10, 10)
+0 = add(30, 20, 10)
+-1 = divide(0, 20, 10)
+0 = neg(-10, 10)
 ```
 
 </td>
 <td>
 
 ```
- 0 = d_add(30, 20, 10)
- 0 = d_divide(2, 20, 10)
- 0 = d_neg(-10, 10)
+
+ 0 = add(30, 20, 10);
+ -1 = divide(0, 10, 0);
+ 0 = neg(-10, 10);
 ```
 
 </td>
@@ -80,15 +76,7 @@ $ ./app-d
 </table>
 </html>
 
-*TIP: POSIX queues can be viewed from the command line:*
-
-``` bash
-sudo mkdir /dev/mqueue
-sudo mount -t mqueue none /dev/mqueue
-ls -las /dev/mqueue
-```
-
-#### Architecture
+### Architecture
 
 ```mermaid
 sequenceDiagram
@@ -99,4 +87,10 @@ sequenceDiagram
     lib-server.c   ->> lib-client.c: return remote result
     lib-client.c   ->> app-d: return result of the distributed API call
 ```
+
+
+
+**Material adicional**:
+  * <a href="https://beej.us/guide/bgnet/html/index-wide.html">Beej's Guide to Network Programming</a>
+  * <a href="https://beej.us/guide/bgnet0/html/index-wide.html">Beej's Guide to Network Concepts (más teoría)</a>
 

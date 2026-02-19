@@ -4,28 +4,33 @@
 + [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
 
-## Servicio distribuido basado en sockets
+## Distributed service based on POSIX queues
 
-*NOTA: Antes de ejecutar en dos máquinas diferentes por favor actualice la dirección IP del servidor en el archivo lib-client.c*
+#### To compile
 
-### To compile
-
+Please, first execute:
 ```
-$ cd kv-distribuido-sockets
-$ make
+cd cal-distributed-mqueue
+make
+```
+
+And the output should be similar to:
+```
 gcc -g -Wall -c app-d.c
 gcc -g -Wall -c lib-client.c
 gcc -g -Wall -c lib.c
-gcc -g -Wall  app-d.o lib.o lib-client.o       -o app-d
+gcc -g -Wall -lrt app-d.o lib.o lib-client.o       -o app-d  -lrt
 gcc -g -Wall -c lib-server.c
-gcc -g -Wall  lib.o lib-client.o lib-server.o  -o lib-server
+gcc -g -Wall    lib.o lib-client.o lib-server.o  -o lib-server  -lrt
 ```
 
-### Ejecutar
+#### To execute
+
+*TIP: POSIX queues are used to communicate processes on the same machine*
 
 <html>
 <table>
-<tr><th>Paso</th><th>Cliente</th><th>Servidor</th></tr>
+<tr><th>Step</th><th>Client</th><th>Server</th></tr>
 <tr>
 <td>1</td>
 <td></td>
@@ -44,18 +49,18 @@ $ ./lib-server
 
 ```
 $ ./app-d
-d_set("nombre", 1, 0x123)
-d_get("nombre", 1) -> 0x123
+0 = d_add(30, 20, 10)
+0 = d_divide(2, 20, 10)
+0 = d_neg(-10, 10)
 ```
 
 </td>
 <td>
 
 ```
-
- 1 = init(nombre, 10);
- 1 = set(nombre, 1, 0x123);
- 1 = get(nombre, 1, 0x123);
+ 0 = d_add(30, 20, 10)
+ 0 = d_divide(2, 20, 10)
+ 0 = d_neg(-10, 10)
 ```
 
 </td>
@@ -75,7 +80,15 @@ d_get("nombre", 1) -> 0x123
 </table>
 </html>
 
-### Architecture
+*TIP: POSIX queues can be viewed from the command line:*
+
+``` bash
+sudo mkdir /dev/mqueue
+sudo mount -t mqueue none /dev/mqueue
+ls -las /dev/mqueue
+```
+
+#### Architecture
 
 ```mermaid
 sequenceDiagram
@@ -86,10 +99,4 @@ sequenceDiagram
     lib-server.c   ->> lib-client.c: return remote result
     lib-client.c   ->> app-d: return result of the distributed API call
 ```
-
-
-
-**Material adicional**:
-  * <a href="https://beej.us/guide/bgnet/html/index-wide.html">Beej's Guide to Network Programming</a>
-  * <a href="https://beej.us/guide/bgnet0/html/index-wide.html">Beej's Guide to Network Concepts (más teoría)</a>
 

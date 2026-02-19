@@ -10,7 +10,7 @@
 
 Please execute this first:
 ```
-cd cal-distribuido-gsoap-standalone
+cd cal-distributed-gsoap-standalone
 make
 ```
 

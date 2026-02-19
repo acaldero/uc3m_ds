@@ -10,7 +10,7 @@
 
 Hay que introducir:
 ```
-cd kv-centralizado-librería
+cd kv-centralized-library
 make
 ```
 

@@ -39,7 +39,6 @@
         <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/ssdd_pq.md">POSIX message queues</a> </li>
         <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/ssdd_mpi.md">Introduction to MPI</a> 
              <a href="https://colab.research.google.com/github/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/ssdd_mpi.ipynb">(notebook)</a> </li>
-        </li>
       </td>
   </tr>
   <tr>
@@ -48,9 +47,9 @@
         <ul>
         <li>
           <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/ejercicio_pasomensajes_vector.md">Vectors with POSIX queues</a>
-          <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/e2-pasomensajes.pdf">(on PDF)</a>
+          <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/e2-pasomensajes.pdf">(in PDF)</a>
         </li>
-        <li> Fecha y hora <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/e1-pasomensajes.pdf">(on PDF)</a> </li>
+        <li> Date and hour <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/e1-pasomensajes.pdf">(in PDF)</a> </li>
         <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/ejercicio_pasomensajes_upgraded.md">Naming and communication</a> </li>
         </ul>
       </td>
@@ -64,7 +63,7 @@
   </tr>
   <tr>
       <td>
-       Ejercicio:
+       Exercise:
        <ul>
           <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-sockets/ejercicio_sockets_calculadora.md">Distributed calculator</a></li>
        </ul>
@@ -110,15 +109,15 @@
 ## Practical use cases
 
   * [Example of transforming a monolithic application into a distributed application: key-value storage](/materials/puc-keyvalue/#readme)
-    * [Example of centralized monolithic key-value storage](/materials/puc-keyvalue/kv-centralizado-monolitico#readme)
-    * [Example of distributed key-value storage based on POSIX queues](/materials/puc-keyvalue/kv-distribuido-mqueue#readme)
-    * [Example of distributed key-value storage based on sockets](/materials/puc-keyvalue/kv-distribuido-sockets#readme)
-    * [Example of distributed key-value storage based on RPC](/materials/puc-keyvalue/kv-distribuido-rpc#readme)
+    * [Example of centralized monolithic key-value storage](/materials/puc-keyvalue/kv-centralized-monolithic#readme)
+    * [Example of distributed key-value storage based on POSIX queues](/materials/puc-keyvalue/kv-distributed-mqueue#readme)
+    * [Example of distributed key-value storage based on sockets](/materials/puc-keyvalue/kv-distributed-sockets#readme)
+    * [Example of distributed key-value storage based on RPC](/materials/puc-keyvalue/kv-distributed-rpc#readme)
 
   * [Example of transforming a monolithic application into a distributed application: calculator](/materials/puc-calculator/#readme)
-    * [Example of a centralized monolithic calculator](/materials/puc-calculator/cal-centralizado-monolitico#readme)
-    * [Example of a distributed calculator based on POSIX queues](/materials/puc-calculator/cal-distribuido-mqueue#readme)
-    * [Example of a distributed calculator based on sockets](/materials/puc-calculator/cal-distribuido-sockets#readme)
-    * [Example of a distributed calculator based on RPC](/materials/puc-calculator/cal-distribuido-rpc#readme)
-    * [Example of a distributed calculator based on GSOAP](/materials/puc-calculator/cal-distribuido-gsoap-standalone#readme)
+    * [Example of a centralized monolithic calculator](/materials/puc-calculator/cal-centralized-monolithic#readme)
+    * [Example of a distributed calculator based on POSIX queues](/materials/puc-calculator/cal-distributed-mqueue#readme)
+    * [Example of a distributed calculator based on sockets](/materials/puc-calculator/cal-distributed-sockets#readme)
+    * [Example of a distributed calculator based on RPC](/materials/puc-calculator/cal-distributed-rpc#readme)
+    * [Example of a distributed calculator based on GSOAP](/materials/puc-calculator/cal-distributed-gsoap-standalone#readme)
 

@@ -4,34 +4,38 @@
 + [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
 
-## Monolithic centralized service
+## Servicio centralizado monolítico
 
-### To compile 
+### To compile
 
-Please execute this first:
+Hay que introducir:
 ```
-cd cal-centralizado-monolitico
+cd kv-centralized-monolithic
 make
 ```
 
-And the expected output should be:
+Y la salida debería ser similar a:
 ```
 gcc -g -Wall -c app-c.c
 gcc -g -Wall app-c.o  -o app-c
 ```
 
-### To execute
+### Ejecutar 
 
-Please execute this:
+Hay que introducir:
 ```
 ./app-c
 ```
 
-And the expected output should be similar to:
+Y la salida debería ser similar a:
 ```
-0 = add(30, 20, 10)
-0 = divide(2, 20, 10)
-0 = neg(-10, 10)
+set("nombre", 100, 0x0)
+set("nombre", 101, 0x1)
+set("nombre", 102, 0x2)
+...
+get("nombre", 107) -> 0x7
+get("nombre", 108) -> 0x8
+get("nombre", 109) -> 0x9
 ```
 
 ### Architecture

@@ -48,7 +48,7 @@ Dicha abstracción se diseña e implementa inicialmente:
   * Se despliega como único ejecutable (centralizado)
 
 El código fuente, las instrucciones de compilación y las instrucciones para la ejecución están en:
-  * [Servicio centralizado monolítico](/puc-keyvalue/kv-centralizado-monolitico/README.md#servicio-centralizado-monol%C3%ADtico)
+  * [Servicio centralizado monolítico](/puc-keyvalue/kv-centralized-monolithic/README.md#service-centralized-monolithic)
 
 Partiendo de esta versión inicial monolítica centralizada,
 para transformar a un servicio distribuidos, se aconseja seguir los siguientes pasos:
@@ -74,7 +74,7 @@ Dicha abstracción se diseña e implementa inicialmente:
   * Se despliega como único ejecutable (centralizado)
 
 El código fuente, las instrucciones de compilación y las instrucciones para la ejecución están en:
-  * [Servicio centralizado con librería](/puc-keyvalue/kv-centralizado-libreria/README.md)
+  * [Servicio centralizado con librería](/puc-keyvalue/kv-centralized-library/README.md)
 
 La arquitectura se puede resumir como:
   ```mermaid
@@ -91,7 +91,7 @@ Dicha abstracción se diseña e implementa inicialmente:
   * Se despliega como varios ejecutables (distribuidos) usando colas POSIX
 
 El código fuente, las instrucciones de compilación y las instrucciones para la ejecución están en:
-  * [Servicio distribuido basado en colas POSIX](/puc-keyvalue/kv-distribuido-mqueue/README.md)
+  * [Servicio distribuido basado en colas POSIX](/puc-keyvalue/kv-distributed-mqueue/README.md)
 
 La arquitectura se puede resumir como:
 ```mermaid
@@ -112,7 +112,7 @@ Dicha abstracción se diseña e implementa inicialmente:
   * Se despliega como varios ejecutables (distribuidos) usando sockets
 
 El código fuente, las instrucciones de compilación y las instrucciones para la ejecución están en:
-  * [Servicio distribuido basado en sockets](/puc-keyvalue/kv-distribuido-sockets/README.md)
+  * [Servicio distribuido basado en sockets](/puc-keyvalue/kv-distributed-sockets/README.md)
 
 La arquitectura se puede resumir como:
 ```mermaid
@@ -133,7 +133,7 @@ Dicha abstracción se diseña e implementa inicialmente:
   * Se despliega como varios ejecutables (distribuidos) usando RPC
 
 El código fuente, las instrucciones de compilación y las instrucciones para la ejecución están en:
-  * [Servicio distribuido basado en RPC](/puc-keyvalue/kv-distribuido-rpc/README.md)
+  * [Servicio distribuido basado en RPC](/puc-keyvalue/kv-distributed-rpc/README.md)
 
 La arquitectura se puede resumir como:
 ```mermaid

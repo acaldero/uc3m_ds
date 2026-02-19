@@ -10,7 +10,7 @@
 
 Please execute this first:
 ```
-cd cal-centralizado-libreria
+cd cal-centralized-library
 make
 ```
 
