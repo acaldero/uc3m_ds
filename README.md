@@ -37,8 +37,8 @@
       <td rowspan="2">Message passing</td>
       <td>
         <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/ssdd_pq.md">POSIX message queues</a> </li>
-        <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/ssdd_mpi.md">Introduction to MPI</a> 
-             <a href="https://colab.research.google.com/github/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/ssdd_mpi.ipynb">(notebook)</a> </li>
+        <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/mpi.md">Introduction to MPI</a> 
+             <a href="https://colab.research.google.com/github/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/mpi.ipynb">(notebook)</a> </li>
       </td>
   </tr>
   <tr>
@@ -65,7 +65,7 @@
       <td>
        Exercise:
        <ul>
-          <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-sockets/ejercicio_sockets_calculadora.md">Distributed calculator</a></li>
+          <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-sockets/exercise_sockets_calculator.md">Distributed calculator</a></li>
        </ul>
       </td>
   </tr>
@@ -73,26 +73,26 @@
       <td rowspan="1">5</td>
       <td>Distributed services</td>
       <td>
-        <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-ds/ssdd_sd.md">Main distributed systems</a></li>
+        <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-ds/ds.md">Main distributed systems</a></li>
       </td>
   </tr>
   <tr>
       <td rowspan="1">6</td>
       <td>RPC</td>
       <td>
-        <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-rpc/ssdd_rpc.md">RPC</a></li>
+        <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-rpc/rpc.md">RPC</a></li>
       </td>
   </tr>
   <tr><td>7</td>
       <td>Distributed file systems</td>
       <td>
-        <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-dfs/ssdd_sfd.md">Introduction to distributed file systems</a></li>
+        <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-dfs/dfs.md">Introduction to distributed file systems</a></li>
       </td>
   </tr>
   <tr><td>8</td>
       <td>Web services</td>
       <td>
-        <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-ws/ssdd_web-services.md">Introduction to web services</a></li>
+        <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-ws/web-services.md">Introduction to web services</a></li>
       </td>
   </tr>
   <tr><td>9</td>
@@ -108,16 +108,16 @@
 
 ## Practical use cases
 
-  * [Example of transforming a monolithic application into a distributed application: key-value storage](/materials/puc-keyvalue/#readme)
-    * [Example of centralized monolithic key-value storage](/materials/puc-keyvalue/kv-centralized-monolithic#readme)
-    * [Example of distributed key-value storage based on POSIX queues](/materials/puc-keyvalue/kv-distributed-mqueue#readme)
-    * [Example of distributed key-value storage based on sockets](/materials/puc-keyvalue/kv-distributed-sockets#readme)
-    * [Example of distributed key-value storage based on RPC](/materials/puc-keyvalue/kv-distributed-rpc#readme)
+  * [Example of transforming a monolithic application into a distributed application: key-value storage](/materials/pc-keyvalue/#readme)
+    * [Example of centralized monolithic key-value storage](/materials/pc-keyvalue/kv-centralized-monolithic#readme)
+    * [Example of distributed key-value storage based on POSIX queues](/materials/pc-keyvalue/kv-distributed-mqueue#readme)
+    * [Example of distributed key-value storage based on sockets](/materials/pc-keyvalue/kv-distributed-sockets#readme)
+    * [Example of distributed key-value storage based on RPC](/materials/pc-keyvalue/kv-distributed-rpc#readme)
 
-  * [Example of transforming a monolithic application into a distributed application: calculator](/materials/puc-calculator/#readme)
-    * [Example of a centralized monolithic calculator](/materials/puc-calculator/cal-centralized-monolithic#readme)
-    * [Example of a distributed calculator based on POSIX queues](/materials/puc-calculator/cal-distributed-mqueue#readme)
-    * [Example of a distributed calculator based on sockets](/materials/puc-calculator/cal-distributed-sockets#readme)
-    * [Example of a distributed calculator based on RPC](/materials/puc-calculator/cal-distributed-rpc#readme)
-    * [Example of a distributed calculator based on GSOAP](/materials/puc-calculator/cal-distributed-gsoap-standalone#readme)
+  * [Example of transforming a monolithic application into a distributed application: calculator](/materials/pc-calculator/#readme)
+    * [Example of a centralized monolithic calculator](/materials/pc-calculator/cal-centralized-monolithic#readme)
+    * [Example of a distributed calculator based on POSIX queues](/materials/pc-calculator/cal-distributed-mqueue#readme)
+    * [Example of a distributed calculator based on sockets](/materials/pc-calculator/cal-distributed-sockets#readme)
+    * [Example of a distributed calculator based on RPC](/materials/pc-calculator/cal-distributed-rpc#readme)
+    * [Example of a distributed calculator based on GSOAP](/materials/pc-calculator/cal-distributed-gsoap-standalone#readme)
 

@@ -198,9 +198,9 @@ Principales primitivas de comunicación colectiva:
   <html>
     <table border="0">
         <tr>
-            <td><img alt="MPI_Barrier"   src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/topic-messagepassing/ssdd_mpi/mpi_barrier.svg" height="125"></td>
+            <td><img alt="MPI_Barrier"   src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/topic-messagepassing/mpi/mpi_barrier.svg" height="125"></td>
             <td><img width="25" height="1"></td>
-            <td><img alt="MPI_Bcast"     src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/topic-messagepassing/ssdd_mpi/mpi_bcast.svg" height="150"></td>
+            <td><img alt="MPI_Bcast"     src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/topic-messagepassing/mpi/mpi_bcast.svg" height="150"></td>
         </tr>
     </table>
   </html>
@@ -208,9 +208,9 @@ Principales primitivas de comunicación colectiva:
   <html>
     <table border="0">
         <tr>
-            <td><img alt="MPI_Scatter"   src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/topic-messagepassing/ssdd_mpi/mpi_scatter.svg" height="150"></td>
+            <td><img alt="MPI_Scatter"   src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/topic-messagepassing/mpi/mpi_scatter.svg" height="150"></td>
             <td><img width="25" height="1"></td>
-            <td><img alt="MPI_Gather"    src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/topic-messagepassing/ssdd_mpi/mpi_gather.svg" height="150"></td>
+            <td><img alt="MPI_Gather"    src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/topic-messagepassing/mpi/mpi_gather.svg" height="150"></td>
         </tr>
     </table>
   </html>
@@ -218,9 +218,9 @@ Principales primitivas de comunicación colectiva:
   <html>
     <table border="0">
         <tr>
-            <td><img alt="MPI_Gather"    src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/topic-messagepassing/ssdd_mpi/mpi_gather.svg" height="175"></td>
+            <td><img alt="MPI_Gather"    src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/topic-messagepassing/mpi/mpi_gather.svg" height="175"></td>
             <td><img width="25" height="1"></td>
-            <td><img alt="MPI_Allgather" src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/topic-messagepassing/ssdd_mpi/mpi_allgather.svg" height="175"></td>
+            <td><img alt="MPI_Allgather" src="https://raw.githubusercontent.com/acaldero/uc3m_ds/main/materials/topic-messagepassing/mpi/mpi_allgather.svg" height="175"></td>
         <tr>
     </table>
   </html>

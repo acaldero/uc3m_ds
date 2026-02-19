@@ -71,7 +71,7 @@
    * Se pueden combinar el uso de abstracciones, por ejemplo en un gestor de canciones puede usar una base de datos para la gestión de autores, títulos, etc. y guardar en la base de dato el nombre del fichero donde está la propia canción.
    * El sistema operativo habitualmente utiliza un sistema de ficheros específico pero ofrece varios sistemas de ficheros adicionales que es posible usar.
 * La *Storage Networking Industry Association* (SNIA) propone el [*The SNIA Shared Storage Model*](https://www.snia.org/education/storage_networking_primer/shared_storage_model):<br>
-     ![SNIA storage model v2](./ssdd_sfd/snia_model_v2.gif)<br>
+     ![SNIA storage model v2](./dfs/snia_model_v2.gif)<br>
    * Donde una aplicación puede usar un gestor de base de datos, o bien un sistema de ficheros (o bien ambos, por ejemplo un reproductor de canciones con una base de datos con la información de las canciones del usuario y las propias canciones guardadas en archivos).
    * Sería posible sistemas gestores de base de datos que usan ficheros por debajo y también sería posible sistemas de ficheros que usan bases de datos por debajo.
    * Este subsistema de ficheros/registros utiliza por debajo un almacenamiento basado en bloques, donde los bloques pueden ser resultado de una agregación en tres niveles: dispositivo, SAN o *host*.
@@ -113,7 +113,7 @@
   <table>
   <tr>
   <td>
-    <img src="/materials/topic-dfs/ssdd_sfd/ssdd_sfd_intro_1.svg">
+    <img src="/materials/topic-dfs/dfs/dfs_intro_1.svg">
   </td>
   <td>
 
@@ -146,7 +146,7 @@
 
 * En dicha arquitectura general, el software está organizado por capas, de forma que las capas superiores usan la funcionalidad de las capas inferiores para implementar su funcionalidad.<br/>
   Las principales capas de software son: <br/>
-  ![Arquitectura básica del software en un sistema de ficheros Unix](./ssdd_sfd/ssdd_sfd_intro_2.svg)
+  ![Arquitectura básica del software en un sistema de ficheros Unix](./dfs/dfs_intro_2.svg)
   * La caché de bloques tiene las siguientes operaciones habitualmente:
     * **getblk**: busca/reserva en caché un bloque (a partir de un v-nodo, desplazamiento y tamaño dado).
     * **brelse**: libera un bloque y lo pasa a la lista de libres.
@@ -197,7 +197,7 @@
     Acceso remoto a dispositivos de bloques que están en otras máquinas
   </td>
   <td>
-     <img alt="Acceso a discos remotos" src="./ssdd_sfd/ssdd_sfd_remoto_1.svg">
+     <img alt="Acceso a discos remotos" src="./dfs/dfs_remoto_1.svg">
   </td>
   <td>
      <a href="https://en.wikipedia.org/wiki/Distributed_Replicated_Block_Device">DRBD</a>
@@ -208,7 +208,7 @@
     Acceso remoto a los servicios de sistema de ficheros del sistema operativo en otra máquina
   </td>
   <td>
-    <img alt="Acceso a discos remotos" src="./ssdd_sfd/ssdd_sfd_remoto_2.svg">
+    <img alt="Acceso a discos remotos" src="./dfs/dfs_remoto_2.svg">
   </td>
   <td>
     <a href="https://es.wikipedia.org/wiki/Network_File_System">NFS</a>
@@ -219,7 +219,7 @@
     Acceso remoto a servicio de directorio (i-nodos), a servicio de bloques y servicio de coherencia de caché
   </td>
   <td>
-    <img alt="Acceso bloques, inodos y caché remotos" src="./ssdd_sfd/ssdd_sfd_remoto_4.svg">
+    <img alt="Acceso bloques, inodos y caché remotos" src="./dfs/dfs_remoto_4.svg">
   </td>
   <td>
     <a href="https://www.researchgate.net/publication/4658185_The_Sprite_Network_Operating_System">Sprite</a>
@@ -275,10 +275,10 @@
 </tr>
 <tr>
   <td>
-     <img alt="Acceso a discos remotos" src="./ssdd_sfd/ssdd_sfd_remoto_2.svg">
+     <img alt="Acceso a discos remotos" src="./dfs/dfs_remoto_2.svg">
   </td>
   <td>
-     <img alt="Acceso a discos remotos" src="./ssdd_sfd/ssdd_sfd_remoto_3.svg">
+     <img alt="Acceso a discos remotos" src="./dfs/dfs_remoto_3.svg">
   </td>
 </tr>
 </table>
@@ -292,7 +292,7 @@
 <table>
 <tr>
   <td>
-  <img alt="Acceso bloques, inodos y caché remotos" src="./ssdd_sfd/ssdd_sfd_remoto_4.svg">
+  <img alt="Acceso bloques, inodos y caché remotos" src="./dfs/dfs_remoto_4.svg">
   </td>
 </tr>
 </table>

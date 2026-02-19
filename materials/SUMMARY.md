@@ -12,8 +12,8 @@
 # Message passing
 
 * [POSIX message queues](/topic-messagepassing/ssdd_pq.md)
-* [Introduction to MPI](/topic-messagepassing/ssdd_mpi.md)
-  * [MPI (notebook)](https://colab.research.google.com/github/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/ssdd_mpi.ipynb)
+* [Introduction to MPI](/topic-messagepassing/mpi.md)
+  * [MPI (notebook)](https://colab.research.google.com/github/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/mpi.ipynb)
 
 # Sockets
 
@@ -21,19 +21,19 @@
 
 # Distributed services
 
-* [Main distributed services](/topic-ds/ssdd_sd.md)
+* [Main distributed services](/topic-ds/ds.md)
 
 # RPC
 
-* [RPC](/topic-rpc/ssdd_rpc.md)
+* [RPC](/topic-rpc/rpc.md)
 
 # Distributed file systems
 
-* [Distributed file systems](/topic-dfs/ssdd_sfd.md)
+* [Distributed file systems](/topic-dfs/dfs.md)
 
 # Web services
 
-* [Web services introduction](/topic-ws/ssdd_web-services.md)
+* [Web services introduction](/topic-ws/web-services.md)
 
 # Fault tolerance
 

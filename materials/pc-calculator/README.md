@@ -6,38 +6,37 @@
 
 ## Aplicación centralizado inicial
 
-Partimos de una abstracción de *una tabla hash* con la siguiente interfaz:
+Partimos de una abstracción de *calculadora básica* con la siguiente interfaz:
 ```
-  // Inicializar un array distribuido de N números enteros.
-  int init ( char  *nombre,  int  N ) ;
+  // Sumar dos números enteros.
+  int add ( int a, int b ) ;
 
-  // Inserta el valor en la posición i del array nombre.
-  int set ( char *nombre, int i, int valor ) ;
+  // Resta dos números enteros.
+  int sub ( int a, int b ) ;
 
-  // Recuperar el valor del elemento i del array nombre.
-  int get ( char *nombre, int i, int *valor ) ;
+  // Cambio de signo de un número entero.
+  int neg ( int a ) ;
 ```
 
 Y tenemos la siguiente función que usa dicha abstracción:
 ```
 int main ( int argc, char *argv[] )
 {
-    int   N = 10 ;
-    char *A = "nombre" ;
+    int   N1 = 20 ;
+    int   N2 = 10 ;
     int   val ;
 
-    // init
-    init(A, N) ;
+    // add
+    val = add(N1, N2) ;
+    printf("%d + %d = %d\n", N1, N2, val) ;
 
-    // set
-    for (int i=0; i<N; i++) {
-	 set (A, 100+i, i) ;
-    }
+    // sub
+    val = sub(N1, N2) ;
+    printf("%d - %d = %d\n", N1, N2, val) ;
 
-    // get
-    for (int i=0; i<N; i++) {
-	 get (A, 100+i, &val) ;
-    }
+    // neg
+    val = neg(N2) ;
+    printf("-%d = %d\n", N2, val) ;
 
     return 0 ;
 }
@@ -48,7 +47,7 @@ Dicha abstracción se diseña e implementa inicialmente:
   * Se despliega como único ejecutable (centralizado)
 
 El código fuente, las instrucciones de compilación y las instrucciones para la ejecución están en:
-  * [Servicio centralizado monolítico](/puc-keyvalue/kv-centralized-monolithic/README.md#service-centralized-monolithic)
+  * [Servicio centralizado monolítico](/pc-calculator/cal-centralized-monolithic#readme)
 
 Partiendo de esta versión inicial monolítica centralizada,
 para transformar a un servicio distribuidos, se aconseja seguir los siguientes pasos:
@@ -59,6 +58,7 @@ para transformar a un servicio distribuidos, se aconseja seguir los siguientes p
     C -- mqueue   --> D[colas POSIX]
     C -- sockets  --> E[sockets]
     C -- RPC      --> F[RPC]
+    C -- GSOAP    --> G[GSOAP]
   ```
 
 La primera transformación consiste en que la abstracción esté en una librería y el programa principal haga uso de esta librería.
@@ -74,7 +74,7 @@ Dicha abstracción se diseña e implementa inicialmente:
   * Se despliega como único ejecutable (centralizado)
 
 El código fuente, las instrucciones de compilación y las instrucciones para la ejecución están en:
-  * [Servicio centralizado con librería](/puc-keyvalue/kv-centralized-library/README.md)
+  * [Servicio centralizado con librería](/pc-calculator/cal-centralized-library#readme)
 
 La arquitectura se puede resumir como:
   ```mermaid
@@ -91,7 +91,7 @@ Dicha abstracción se diseña e implementa inicialmente:
   * Se despliega como varios ejecutables (distribuidos) usando colas POSIX
 
 El código fuente, las instrucciones de compilación y las instrucciones para la ejecución están en:
-  * [Servicio distribuido basado en colas POSIX](/puc-keyvalue/kv-distributed-mqueue/README.md)
+  * [Servicio distribuido basado en colas POSIX](/pc-calculator/cal-distributed-mqueue#readme)
 
 La arquitectura se puede resumir como:
 ```mermaid
@@ -112,7 +112,7 @@ Dicha abstracción se diseña e implementa inicialmente:
   * Se despliega como varios ejecutables (distribuidos) usando sockets
 
 El código fuente, las instrucciones de compilación y las instrucciones para la ejecución están en:
-  * [Servicio distribuido basado en sockets](/puc-keyvalue/kv-distributed-sockets/README.md)
+  * [Servicio distribuido basado en sockets](/pc-calculator/cal-distributed-sockets#readme)
 
 La arquitectura se puede resumir como:
 ```mermaid
@@ -133,7 +133,28 @@ Dicha abstracción se diseña e implementa inicialmente:
   * Se despliega como varios ejecutables (distribuidos) usando RPC
 
 El código fuente, las instrucciones de compilación y las instrucciones para la ejecución están en:
-  * [Servicio distribuido basado en RPC](/puc-keyvalue/kv-distributed-rpc/README.md)
+  * [Servicio distribuido basado en RPC](/pc-calculator/cal-distributed-rpc#readme)
+
+La arquitectura se puede resumir como:
+```mermaid
+sequenceDiagram
+    app-d          ->> lib-client.c: request lib.h API in a distributed way
+    lib-client.c   ->> lib-server.c: request remote API
+    lib-server.c   ->> lib.c: request lib.h API call
+    lib.c          ->> lib-server.c: return API call result
+    lib-server.c   ->> lib-client.c: return remote result
+    lib-client.c   ->> app-d: return result of the distributed API call
+```
+
+
+## Servicio distribuido basado en GSOAP
+
+Dicha abstracción se diseña e implementa inicialmente:
+  * En varios fichero fuente (librería y ejecutables) y
+  * Se despliega como varios ejecutables (distribuidos) usando GSOAP
+
+El código fuente, las instrucciones de compilación y las instrucciones para la ejecución están en:
+  * [Servicio distribuido basado en GSOAP](/pc-calculator/cal-distributed-gsoap-standalone#readme)
 
 La arquitectura se puede resumir como:
 ```mermaid
