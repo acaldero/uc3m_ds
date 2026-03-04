@@ -188,7 +188,7 @@ Where:
    * Any application that wants to send and receive data must "open" a port
 
 * It is represented by a 16-bit unsigned integer:
-   * 2^16 ports on a machine ~ 65536 possible ports
+   * 2<sup>16</sup> ports on a machine ~ 65536 possible ports
    * Reserved by IANA for Internet applications:
       * 0-1023 (also called *well-known* ports)
       * Ports between 1024 and 49151 are registered ports to be used by services
@@ -352,7 +352,7 @@ int main ()
 struct sockaddr_in  a4;
 struct sockaddr_in6 a6;
 memset(&a4, 0, sizeof(struct sockaddr_in));  // initialize everything to zero
-m emset(&a6, 0, sizeof(struct sockaddr_in6)); // initialize everything to zero
+memset(&a6, 0, sizeof(struct sockaddr_in6)); // initialize everything to zero
  ```
 
   * **inet_addr** -> PROBLEM: the returned error is confused with a valid value
