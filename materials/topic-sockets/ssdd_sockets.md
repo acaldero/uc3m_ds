@@ -1,296 +1,302 @@
 
-# Comunicación con Sockets
+
+# Communication with Sockets
 + **Felix García Carballeira and Alejandro Calderón Mateos** @ arcos.inf.uc3m.es
-+ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
++ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_sd/blob/main/LICENSE)
 
 
-## Contenidos
+## Contents
 
- * Introducción a sockets
-   * [Motivación](#introducción-a-sockets)
-   * [Dominios y tipos](#sockets-dominios-de-comunicación)
-   * [Direcciones y puertos](#direcciones)
-     * [Ejemplos en C y Python](#examples-de-conversión)
-   * [Representación de datos](#orden-de-los-bytes-big-endian-y-little-endian)
- * Modelos de comunicación
-   * [Stream o orientado a conexión](#modelos-de-comunicaci%C3%B3n-orientado-a-conexi%C3%B3n)
-     * [Ejemplo en C](#ejemplo-de-uso-de-sockets-orientados-a-conexión-en-c)
-     * [Ejemplo en Python](#ejemplo-de-uso-de-sockets-orientados-a-conexión-en-python)
-   * [Datagram o no orientado a conexión](#modelos-de-comunicación-no-orientado-a-conexión-en-c)
-     * [Ejemplo en C](#ejemplo-de-uso-de-sockets-no-orientados-a-conexi%C3%B3n)
-     * [Ejemplo en Python](#ejemplo-de-uso-de-sockets-no-orientados-a-conexión-en-python)
- * Aspectos adicionales
-   * [Opciones más comunes de un socket](#opciones-importantes-asociadas-a-un-socket)
-   * [Servidor secuencial vs procesos pesados vs hilos](#servidor-secuencial-vs-procesos-pesados-vs-hilos)
-   * [Trabajar con heterogeneidad en el sistema distribuido](#trabajar-con-heterogeneidad-en-el-sistema-distribuido)
-
-
-## Introducción a sockets
-
-* Mecanismo de IPC para poder comunicar procesos que ejecutan en distintas máquinas
-  * Otros posibles mecanismos IPC: ficheros, tuberías con nombre, etc.
-
-* Breve historia:
-  * La primera implementación apareció en 1983 en UNIX BSD 4.2
-    * Intento de incluir TCP/IP en UNIX
-    * Diseño independiente del protocolo de comunicación
-  * API formalmente especificado en el estándar POSIX.1g (2000)
-  * Actualmente:
-    * Disponibles en prácticamente todos los sistemas operativos: Linux, Windows, MacOS, etc.
-    * API en casi todos los lenguajes:  Java (como clase nativa), Python (como paquete socket), etc.
+* Introduction to sockets
+  * [Motivation](#introduction-to-sockets)
+  * [Domains and types](#sockets-communication-domains)
+  * [Addresses and ports](#addresses)
+     * [Examples in C and Python](#conversion-examples)
+  * [Data representation](#big-endian-and-little-endian-byte-order)
+* Communication models
+  * [Stream or connection-oriented](#connection-oriented-communication-models) Connection-oriented)
+     * [Example in C](#example-of-using-connection-oriented-sockets-in-c)
+     * [Example in Python](#example-of-using-connection-oriented-sockets-in-python)
+  * [Datagram or connectionless](#connectionless-communication-models -connection-in-c)
+     * [Example in C](#example-of-using-connection-oriented-sockets)
+     * [Example in Python](#example-of-using-connection-oriented-sockets-in-python)
+* Additional aspects
+   * [Most common socket options](#important-options-associated-with-a-socket)
+   * [Sequential server vs heavy processes vs threads](#sequential-server-vs -heavy-processes-vs-threads)
+   * [Working with heterogeneity in distributed systems](#working-with-heterogeneity-in-distributed-systems)
 
 
-## Qué representa un socket
+## Introduction to sockets
+
+* IPC mechanism for communicating between processes running on different machines
+  * Other possible IPC mechanisms: files, named pipes, etc.
+
+* Brief history:
+  * The first implementation appeared in 1983 in UNIX BSD 4.2
+    * Attempt to include TCP/IP in UNIX
+    * Design independent of the communication protocol
+  * API formally specified in the POSIX.1g standard (2000)
+  * Currently:
+    * Available on virtually all operating systems: Linux, Windows, MacOS, etc.
+    * API in almost all languages: Java (as a native class), Python (as a socket package), etc.
+
+
+## What a socket represents
 
 ```c
 #include <sys/socket.h>
+
 int socket(int domain, int type, int protocol) ;
 ...
 ```
 
-* Un **socket** es una abstracción que:
-  * Representa un extremo de una comunicación bidireccional con una terna (protocolo, dirección, puerto) asociada
-  * Ofrece interfaz de acceso a la capa de transporte del protocolo TCP/IP
+* A **socket** is an abstraction that:
+  * Represents one end of a bidirectional communication with an associated triplet (protocol, address, port)
+  * Provides an interface for accessing the TCP/IP transport layer
 
-* Un **socket** se representa como descriptor de un punto final de comunicación (**dirección IP** y **puerto**)
+* A **socket** is represented as a descriptor of a communication endpoint (**IP address** and **port**)
 
-* Tres elementos asociados a un socket en la creación:
-  * Dominio de comunicación
-  * Tipo de sockets
-  * Protocolo
-
-
-## Sockets: dominios de comunicación
+* Three elements associated with a socket upon creation:
+  * Communication domain
+  * Socket type
+  * Protocol
 
 
-  ```c
-  int socket(int domain, int type, int protocol) ;
-  ```
+## Sockets: communication domains
 
-  * **Dominio de comunicación**
-    * Un socket está asociado a un dominio desde su creación
-    * Sólo se pueden comunicar sockets del mismo dominio
-    * Los servicios de sockets son independientes del dominio
-    * Ejemplos:
-       * AF_UNIX: comunicación dentro de una máquina
-       * AF_INET: comunicación usando protocolos TCP/IP (IPv4)
-       * AF_INET6: comunicación usando protocolos TCP/IP (IPv6)
+```c
+int socket(int domain, int type, int protocol);
+//             ^^
+```
 
-  * Tipo de sockets
-  * Protocolo
-
-
-## Sockets: tipo de socket
-
-  ```c
-  int socket(int domain, int type, int protocol) ;
-  ```
-
-  * Dominio de comunicación
-       * AF_INET: comunicación usando protocolos TCP/IP (IPv4)
-       * AF_INET6: comunicación usando protocolos TCP/IP (IPv6)
-
-  * **Tipo de sockets**
-    * SOCK_STREAM: Stream, protocolo TCP
-    * SOCK_DGRAM: Datragrama, protocolo UDP
-    * SOCK_RAW: Raw, sin protocolo de transporte (protocolo IP)
-
-  * Protocolo
+* **Communication domain**
+  * A socket is associated with a domain from the moment it is created
+  * Only sockets from the same domain can communicate
+  * Socket services are independent of the domain
+  * Examples:
+    * AF_UNIX: communication within a machine
+    * AF_INET: communication using TCP/IP protocols (IPv4)
+    * AF_INET6: communication using TCP/IP protocols (IPv6)
+  
+  * Socket types
+  * Protocol
 
 
-## Sockets: protocolo
+## Sockets: socket type
 
-  ```c
-  int socket(int domain, int type, int protocol) ;
-  ```
+```c
+int socket(int domain, int type, int protocol) ;
+//                         ^^
+```
 
-  * Dominio de comunicación
-       * AF_INET: comunicación usando protocolos TCP/IP (IPv4)
-       * AF_INET6: comunicación usando protocolos TCP/IP (IPv6)
+* Communication domain
+    * AF_INET: communication using TCP/IP protocols (IPv4)
+    * AF_INET6: communication using TCP/IP protocols (IPv6)
 
-  * Tipo de sockets
-    * SOCK_STREAM: Stream
-    * SOCK_DGRAM: Datragrama
-    * SOCK_RAW: Raw
+* **Socket type**
+   * SOCK_STREAM: Stream, TCP protocol
+   * SOCK_DGRAM: Datagram, UDP protocol
+   * SOCK_RAW: Raw, no transport protocol (IP protocol)
+  
+* Protocol
 
-  * **Protocolo**
-    * 0: valor por defecto (ver /etc/protocols para otros)
+
+## Sockets: protocol
+
+```c
+int socket(int domain, int type, int protocol) ;
+//                                   ^^
+```
+
+* Communication domain
+   * AF_INET: communication using TCP/IP protocols (IPv4)
+   * AF_INET6: communication using TCP/IP protocols (IPv6)
+
+* Socket type
+   * SOCK_STREAM: Stream
+   * SOCK_DGRAM: Datagram
+   * SOCK_RAW: Raw
+
+* **Protocol**
+   * 0: default value (see /etc/protocols for others)
 
 
-## Socket **stream** vs **datagram**
+## **Stream** vs **datagram** socket
+
 
 | socket         | stream         | datagram       |
 |----------------|----------------|----------------|
-| Protocolo      | TCP            | UDP            |
-| Flujo de datos | bidireccional  | bidireccional  |
-| Conexión       | conexión extremo-a-extremo antes de intercambio de datos | No hay conexión entre procesos comunicados |
-| Parcelación    | flujo de bytes<br>(no preserva el límite entre mensajes) | flujo de datagramas (un datagrama es una entidad autocontenida, mantiene separación entre paquetes) (1) |
-| Fiabilidad     | Si (2)           | No<br>(desordenados, duplicados, pérdidas) |
-| Ejemplos       | HTTP, FTP, etc.  | DNS  |
-
- * (1) Longitud máxima de un datagrama (datos y cabeceras) es 64 KB<br>Cabecera IP+cabecera UDP = 28 bytes
- * (2) Paquetes ordenados por secuencia, sin duplicación de paquetes, libre de errores, notifica errores
-
-
-## Comparación de los protocolos TCP, UDP y IP
-
-| Característica           | IP  | UDP  | TCP  |
-|--------------------------|-----|------|------|
-| Orientado a conexión     | NO  | NO   | SI   |
-| Límite entre mensajes    | SI  | SI   | NO   |
-| Ack                      | NO  | NO   | SI   |
-| Timeout y retransmisión  | NO  | NO   | SI   |
-| Detección de duplicación | NO  | NO   | SI   |
-| Secuenciamiento          | NO  | NO   | SI   |
-| Flujo de control         | NO  | NO   | SI   |
+| Protocol       | TCP            | UDP            |
+| Data flow      | bidirectional  | bidirectional  |
+| Connection     | end-to-end connection before data exchange | No connection between communicating processes |
+| Packetization  | byte stream<br> (does not preserve the boundary between messages) | datagram flow (a datagram is a self-contained entity, maintains separation between packets) (1) |
+| Reliability    | Yes (2)          | No<br>(disordered, duplicates, losses) |
+| Examples       | HTTP, FTP, etc.  | DNS  |
+ 
+* (1) Maximum length of a datagram (data and headers) is 64 KB<br>IP header + UDP header = 28 bytes
+* (2) Packets sorted by sequence, no packet duplication, error-free, error notification
 
 
-## Información asociada a una comunicación
+## Comparison of TCP, UDP, and IP protocols
 
-La información asociada a una comunicación ha de incluir:
-  ```
-  (Protocolo, IP-local, P-local, IP-remoto, P-remoto)
-  ```
-
-Donde:
- * Protocolo: TCP, UDP, RAW
- * IP-local:  dirección IP local (origen)
- * P-local:   puerto local (origen)
- * IP-remoto: dirección IP remota (destino)
- * P-remoto:  puerto remoto (destino
+| Feature                    | IP  | UDP  | TCP |
+|----------------------------|-----|------|-----|
+| Connection-oriented        | NO  | NO   | YES |
+| Limit between messages     | YES | YES  | NO  |
+| Ack                        | NO  | NO   | YES |
+| Timeout and retransmission | NO  | NO   | YES |
+| Duplication detection      | NO  | NO   | YES |
+| Sequencing                 | NO  | NO   | YES |
+| Flow control               | NO  | NO   | YES |
 
 
-## Direcciones
+## Information associated with a communication
 
- * Las direcciones se usan para:
-   * Asignar una dirección local a un socket (bind)
-   * Especificar una dirección remota (connect o sendto)
+The information associated with a communication must include:
+```
+  (Protocol, Local IP, Local P, Remote IP, Remote P)
+```
 
- * Las direcciones son dependientes del dominio
-    * Cada dominio usa una estructura específica
-      * Direcciones en AF_UNIX (``struct sockaddr_un``)
-        * Nombre de fichero
-      * Direcciones en AF_INET (``struct sockaddr_in``)
-        * Dirección de host (32 bits) + puerto (16 bits) + protocolo
-   * Se utiliza la estructura genérica ``struct sockaddr`` en el API
-   * Es necesario la conversión de tipos (casting) en las llamadas
+Where:
+* Protocol: TCP, UDP, RAW
+* Local IP:  local IP address (source)
+* Local P:   local port (source)
+* Remote IP: remote IP address (destination)
+* Remote P:  remote port (destination
 
 
-## Puertos
+## Addresses
 
- * Un puerto se asocia a un proceso destino en un computador:
-    * Permite que la transmisión se dirija a un proceso específico en el computador destino
-    * Un puerto tiene un único receptor y múltiples emisores (excepto multicast)
-    * Toda aplicación que desee enviar y recibir datos debe "abrir" un puerto
+* Addresses are used to:
+  * Assign a local address to a socket (bind)
+  * Specify a remote address (connect or sendto)
+ 
+* Addresses are domain-dependent
+  * Each domain uses a specific structure
+    * Addresses in AF_UNIX (``struct sockaddr_un``)
+      * File name
+    * Addresses in AF_INET (``struct sockaddr_in``)
+      * Host address (32 bits) + port (16 bits) + protocol
+  * The generic structure ``struct sockaddr`` is used in the API
+  * Type conversion (casting) is necessary in calls
 
- * Se representa con un número entero de 16 bits sin signo:
-   * 2^16 puertos en una máquina ~ 65536 puertos posibles
-   * Reservados por la IANA para aplicaciones de Internet:
-      * 0-1023 (también llamados *well-known* puertos)
-      * Puertos entre 1024 y 49151 son puertos registrados para ser usados por los servicios
-      * Puertos por encima de 65535 para uso privado
+
+## Ports
+
+* A port is associated with a destination process on a computer:
+   * Allows transmission to be directed to a specific process on the destination computer
+   * A port has a single receiver and multiple senders (except multicast)
+   * Any application that wants to send and receive data must "open" a port
+
+* It is represented by a 16-bit unsigned integer:
+   * 2^16 ports on a machine ~ 65536 possible ports
+   * Reserved by IANA for Internet applications:
+      * 0-1023 (also called *well-known* ports)
+      * Ports between 1024 and 49151 are registered ports to be used by services
+      * Ports above 65535 are for private use
       * http://www.iana.org/assignments/port-numbers
 
-  * El espacio de puertos para streams y datagramas es independiente
+* The port space for streams and datagrams is independent
 
 
-## Dirección IP de host
+## Host IP address
 
- * En C, una dirección IP de host se almacena en una estructura de tipo ```in_addr```:
+* In C, a host IP address is stored in a structure of type ```in_addr```:
    ```c
-   #include <netinet/in.h>
+   # include <netinet/in.h>
 
    typedef uint32_t in_addr_t;
 
    struct in_addr {
-     in_addr_t s_addr; /* entero sin signo de 32 bits */
+      in_addr_t s_addr; /* 32-bit unsigned integer */
    };
 
    ...
    struct in_addr a1 ;
-   a1.s_addr = inet_addr("10.12.110.57"); // a.s_addr es la dirección en binario
+   a1.s_addr = inet_addr("10.12.110 .57"); // a.s_addr is the address in binary
+   ...
    ```
 
 * <details>
-  <summary>En Python...</summary>
-  El módulo ipaddress incluye clases para trabajar con direcciones de red IPv4 y IPv6
+  <summary>In Python...</summary>
+  The ipaddress module includes classes for working with IPv4 and IPv6 network addresses
 
   ### ip_address.py
   ```python
   import binascii
   import ipaddress
 
-  addr = ipaddress.ip_address('176.58.10.138')
+  addr = ipaddress.ip_address('176. 58.10.138')
   print(addr)
 
-  print(' IP version:',  addr.version)
-  print(' is private:',  addr.is_private)
-  print(' packed form:', binascii.hexlify(addr.packed))
-  print(' integer:',     int(addr))
-  print('')
+  print(‘ IP version:’,  addr.version)
+  print(‘ is private:’,  addr.is_private)
+  print(‘ packed form:’, binascii.hexlify(addr.packed))
+  print(‘ integer:’,     int(addr))
+  print(‘’)
   ```
   </details>
 
 
-## Direcciones en AF_INET
+## Addresses in AF_INET
 
- * En C, una dirección incluye la dirección IP, puerto y familia en la estructura ```struct sockaddr_in```:
-```c
-#include <netinet/in.h>
+* In C, an address includes the IP address, port, and family in the ```struct sockaddr_in``` structure:
+  ```c
+  #include <netinet/in.h>
 
-struct sockaddr_in
-{
-  short          sin_family;  /* dominio Internet (AF_INET) */
-  in_port_t      sin_port;    /* puerto: entero 16 bits sin signo */
-  struct in_addr sin_addr;    /* dirección IP (entero 32 bits sin signo) */
-  unsigned char  sin_zero[8]; /* relleno o padding (8 bytes) */
-};
+  struct sockaddr_in
+  {
+    short          sin_family;  /* Internet domain (AF_INET) */
+    in_port_t      sin_port;    /* port: 16-bit unsigned integer */
+    struct in_addr sin_addr;    /* IP address (32-bit unsigned integer) */
+    unsigned char  sin_zero[8]; /* padding (8 bytes) */
+  };
 
-...
-struct sockaddr_in a2;
-memset(&a2, 0, sizeof(struct sockaddr_in)); // inicializar todo a cero
-a2.sin_family      = AF_INET ;
-a2.sin_port        = htons(8080) ;
-a2.sin_addr.s_addr = inet_addr("10.12.110.57");
-```
- * **TIP:** Al usar ```struct sockaddr_in``` que hay que inicializar a 0 todos los campos para limpiar lo que tenga antes.
-
-
-## Servicios sobre direcciones (1/2)
-
- * Hay distintas notaciones para una dirección:
-    | Notación      | Ejemplo                           | Formato  | Entendible por |
-    |---------------|-----------------------------------|----------|----------------|
-    | dominio-punto | "www.uc3m.es"                     | Texto    | Humano         |
-    | decimal-punto | "176.58.10.138"                   | Texto    | Humano         |
-    | binario       | 10110000001110100000101010001010  | Binario  | Máquina        |
+  ...
+  struct sockaddr_in a2;
+  memset(&a2, 0, sizeof(struct sockaddr_in)); // initialize everything to zero
+  a2.sin_family      = AF_INET ;
+  a2.sin_port        = htons(8080) ;
+  a2.sin_addr. s_addr = inet_addr(“10.12.110.57”);
+  ```
+* **TIP:** When using ```struct sockaddr_in``` , all fields must be initialized to 0 to clear any previous values.
 
 
- * Servicios sobre direcciones:
-   * Obtener el nombre de la máquina local (ej.: "nodo1.inf.uc3m.es")
-   * Obtener la dirección de un host (ej.: "nodo1.inf.uc3m.es" -> "10.1.2.3")
-   * Transformar direcciones (ej.: "10.1.2.3" -> 0x12345678 / 0x12345678 -> "10.1.2.3")
+## Services on addresses (1/2)
+
+ * There are different notations for an address:
+    | Notation      | Example                           | Format  | Understandable by |
+    |---------------|-----------------------------------|---------|-------------------|
+    | domain-dot    | "www.uc3m.es"                     | Text    | Human             |
+    | decimal-dot   | "176.58.10.138"                   | Text    | Human             |
+    | binary        | 10110000001110100000101010001010  | Binary  | Machine           |
 
 
-## Servicios sobre direcciones (2/2)
+* Address services:
+   * Get the name of the local machine (e.g., "node1.inf.uc3m.es")
+   * Get the address of a host (e.g., "node1.inf.uc3m.es" -> "10.1.2.3")
+   * Transform addresses (e.g.: "10.1.2.3" -> 0x12345678 / 0x12345678 -> "10.1.2.3")
+
+
+## Address services (2/2)
 
 ```mermaid
 flowchart TD
-    D>obtener nombre de máquina] --> |"(A) obtener nombre local"| A
+    D>get machine name] --> |"(A) get local name"| A
     D -.-> A
     D -.-> B
-    B -->|"(E) resolución inversa"| A
-    A(dominio-punto:<br> www.uc3m.es) -->|"(D) resolución"| B(decimal-punto:<br> 176.58.10.138)
-    B -->|"(B) transformación<br> dec-punto a binario"| C
-    C(binario:<br> 10110000001110100000101010001010) -->|"(C) transformación<br> binario a dec-punto"| B
+    B -->|"(E) reverse resolution"| A
+    A(domain-dot:<br> www.uc3m.es) -->|"(D) resolution"| B(decimal-dot: <br> 176.58.10.138)
+    B -->|"(B) transformation<br> dec-point to binary"| C
+    C(binary:<br> 10110000001110100000101010001010) -->| "(C) transformation<br> binary to dec-point"| B
 
-    subgraph " "
+    subgraph “ ”
     A
-    subgraph " "
+    subgraph “ ”
     B
     C
     end
-    subgraph " "
+    subgraph “ ”
     C
     D
     end
@@ -298,12 +304,12 @@ flowchart TD
 ```
 
 
-## Servicios sobre direcciones: (A) obtener el nombre local
+## Services on addresses: (A) obtain the local name
 
-* En C, ```gethostname``` es la función que facilita el nombre de la máquina (formato dominio punto) en la que se ejecuta:
+* In C, ```gethostname``` is the function that provides the name of the machine (domain dot format) on which it is running:
   ```c
-  int gethostname ( char *name,        // buffer donde se almacena el nombre
-                    size_t namelen );  // longitud del buffer
+  int gethostname ( char *name,        // buffer where the name is stored
+                    size_t namelen );  // buffer length
   ```
 
 #### gethostname.c
@@ -314,136 +320,138 @@ flowchart TD
 
 int main ()
 {
-    char maquina[256];
+    char machine[256];
     int err;
 
-    err = gethostname(maquina, 256);
+    err = gethostname(machine, 256);
     if (err < 0) {
-        perror("gethostname: ") ;
+        perror(“gethostname: ”) ;
         return -1;
     }
-
-    printf("Ejecuto en la maquina %s\n", maquina) ;
+    
+    printf(“Running on machine %s\n”, machine) ;
     return 0 ;
 }
 ```
 
 * <details>
-  <summary>En Python...</summary>
-  El método gethostname de la clase socket se encarga.
+  <summary>In Python...</summary>
+  The gethostname method of the socket class takes care of this.
 
   ### gethostname.py
   ```python
   import socket
-  name = socket.gethostname();
-  print('host name: ' + name)
+  name = socket. gethostname();
+  print(‘host name: ’ + name)
   ```
   </details>
 
 
-## Servicios sobre direcciones: (B) decimal-punto -> binario
+## Services on addresses: (B) decimal-dot -> binary
 
 ```c
 struct sockaddr_in  a4;
 struct sockaddr_in6 a6;
-memset(&a4, 0, sizeof(struct sockaddr_in));  // inicializar todo a cero
-memset(&a6, 0, sizeof(struct sockaddr_in6)); // inicializar todo a cero
+memset(&a4, 0, sizeof(struct sockaddr_in));  // initialize everything to zero
+m emset(&a6, 0, sizeof(struct sockaddr_in6)); // initialize everything to zero
  ```
 
-  * **inet_addr** -> PROBLEMA: el error devuelto se confunde con un valor válido
+  * **inet_addr** -> PROBLEM: the returned error is confused with a valid value
     ```c
-    // (opción 1) in_addr_t inet_addr(const char *cp);
-    a4.sin_addr.s_addr = inet_addr("10.10.10.57");
+    // (option 1) in_addr_t inet_addr(const char *cp);
+    a4.sin_addr.s_addr = inet_addr(“10.10.10.57”);
     if (INADDR_NONE == a4.sin_addr.s_addr) {
-        // INADDR_NONE: dirección con todos los bits a uno
-        printf("ERROR en inet_addr\n") ;
+        // INADDR_NONE: address with all bits set to one
+        printf(“ERROR in inet_addr\n”);
     }
     ```
-  * **inet_aton** ->  PROBLEMA: inet_aton solo vale para IPv4
+  * **inet_aton** ->  PROBLEM: inet_aton is only valid for IPv4
     ```c
-    // (opción 2) int inet_aton(char *str, struct in_addr *addr);
-    int ret = inet_aton("10.10.10.57", &(a4.sin_addr.s_addr));
+    // (option 2) int inet_aton(char *str, struct in_addr *addr);
+    int ret = inet_aton(“10.10.10.57”, &(a4.sin_addr.s_addr));
+    
     if (0 == ret) {
-        printf("ERROR en inet_aton\n") ;
+        printf(“ERROR in inet_aton\n”);
     }
     ```
-  * **inet_pton** -> vale para IPv4 y para IPv6
-    ```c
-    // (opción 3) int inet_pton(int family, const char *strptr, void *addrptr);
-    int ret = inet_pton(AF_INET6, "2024:db8:8722:3a92::15", &(a6.sin6_addr));
+* **inet_pton** -> valid for IPv4 and IPv6
+   ```c
+    // (option 3) int inet_pton(int family, const char *strptr, void * addrptr);
+    int ret = inet_pton(AF_INET6, “2024:db8:8722:3a92::15”, &(a6.sin6_addr));
     if (ret != 1) {
-        printf("ERROR en inet_pton\n") ;
+        printf(“ERROR in inet_pton\n”) ;
     }
-    ```
+   ```
 
 
-## Servicios sobre direcciones: (C ) binario -> decimal-punto
+## Services on addresses: (C ) binary -> decimal-dot
 
 ```c
 struct sockaddr_in  a4;
-memset(&a4, 0, sizeof(struct sockaddr_in));  // inicializar todo a cero
- ```
+memset(&a4, 0, sizeof(struct sockaddr_in));  // initialize everything to zero
+ 
+```
 
-  * **inet_ntoa** ->  PROBLEMA: inet_ntoa solo vale para IPv4
+  * **inet_ntoa** ->  PROBLEM: inet_ntoa is only valid for IPv4
     ```c
-    // (opción 1) int inet_ntoa(...
+    // (option 1) int inet_ntoa(...
     char str4[INET_ADDRSTRLEN];
     char *ret = inet_ntoa(a4.sin_addr.s_addr);
     if (NULL == ret) {
-        printf("ERROR en inet_ntoa\n") ;
+        printf(“ERROR in inet_ntoa\n”) ;
     }
     ```
-  * **inet_ntop** -> vale para IPv4 y para IPv6
-    ```c
-    // (opción 2) const char *inet_ntop(int domain, const void *addrptr, char *dst_str, size_t len);
-    char str4[INET_ADDRSTRLEN];
-    ptr = inet_ntop(AF_INET, &(a4.sin_addr.s_addr), str4, sizeof(str4));
-    if (NULL == ret) {
-        printf("ERROR en inet_ntop\n") ;
-    }
-    ```
+* **inet_ntop** -> valid for IPv4 and IPv6
+   ```c
+   // (option 2) const char *inet_ntop(int domain, const void *addrptr, char *dst_str, size_t len);
+   char str4[INET_ADDRSTRLEN];
+   ptr = inet_ntop(AF_INET, &(a4.sin_addr.s_addr), str4, sizeof(str4));
+   if (NULL == ret) {
+       printf(“ERROR in inet_ntop\n”); 
+   }
+   ```
 
 
-## Obtener la información de una máquina: (D, B y E) resolver nombres (forma clásica)
+## Obtaining information about a machine: (D, B, and E) resolving names (classic form)
 
-  * La información de una máquina se representa mediante la estructura ``struct hostent``:
-    ```c
-    struct hostent
-    {
-       char   *h_name ;
+* Information about a machine is represented by the ``struct hostent`` structure:
+  ```c
+  struct hostent
+  {
+       char   *h_name;
        char  **h_aliases ;
        int     h_addrtype ;
        int     h_length ;
        char  **h_addr_list ;
-    }
-    ```
+  }
+  ```
 
-    * Obtiene la información de un host a partir de una dirección en formato dominio-punto
-         ```c
-      struct hostent *gethostbyname(char *str);  // str: nombre de la máquina
-      ```
-
-    * Obtiene la información de un host a partir de una dirección IP
-        ```c
-      struct hostent *gethostbyaddr(const void *addr,  // addr: puntero a struct in_addr
-                                      int len,           // len:  tamaño de la estructura
-                                      int type);         // type: AF_INET
-      ```
-
-    * Un ejemplo de  estructura  ``struct hostent`` rellena podría ser:
+* Obtains information about a host from an address in domain-dot format
+  ```c
+  struct hostent *gethostbyname ( char *str );  // str: machine name
+  ```
+    
+* Obtains information about a host from an IP address
+  ```c
+  struct hostent *gethostbyaddr ( const void *addr,  // addr: pointer to struct in_addr
+                                  int len,           // len:  size of the structure
+                                  int type);         // type: AF_INET
+  ```
+    
+* An example of a filled  ``struct hostent`` structure could be:
 
 <html>
 <p align="center">
   <img src="http://www.cs.emory.edu/~cheung/Courses/455/Syllabus/9-netw-prog/FIGS/gethostbyaddr.gif" /><br>
-<small><b>Imagen de  http://www.cs.emory.edu/~cheung/Courses/455/Syllabus/9-netw-prog/netw-supp4.html</b></small>
+<small><b>Image from  http://www.cs.emory.edu/~cheung/Courses/455/Syllabus/9-netw-prog/netw-supp4.html</b></small>
 </p>
 </html>
 
 
-## Obtener la información de una máquina: (D, B y E) resolver nombres (forma moderna)
+## Obtaining information about a machine: (D, B, and E) Resolving names (modern form)
 
-  * Para tanto IPv4 como IPv6 se recomienda usar la nueva estructura  ``struct addrinfo``:
-    ```c
+* For both IPv4 and IPv6, it is recommended to use the new  ``struct addrinfo`` structure:
+  ```c
     struct addrinfo {
        int    ai_flags;    // AI_PASSIVE, AI_CANONNAME, AI_NUMERICHOST, etc.
        int    ai_family;   // PF_UNSPEC, PF_INET, etc.
@@ -454,33 +462,33 @@ memset(&a4, 0, sizeof(struct sockaddr_in));  // inicializar todo a cero
        struct sockaddr * ai_addr;
        struct addrinfo * ai_next;
     };
+  ```
+
+  * The equivalent of ``gethostbyname`` for IPv4 and IPv6 is **getaddrinfo** + **freeaddrinfo**
+    ```c
+      int getaddrinfo ( const char *restrict node,
+                        const char *restrict service,
+                        const struct addrinfo *restrict hints,
+                        struct addrinfo **restrict res );
+      void freeaddrinfo ( struct addrinfo *res );
     ```
 
-    * El equivalente a ``gethostbyname`` para IPv4 e IPv6 es **getaddrinfo** + **freeaddrinfo**
-         ```c
-      int getaddrinfo ( const char *restrict node,
-                           const char *restrict service,
-                           const struct addrinfo *restrict hints,
-                           struct addrinfo **restrict res );
-      void freeaddrinfo ( struct addrinfo *res );
-      ```
+    It is advisable to see the example of [Beej's simple server](https://beej.us/guide/bgnet/html/#a-simple-stream-server) on the use of getaddrinfo+freeaddrinfo since its use is not a simple change from gethostbyname to getaddrinfo. Regarding the results that getaddrinfo returns, you have to iterate and try socket+bind or socket+connect until the first result that allows it, which will be the one that works.
 
-       Se aconseja ver ejemplo de [servidor simple de Beej](https://beej.us/guide/bgnet/html/#a-simple-stream-server) sobre el uso de getaddrinfo+freeaddrinfo puesto que su uso no es un simple cambio de gethostbyname por getaddrinfo. Sobre los resultados que getaddrinfo devuelve hay que iterar e intentar hacer socket+bind o socket+connect hasta el primer resultado que lo permita, que será el de trabajo.
-
-    * La función **getnameinfo** es la inversa de getaddrinfo: convierte una dirección de socket interna en el nombre legible y servicio correspondiente, de forma independiente del protocolo.
-      ```c
+  * The **getnameinfo** function is the inverse of getaddrinfo: it converts an internal socket address into the corresponding readable name and service, independently of the protocol.
+    ```c
       int getnameinfo ( const struct sockaddr *sa,
                         socklen_t salen,
                         char *host, size_t hostlen,
                         char *serv, size_t servlen, int flags );
-      ```
+    ```
 
 
-## Ejemplos de conversión
+## Conversion examples
 
 ```mermaid
 flowchart TD
-    A(in_addr, 32-bit, IPv4) -->|inet_ntop,<br> inet_ntoa| B(Dirección decimal-punto IPv4)
+    A(in_addr, 32-bit, IPv4) -->|inet_ntop,<br> inet_ntoa| B(IPv4 decimal-dot address)
     B -->|inet_pton,<br> inet_aton,<br> inet_addr| A
     C(in6_addr, 128-bit, IPv6) -->|inet_ntop| D(x:x:x:x:x:x:a.b.c.d)
     D -->|inet_pton| C
@@ -496,45 +504,45 @@ flowchart TD
     end
 ```
 
-* En C:
+* In C:
 
-  * <details>
-    <summary>Ejemplo de inet_aton + inet_ntoa... </summary>
+* <details>
+  <summary>Example of inet_aton + inet_ntoa... </summary>
 
-    ### direcciones.c
-    ```c
-    #include <stdlib.h>
-    #include <stdio.h>
-    #include <sys/socket.h>
-    #include <netinet/in.h>
-    #include <arpa/inet.h>
+  ### addresses.c
+  ```c
+  #include <stdlib.h>
+  #include <stdio.h>
+  #include <sys/socket.h>
+  #include <netinet/in.h>
+  #include <arpa/inet.h>
 
-    int main(int argc, char **argv)
-    {
+  int main(int argc, char **argv)
+  {
        struct in_addr in;
-
+       
        if (argc != 2) {
-           printf("Uso: %s <decimal-punto>\n", argv[0]);
+           printf(“Usage: %s <decimal-dot>\n”, argv[0]);
            exit(0);
        }
 
        if (inet_aton(argv[1], &in) == 0) {
-           printf("Error en la dirección\n");
+           printf("Address error\n “);
            exit(0);
        }
 
-       printf("La dirección es %s\n", inet_ntoa(in));
+       printf(”The address is %s\n", inet_ntoa (in));
        exit(0);
     }
-     ```
-   </details>
+  ```
+  </details>
 
 
-  * <details>
-    <summary>En C, ejemplo de gethostbyname + inet_ntoa...</summary>
+* <details>
+  <summary>In C, example of gethostbyname + inet_ntoa...</summary>
 
-     ### dns.c
-     ```c
+  ### dns.c
+  ```c
     #include <stdio.h>
     #include <string.h>
     #include <stdlib.h>
@@ -543,64 +551,64 @@ flowchart TD
     #include <netinet/in.h>
     #include <arpa/inet.h>
 
-    int main(int argc, char **argv)
+    int main ( int argc, char **argv )
     {
         struct hostent *hp;
-        struct in_addr in;
-
+        struct in_addr  in;
+        
         hp = gethostbyname("www.uc3m.es");
         if (hp == NULL) {
-            printf("Error en gethostbyname\n"); exit(0);
+            printf("Error in gethostbyname\n");
+            exit(0);
         }
 
         memcpy(&(in.s_addr), *(hp->h_addr_list), sizeof(in.s_addr));
-        printf("%s es %s (%ld)\n", hp->h_name, inet_ntoa(in), in.s_addr);
+        printf("%s is %s (%ld)\n", hp->h_name, inet_ntoa(in), in.s_addr);
 
         return 0;
     }
-    ```
-   </details>
+  ```
+  </details>
+  
+* <details>
+  <summary>Example of inet_aton + gethostbyaddr (D, B, and classic E)...</summary>
 
+   ### obtener-dominio.c
+   ```c
+   #include <netdb.h>
+   #include <stdio.h>
+   #include <string.h>
+   #include <sys/socket.h>
+   #include <netinet/in.h>
+   #include <arpa/inet.h>
 
-  * <details>
-    <summary>Ejemplo de inet_aton + gethostbyaddr (D, B y E clásico)...</summary>
-
-    ### obtener-dominio.c
-    ```c
-    #include <netdb.h>
-    #include <stdio.h>
-    #include <string.h>
-    #include <sys/socket.h>
-    #include <netinet/in.h>
-    #include <arpa/inet.h>
-
-    int main(int argc, const char **argv)
-    {
+   int main(int argc, const char **argv)
+   {
        struct in_addr addr; struct hostent *hp;
        char **p; struct in_addr in;
        char **q; int err;
-
+       
        if (argc != 2) {
-           printf("USO: %s <Direccion-IP>\n", argv[0]);
+           printf("USAGE: %s <IP-address>\n", argv[0]);
            return (1);
        }
 
        err = inet_aton(argv[1], &addr);
        if (err == 0) {
-           printf("por favor use direccion IP en formato a.b.c.d\n");
+           printf("please use IP address in a.b.c.d format\n");
            return (2);
        }
 
        hp = gethostbyaddr((char *) &addr, sizeof(addr), AF_INET);
        if (hp == NULL) {
-           printf("Error en gethostbyaddr\n");
-           return (3);
+           printf("Error in gethostbyaddr\n");
+           return (3); 
        }
 
        for (p = hp->h_addr_list; *p != 0; p++)
        {
            memcpy(&(in.s_addr), *p, sizeof(in.s_addr));
-           printf("%s es \t%s (%ld)\n", inet_ntoa(in), hp->h_name, in.s_addr) ;
+           printf("%s is \t%s (%ld)\n", inet_ntoa(in), hp->h_name, in.s_addr) ;
            for (q=hp->h_aliases; *q != 0; q++) {
                 printf("%s\n", *q);
            }
@@ -608,45 +616,45 @@ flowchart TD
 
        return(0);
     }
-    ```
-    </details>
+  ```
+  </details>
+  
+* <details>
+  <summary>Example of getaddrinfo + getnameinfo + freeaddrinfo (D, B, and modern E)...</summary>
 
+  ### get-domain-6.c
+  ```c
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include <netdb.h>
+  #include <string.h>
+  #include <netinet/in.h>
+  #include <sys/socket.h>
 
-  * <details>
-    <summary>Ejemplo de getaddrinfo + getnameinfo + freeaddrinfo (D, B y E moderno)...</summary>
-
-    ### obtener-dominio-6.c
-    ```c
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <netdb.h>
-    #include <string.h>
-    #include <netinet/in.h>
-    #include <sys/socket.h>
-
-    int main ( int argc, char*argv[] )
-    {
+  int main ( int argc, char*argv [] )
+  {
         int ret;
         struct addrinfo *results;
         struct addrinfo *res;
         char hostname[1025] ;
 
-        // domain name -> lista de direcciones
+        // domain name -> list of addresses
         ret = getaddrinfo("www.uc3m.es", NULL, NULL, &results);
         if (ret < 0) {
-            printf("ERROR en getaddrinfo: %s\n", gai_strerror(ret));
+            printf("ERROR in getaddrinfo: %s\n", gai_strerror(ret));
             return -1;
         }
-
-        // recorrer todos los resultados y hacer búsqueda inversa
+  
+        // go through all results and do reverse lookup
         for (res = results; res != NULL; res = res->ai_next)
         {
-            strcpy(hostname, "") ;
-            ret = getnameinfo(res->ai_addr, res->ai_addrlen,
-                          hostname, 1025,
-                          NULL, 0, 0);
+            strcpy(hostname, "");
+            ret = getnameinfo(res->ai_addr,
+                              res->ai_addrlen,
+                              hostname, 1025,
+                               NULL, 0, 0);
             if (ret < 0) {
-                printf("ERROR en getnameinfo: %s\n", gai_strerror(ret));
+                printf("ERROR in getnameinfo: %s\n", gai_strerror(ret));
                 continue;
             }
 
@@ -655,19 +663,19 @@ flowchart TD
             else printf("hostname: <empty>\n");
         }
 
-        // liberar memoria de los resultados
+        // free memory from results
         freeaddrinfo(results);
 
         return 0;
     }
-    ```
-    </details>
+  ```
+  </details>
 
-* En Python:
+* In Python:
 
   * <details>
-    <summary>Ejemplo de gethostname + gethostbyname...</summary>
-
+    <summary>Example of gethostname + gethostbyname...</summary>
+    
     ### gethostname.py
     ```python
     import socket
@@ -675,9 +683,9 @@ flowchart TD
     print(name + ': ' + socket.gethostbyname(name))
     ```
     </details>
-
+  
   * <details>
-    <summary>Ejemplo de gethostbyaddr...</summary>
+    <summary>Example of gethostbyaddr...</summary>
 
     ### dns.py
     ```python
@@ -686,7 +694,7 @@ flowchart TD
 
     arguments = len(sys.argv)
     if arguments < 2:
-       print('Uso: dns <host>')
+       print('Usage: dns <host>')
        exit()
     try:
        hostname, aliases, addresses = socket.gethostbyaddr(sys.argv[1])
@@ -698,113 +706,117 @@ flowchart TD
     ```
     </details>
 
-  * <details>
-    <summary>Ejemplo de inet_aton...</summary>
+* <details>
+  <summary>Example of inet_aton...</summary>
+  
+  ### addr_dot2bin.py
+  ```python
+   import socket
+   import struct
 
-    ### addr_dot2bin.py
-    ```python
-    import socket
-    import struct
+   // Example from: https://pythontic.com/modules/socket/inet_aton
+   IPQuad  = "192.168.0.0"
+   IP32Bit = socket.inet_aton (IPQuad)
+   print(IP32Bit)
+  ```
+  </details>
 
-    // Example from: https://pythontic.com/modules/socket/inet_aton
-    IPQuad  = "192.168.0.0"
-    IP32Bit = socket.inet_aton(IPQuad)
-    print(IP32Bit)
+
+## Byte order: big-endian and little-endian
+ 
+* There are two orders of bytes in a word in memory:
+  * Big-endian
+    * Motorola
+  * Little-endian
+    * Intel, AMD
+
+* The differences between the two can be seen in the following figure (Aeroid, CC BY-SA 4.0, via Wikimedia Commons):
+  <html>
+  <table border="1">
+  <tr>
+    <td>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/5/5d/32bit-Endianess.svg">
+    </td>
+  </tr>
+  </table>
+  </html>
+
+
+## Byte order and *Network Byte Order*
+ 
+* Big-endian is the standard for byte ordering used in TCP/IP
+    * Also called *Network Byte Order*
+
+* On computers that do not use Big-endian, it is necessary to use functions to translate numbers between the format used by TCP/IP (Big-endian) and the format used by the computer itself (Little-endian)
+  * Host (Little-Endian) -> Network (Big-Endian):
+      ```c
+       #include <arpa/inet.h>
+      u_long  htonl(u_long hostlong);   // translate 32-bit number from host format to net format
+      u_short htons(u_short hostshort) ; // translate 16-bit number from host format to net format
+      ```
+  * Network (Big-Endian) -> host (Little-Endian):
+    ```c
+       #include <arpa/inet. h>
+       u_long ntohl(u_long netlong);     // translate 32-bit number from net format to host
+       u_short ntohs(u_short netshort);  // translate 16-bit number from net format to host
     ```
-    </details>
 
 
-## Orden de los bytes: big-endian y little-endian
-
- * Hay dos órdenes de los bytes de una palabra en memoria:
-    * Big-endian
-       * Motorola
-    * Little-endian
-       * Intel, AMD
-
-* Las diferencias entre los dos se puede ver en la siguiente figura:
-
-![wikipedia Endianess](https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/32bit-Endianess.svg/880px-32bit-Endianess.svg.png)
-
-
-## Orden de los bytes y el *Network Byte Order*
-
- * Big-endian es el estándar para el ordenamiento de los bytes usado en TCP/IP
-    * También llamado *Network Byte Order*
-
-  * En computadores que no utilicen Big-endian es necesario emplear funciones para traducir números entre el formato que utiliza TCP/IP (Big-endian) y el empleado por el propio computador (Little-endian)
-    * Host (Little-Endian) -> Network (Big-Endian):
-         ```c
-       #include <arpa/inet.h>
-      u_long  htonl(u_long hostlong);   // traducir número de 32 bits del formato host al de net
-      u_short htons(u_short hostshort); // traducir número de 16 bits del formato host al de net
-      ```
-    * Network (Big-Endian) -> host (Little-Endian):
-         ```c
-       #include <arpa/inet.h>
-       u_long ntohl(u_long netlong);     // traducir número de 32 bits del formato net a host
-       u_short ntohs(u_short netshort);  // traducir número de 16 bits del formato net a host
-      ```
-
-
-
-## Representación de los datos: marshalling/unmarshalling
-
- * En un sistema distribuido con máquinas heterogéneas no solo el orden de los bytes puede ser distinto, también el tamaño de la palabra en los nodos conectados (máquinas de 32-bits, 64-bits, etc.), la representación usada (enteros en complemento a dos, enteros en complemento a uno, etc.), el juego de caracteres (ASCII, utf-16, etc.), etc.
-
- * De forma general se precisa dos procedimientos:
-    * Un procedimiento de **marshalling** o empaquetamiento de datos: <br>transforma los valores de las estructuras de datos del formato de una máquina a un formato común para envío por la red (**representación externa**).
-    * Un procedimiento de **unmarshalling** o de desempaquetamiento de datos: <br>transforma del formato común recibido por la red en el formato de la máquina al que llega los valores (**representación interna**).
+## Data representation: marshalling/unmarshalling
+ * In a distributed system with heterogeneous machines, not only can the byte order be different, but also the word size in the connected nodes (32-bit machines, 64-bit machines, etc.), the representation used (two's complement integers, one's complement integers, etc.), the character set (ASCII, utf-16, etc.), etc.
+ 
+* In general, two procedures are required:
+    * A **marshalling** or data packaging procedure: <br>transforms the values of the data structures from one machine's format to a common format for sending over the network (external representation).
+    * A procedure for **unmarshalling** or unpacking data: <br>transforms the common format received by the network into the format of the machine to which the values are sent (internal representation).
 
 ```mermaid
    graph LR;
-    E1("'Cadena'", 1.2, 0x12, -1.5) -->|marshalling| E2
-    E2(...10011...0110...) -->|unmarshalling| E3("'Cadena'", 1.2, 0x12, -1.5)
-
-    subgraph "En computador A"
-    E1
-    end
-    subgraph "Red"
-    E2
-    end
-    subgraph "En computador B"
-    E3
-    end
+     E1("'String'", 1.2, 0x12, -1.5) -->|marshalling| E2
+     E2(...10011...0110...) -->|unmarshalling| E3("'String'", 1.2, 0x12, -1.5)
+     subgraph "On computer A"
+     E1
+     end
+     subgraph "Network"
+     E2
+     end
+     subgraph "On computer B"
+     E3
+     end
 ```
 
-## Modelos de comunicación: orientado a conexión
+## Communication models: connection-oriented
 
-* Uso de TCP mediante sockets stream (SOCK_STREAM)
+* Use of TCP via stream sockets (SOCK_STREAM)
 
 <html>
 <table>
-<tr><th>Servidor</th><th>Cliente</th></tr>
+<tr><th>Server</th><th>Client</th></tr>
 <tr>
 <td valign=top>
 <ul>
-   <li> 1.- Creación de un socket (<b>socket</b>) </li>
-   <li> 2.- Obtener la dirección</li>
-   <li> 3.- Asignación de direcciones (<b>bind</b>)</li>
-   <li> 4.- Preparar para aceptar conexiones (<b>listen</b>)</li>
-   <li> Por cada cliente:</li>
+   <li> (1) Create a socket (<b>socket</b>) </li>
+   <li> (2) Obtain the address</li>
+   <li> (3) Assign addresses (<b>bind</b>)</li>
+   <li> (4) Prepare to accept connections (<b>listen</b>)</ li>
+   <li> For each client:</li>
    <ul>
-   <li> 5.- Aceptar una conexión (<b>accept</b>)</li>
-   <li> 6.- Transferencia de datos (<b>read</b> y <b>write</b>)</li>
-   <li> 7.- Cerrar socket conectado (<b>close</b>)</li>
+   <li> (5) Accept a connection (<b>accept</b>)</li>
+   <li> (6) Data transfer (<b>read</b> and <b>write</b>)</li>
+   <li> (7) Close connected socket (<b>close</ b>)</li>
    </ul>
-   <li> 8.- Cerrar socket servicio (<b>close</b>)</li>
+   <li> (8) Close service socket (<b>close</b>)</li>
 </ul>
 </td>
 <td valign=top>
 <ul>
-   <li> (1) Creación de un socket (<b>socket</b>)</li>
-   <li> (2) Obtener la dirección</li>
+   <li> (1) Create a socket (<b>socket</b>)</li>
+   <li> (2) Obtain the address</li>
    <li></li>
    <li></li>
    <li></li>
-   <li> (3) Solicitud de conexión (<b>connect</b>)</li>
-   <li> (4) Transferencia de datos (<b>write</b> y <b>read</b>)</li>
-   <li> (5) Cerrar un socket (<b>close</b>)</li>
+   <li> (3) Connection request (<b>connect</b>)</li>
+   <li> (4) Data transfer (<b>write</b> and <b>read</b>)</li>
+   <li> (5) Close a socket (<b>close</b>)</li>
 </ul>
 </td>
 </tr>
@@ -813,24 +825,23 @@ flowchart TD
 
 ```mermaid
 graph LR;
-    CA("socket()") --> CB("connect()")
-    CB --> CC("write()")
-    CC --> CD("read()")
-    CD --> CE("close()")
-
-    SA("socket()") --> SB("bind()")
-    SB --> SC("listen()")
-    SC --> SD("accept()")
-    SD --> SE("read()")
-    SE --> SF("write()")
-    SF --> SG("close()")
+    CA(“socket()”) --> CB(“connect()”)
+    CB --> CC(“write()”)
+    CC --> CD(“read()”)
+    CD --> CE(“close()”)
+    SA(“socket()”) --> SB(“bind()”)
+    SB --> SC(“listen()”)
+    SC --> SD(“accept()”)
+    SD --> SE(“read()”)
+    SE --> SF(“write()”)
+    SF --> SG(“close()”)
     SG --> SD
 
-    CB -.->|conexión| SD
-    CC -.->|petición| SE
-    SF -.->|respuesta| CD
+    CB -.->|connection| SD
+    CC -.->|request| SE
+    SF -.->|response| CD
 
-    subgraph "Proceso cliente"
+    subgraph "Client process"
     CA
     CB
     CC
@@ -838,7 +849,7 @@ graph LR;
     CE
     end
 
-    subgraph "Proceso servidor"
+    subgraph "Server process"
     SA
     SB
     SC
@@ -846,7 +857,7 @@ graph LR;
     SE
     SF
     SG
-    subgraph "servicio"
+    subgraph "service"
       SD
       SE
       SF
@@ -856,256 +867,263 @@ graph LR;
 ```
 
 
-## Ejemplo de uso de sockets orientados a conexión (en C)
+## Example of connection-oriented socket usage (in C)
 
-**servidor-base-tcp.c**
-   ```c
-   #include <stdio.h>
-   #include <stdlib.h>
-   #include <string.h>
-   #include <unistd.h>
-   #include <netinet/in.h>
-   #include <sys/types.h>
-   #include <arpa/inet.h>
-   #include <sys/socket.h>
+**server-base-tcp.c**
+  ```c
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include <string.h>
+  #include <unistd.h>
+  #include <netinet/in.h>
+  #include <sys/types.h>
+  #include <arpa/inet.h>
+  #include <sys/socket.h>
 
 
-   // escribe todos los 'total' bytes del buffer
-   int sendMessage ( int newsd, char *buffer, size_t total )
-   {
-       size_t escritos = 0 ;
+  // write all 'total' bytes from the buffer
+  int sendMessage ( int newsd, char *buffer, size_t total )
+  {
+       size_t written = 0 ;
        ssize_t result  = 0 ;
 
-       while (escritos != total) // mientras queda por escribir...
-       {
-          result = write(newsd, buffer+escritos, total-escritos) ;
-          // puede que write NO escriba todo lo solicitado de una vez
-          if (-1 == result) {
-              return -1 ;
-          }
+       // "return write(newsd, buffer, total) ;" is not valid because
+       // write may NOT write everything requested at once
 
-          escritos = escritos + result ;
+       while (written = 0) // while there is still writing to do...
+       {
+           result = write(newsd, buffer+written, total-written) ;
+           if (-1 == result) {
+               return -1 ;
+           }
+
+           written = written + result ;
        }
 
-       return escritos ;
-   }
+       return written ;
+  }
 
-   int main ( int argc, char **argv )
-   {
-       int sd, newsd, ret;
-       socklen_t size;
-       struct sockaddr_in server_addr, client_addr;
+  int main ( int argc, char **argv )
+  {
+      int sd, newsd, ret;
+      socklen_t size;
+      struct sockaddr_in server_addr, client_addr;
 
-       if (argc != 2) {
-           printf("Uso: %s <puerto>\n", argv[0]);
+      if (argc != 2) {
+           printf("Usage: %s <port>\n", argv[0]);
            return 0;
        }
 
-       int puerto = atoi(argv[1]) ;
+       int port = atoi(argv[1]);
 
-       // (1) Creación de un socket
-       // * NO tiene dirección asignada aquí
+       // (1) Create a socket
+       // * NO address assigned here
        sd = socket(AF_INET, SOCK_STREAM, 0) ;
        if (sd < 0) {
-           perror("Error en la creación del socket: ");
+           perror("Error creating socket: ");
            return -1;
        }
 
-       // (2) Obtener la dirección
-       bzero((char *)&server_addr, sizeof(server_addr));
+       // (2) Obtain the address
+       bzero((char *)& server_addr, sizeof(server_addr));
        server_addr.sin_family = AF_INET;
-       server_addr.sin_port = htons(puerto);
+       server_addr.sin_port   = htons(port);
        server_addr.sin_addr.s_addr = INADDR_ANY;
 
-       // (3) Asigna dirección a un socket:
-       // * host = INADDR_ANY -> cualquier dirección del host
-       // * port = 0 -> el sistema selecciona el primer puerto libre
-       // * port = 1...1023 -> puertos reservados (puede necesitar ser root la ejecución)
+       // (3) Assign address to a socket:
+       // * host = INADDR_ANY -> any host address
+       // * port = 0 -> the system selects the first free port
+       // * port = 1...1023 -> reserved ports (may require root privileges to execute)
        ret = bind(sd,(struct sockaddr *)& server_addr, sizeof(server_addr)) ;
        if (ret < 0) {
-           perror("Error en bind: ") ;
+           perror("Error in bind: ") ;
            return -1 ;
        }
 
-       // Con bind(port=0...) se buscaría el primer puerto libre y con
-       // getsockname() se puede obtener el puerto asignado por bind
-       size = sizeof(struct sockaddr_in) ;
-       bzero(&client_addr, size);
-       getsockname(sd, (struct sockaddr *) &client_addr, &size);
-       printf("servidor: bind() asociado a %s:%d\n",
-               inet_ntoa(client_addr.sin_addr),
-               ntohs(client_addr.sin_port));
+         // With bind(port=0...):
+         // the first free port would be searched for and with getsockname(...)
+         // the port that has been assigned by bind(...) can be obtained
+         bzero(&client_addr, size);
+         size = sizeof(struct sockaddr_in) ;
+         getsockname(sd, (struct sockaddr *) &client_addr, &size);
+         printf("server: bind() associated with %s:%d\n",
+                 inet_ntoa(client_addr.sin_addr),
+                 ntohs(client_addr.sin_port));
 
-       // (4) preparar para aceptar conexiones
-       // * listen permite definir el número máximo de peticiones pendientes a encolar
-       // * SOMAXCONN está en sys/socket.h
+       // (4) prepare to accept connections
+       // * listen allows you to define the maximum number of pending requests to queue
+       // * SOMAXCONN is in sys/socket.h
        ret = listen(sd, SOMAXCONN);
        if (ret < 0) {
-           perror("Error en listen: ") ;
-           return -1 ;
+           perror("Error in listen: ");
+           return -1;
        }
 
        while (1)
        {
-          // (5) aceptar nueva conexión (newsd) desde socket servidor (sd)
-          // * bloquea al servidor hasta que se produce la conexión
-          // * sd permite acceptar conexiones y newsd permitirá trabajar con cliente
-          size = sizeof(struct sockaddr_in) ;
+          // (5) accept new connection (newsd) from server socket (sd)
+          // * blocks the server until the connection is made
+          // * sd allows connections to be accepted and newsd will allow working with the client
           bzero(&client_addr, size);
+          size = sizeof(struct sockaddr_in) ;
           newsd = accept (sd, (struct sockaddr *) &client_addr, &size);
           if (newsd < 0) {
-              perror("Error en el accept");
+              perror("Error in accept");
               return -1 ;
           }
 
-          // <Ayuda a la depuración>
-             // a) dirección rellenada por llamada accept()
-             printf("conexión aceptada de IP:%s y puerto:%d\n",
+          // <Debugging help>
+             // a) address filled in by accept() call
+             printf("connection accepted from IP:%s and port: %d\n",
                      inet_ntoa(client_addr.sin_addr),
-                         ntohs(client_addr.sin_port));
-             // b) dirección asociada al socket newsd en otro extremo
-             char sck_IP[32] ;
-             size = sizeof(struct sockaddr_in) ;
+                     ntohs(client_addr.sin_port));
+             // b) address associated with the newsd socket at the other end
+             char sck_IP[32];
+             size = sizeof(struct sockaddr_in);
              getpeername(newsd, (struct sockaddr *)&client_addr, &size);
              inet_ntop(AF_INET, &(client_addr.sin_addr), sck_IP, sizeof(sck_IP));
-             printf("conexión aceptada de IP:%s y puerto:%d\n",
-                     sck_IP, ntohs(client_addr.sin_port));
-          // </Ayuda a la depuración>
+             printf("connection accepted from IP:%s and port:%d\n",
+                     sck_IP, ntohs(client_addr.sin_port) );
+          // </Debug help>
 
-          // (6) transferir datos sobre newsd
-          char buffer[1024] ;
-          size_t escritos ;
+          // (6) Transfer data over newsd
+          char buffer[1024];
+          size_t written;
 
-          // Preparar el mensaje a enviar: 1024 bytes con "hola mundo"
-          strcpy(buffer, "Hola mundo") ;
-          // Transferir datos sobre newsd
-          escritos = sendMessage(newsd, buffer, sizeof(buffer)) ;
-          if (escritos < 0) {
-              printf("Error al escribir buffer\n") ;
+          // Prepare the message to send: 1024 bytes including "hello world"
+          strcpy(buffer, "Hello world");
+
+          // Transfer data over newsd
+          written = sendMessage(newsd, buffer, sizeof(buffer));
+          if (written < 0) {
+              printf("Error writing buffer\n");
           }
-
-          // (7) cerrar socket conectado
+          
+          // (7) close connected socket
           close(newsd);
        }
 
-       // (8) cerrar socket de servicio
+       // (8) close service socket
        close(sd);
 
-   } /* fin main */
+   } /* end main */
    ```
 
-**cliente-base-tcp.c**
-   ```c
-   #include <stdlib.h>
-   #include <stdio.h>
-   #include <unistd.h>
-   #include <string.h>
-   #include <netdb.h>
-   #include <sys/socket.h>
-   #include <arpa/inet.h>
-   #include <arpa/inet.h>
+**client-base-tcp.c**
+  ```c
+  #include <stdlib.h>
+  #include <stdio.h>
+  #include <unistd.h>
+  #include <string.h>
+  #include <netdb.h>
+  #include <sys/socket.h>
+  #include <arpa/inet.h>
+  #include <arpa/inet.h>
 
-   // lee todos los 'total' bytes y los guarda en el buffer
-   int recvMessage ( int sd, char *buffer, size_t total )
-   {
-       size_t  leidos = 0 ;
+  // reads all ‘total’ bytes and saves them in the buffer
+  int recvMessage ( int sd, char *buffer, size_t total )
+  {
+       size_t  read = 0 ;
        ssize_t result = 0 ;
 
-       while (leidos != total) // mientras queda por leer...
+       while (read != total) // while there is still more to read...
        {
-          // puede que read NO lea todo lo solicitado de una vez
-          result = read(sd, buffer+leidos , total-leidos ) ;
-          if (-1 == result) {
-              return -1 ;
-          }
+           // read may NOT read everything requested at once
+           result = read(sd, buffer+read , total-read ) ;
+           if (-1 == result) {
+               return -1 ;
+           }
 
-          leidos = leidos + result ;
+           read = read + result ;
        }
 
-       return leidos ;
+       return read ;
    }
-
+   
    int main ( int argc, char **argv )
    {
-       char *maquina; short puerto;
+       char *machine; short port;
        struct sockaddr_in server_addr;
        struct hostent *hp;
        int sd, ret;
 
        if (argc != 3) {
-           printf("Uso: %s <IP máquina> <puerto>\n", argv[0]);
+           printf("Usage: %s <machine IP> <port>\n", argv [0]);
            return 0;
        }
 
-       maquina = argv[1] ;
-       puerto  = (short) atoi(argv[2]);
-       hp = gethostbyname(maquina);
+       // arguments: machine and port
+       machine = argv[1];
+       port  = (short) atoi(argv[2]);
+
+       // “localhost” -> 127.0.0.1 as IP address
+       hp = gethostbyname(machine);
        if (NULL == hp) {
-           printf("ERROR en gethostbyname con '%s'\n", maquina) ;
+           printf("ERROR in gethostbyname with '%s'\n", machine) ;
            return -1 ;
        }
-
-       // (1) creación del socket (NO tiene dirección asignada aquí)
+       
+       // (1) socket creation (NO address assigned here)
        sd = socket(AF_INET, SOCK_STREAM, 0);
        if (sd < 0) {
-           perror("ERROR en socket: ") ;
-           return -1 ;
+           perror("ERROR in socket: ");
+           return -1;
        }
-
-       // (2) obtener la dirección
+       
+       // (2) obtain the address
        bzero((char *)&server_addr, sizeof(server_addr));
-       memcpy (&(server_addr.sin_addr), hp->h_addr, hp->h_length);
        server_addr.sin_family = AF_INET;
-       server_addr.sin_port = htons(puerto);
-
-       // (3) Solicitud de conexión (con socket remoto)
-       // * si el socket local no tiene dirección asignada
-       //   entonces se le asigna una automáticamente con puerto temporal
+       server_addr.sin_port   = htons(port);
+       memcpy (&(server_addr.sin_addr), hp->h_addr, hp->h_length);
+       
+       // (3) Connection request (with remote socket)
+       // * if the local socket does not have an assigned address
+       //   then one is automatically assigned with a temporary port
        ret = connect(sd, (struct sockaddr *) &server_addr, sizeof(server_addr)) ;
        if (ret < 0) {
-           perror("ERROR en connect: ");
+           perror("ERROR in connect: ");
            return -1;
        }
 
-       // Preparar el espacio para recepción del mensaje
-       char buffer[1024] ;
-       strcpy(buffer, "") ;
+       // Prepare space for receiving the message
+       char buffer[1024];
+       strcpy(buffer, "");
 
-       // (4) transferir datos sobre sd
-       size_t leidos = recvMessage(sd, buffer, sizeof(buffer)) ;
-       if (leidos < 0) {
-           printf("Error al leer buffer\n") ;
+       // (4) Transfer data over sd
+       size_t leidos = recvMessage(sd, buffer, sizeof(buffer));
+       if (read < 0) {
+           printf("Error reading buffer\n");
        }
 
-       // Imprimir el mensaje recibido
-       printf("mensaje del servidor: %s\n", buffer) ;
+       // Print the received message
+       printf("message from server: %s\n", buffer);
 
-       // (5) Cerrar socket
+       // (5) Close socket
        close(sd);
 
        return 0;
    }
-   ```
-
-* Para compilar, se puede usar:
-   ```bash
-   gcc -Wall -g  -o servidor-base-tcp servidor-base-tcp.c
-   gcc -Wall -g  -o cliente-base-tcp  cliente-base-tcp.c
   ```
 
-* Para ejecutar, se puede usar:
-   ```bash
-   user$ ./servidor-base-tcp 4200 &
-   user$ ./cliente-base-tcp  localhost 4200
-   conexión aceptada de IP:127.0.0.1 y puerto:57422
-   mensaje del servidor: Hola mundo
-   user$  kill -9 %1
+* To compile, you can use:
+  ```bash
+  gcc -Wall -g  -o base-tcp-server base-tcp-server.c
+  gcc -Wall -g  -o base-tcp-client  base-tcp-client.c
+  ```
+
+* To run, you can use:
+  ```bash
+  user$ ./base-tcp-server 4200 &
+  user$ ./base-tcp-client  localhost 4200
+  Connection accepted from IP:127.0.0.1 and port:57422
+  Server message: Hello world
+  user$  kill -9 %1
   ```
 
 
-## Ejemplo de uso de sockets orientados a conexión (en Python)
+## Example of using connection-oriented sockets (in Python)
 
-  ### server_base_tcp.py
+  ## # server_base_tcp.py
   ```python
   import socket
   import sys
@@ -1128,10 +1146,10 @@ graph LR;
                message += msg.decode()
            message = message + "\0"
 
-           print('mensaje: ' + message)
+           print('message: ' + message)
            connection.sendall(message.encode())
        finally:
-           connection.close()
+           connection.close ()
   ```
 
   ### client_base_tcp.py
@@ -1141,16 +1159,16 @@ graph LR;
 
   arguments = len(sys.argv)
   if arguments < 3:
-      print('Uso: client_base_tcp  <host> <port>')
-      exit()
+     print('Usage: client_base_tcp  <host> <port>')
+     exit ()
 
   sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   server_address = (sys.argv[1], int(sys.argv[2]))
-  print('conectando a {} y puerto {}'.format(*server_address))
+  print('connecting to {} and port {}'.format(*server_address))
   sock.connect(server_address)
 
   try:
-      message = b'Esto es una cadena de prueba\0'
+      message = b'This is a test string\0'
       sock.sendall(message)
 
       message = ''
@@ -1161,50 +1179,50 @@ graph LR;
           message += msg.decode()
       message = message + "\0"
 
-      print('mensaje: ' + message)
-  finally:
+      print('message: ' + message)
+finally:
       sock.close()
-  ```
+```
 
-* Para ejecutar, se puede usar:
-   ```bash
+* To run, you can use:
+  ```bash
    user$ python3 server_base_tcp.py & 
    user$ python3 client_base_tcp.py  localhost 10009
-   conectando a localhost y puerto 10009
-   mensaje: Esto es una cadena de prueba
-   mensaje: Esto es una cadena de prueba
+   connecting to localhost and port 10009
+   message: This is a test string
+   message: This is a test string
    user$  kill -9 %1
-  ```
+   ```
 
 
-## Modelos de comunicación: NO orientado a conexión (en C)
+## Communication models: Connectionless (in C)
 
-* Uso de UDP mediante sockets datagrama (SOCK_DGRAM)
+* Use of UDP via datagram sockets (SOCK_DGRAM)
 
 <html>
 <table>
-<tr><th>Servidor</th><th>Cliente</th></tr>
+<tr><th>Server</th><th>Client</th></tr>
 <tr>
 <td valign=top>
 <ul>
-   <li> (1) Creación de un socket (<b>socket</b>) </li>
-   <li> (2) Obtener la dirección de un socket</li>
-   <li> (3) Asignación de direcciones (<b>bind</b>)</li>
-   <li>Bucle:</li>
+   <li> (1) Create a socket (<b>socket</b>) </li>
+   <li> (2) Get the address of a socket</li>
+   <li> (3) Address assignment (<b>bind</b>)</li>
+   <li>Loop:</li>
    <ul>
-   <li> (4) Transferencia de datos (<b>recvfrom</b> y <b>sendto</b>)</li>
+   <li> (4) Data transfer (<b>recvfrom</b> and <b>sendto</b>)</li>
    </ul>
-   <li> (5) Cerrar socket (<b>close</b>)</li>
+   <li> (5) Close socket (<b>close</b>)</li>
 </ul>
 </td>
 <td valign=top>
 <ul>
-   <li> (1) Creación de un socket (<b>socket</b>)</li>
-   <li> (2) Obtener la dirección de un socket</li>
+   <li> (1) Create a socket (<b>socket</b>)</li>
+   <li> (2) Obtain the address of a socket</li>
    <li></li>
    <li></li>
-   <li> (3) Transferencia de datos (<b>sendto</b> y <b>recvfrom</b>)</li>
-   <li> (4) Cerrar un socket (<b>close</b>)</li>
+   <li> (3) Transferring data (<b>sendto</b> and <b>recvfrom</b>)</li>
+   <li> (4) Closing a socket (<b>close</b>)</li>
 </ul>
 </td>
 </tr>
@@ -1223,22 +1241,22 @@ graph LR;
     SF --> SG("close()")
     SF --> SE
 
-    CC -.->|petición| SE
-    SF -.->|respuesta| CD
+    CC -.->|request| SE
+    SF -.->|response| CD
 
-    subgraph "Proceso servidor"
+    subgraph "Server process"
     SA
     SB
     SE
     SF
     SG
-    subgraph "servicio"
+    subgraph "service"
       SE
       SF
     end
     end
 
-    subgraph "Proceso cliente"
+    subgraph "Client process"
     CA
     CC
     CD
@@ -1247,7 +1265,7 @@ graph LR;
 ```
 
 
-## Ejemplo de uso de sockets NO orientados a conexión
+## Example of using connectionless sockets
 
 **servidor-base-udp.c**
    ```c
@@ -1258,138 +1276,138 @@ graph LR;
 #include <string.h>
 #include <unistd.h>
 
-    int main ( int argc, char *argv[] )
-    {
-        int sock, ret;
-
-        // (1) Creación del socket
-        sock = socket(PF_INET, SOCK_DGRAM, 0) ;
-        if (sock < 0) {
-            perror("Error al crear el socket: ") ;
+int main ( int argc, char *argv[] )
+{
+    int sock, ret;
+        
+    // (1) Create the socket
+       sock = socket(PF_INET, SOCK_DGRAM, 0) ;
+       if (sock < 0) {
+            perror("Error creating socket: ") ;
             return -1;
-        }
-
-        // (2) Obtener la dirección del socket
+       }
+        
+    // (2) Obtain the socket address
         struct sockaddr_in server_address;
         memset(&server_address, 0, sizeof(server_address));
         server_address.sin_family      = AF_INET;
-        server_address.sin_port        = htons(4200);
+        server_address. sin_port       = htons(4200);
         server_address.sin_addr.s_addr = htonl(INADDR_ANY);
 
-        // (3) Asignación de dirección
+    // (3) Address assignment
         ret = bind(sock, (struct sockaddr *)&server_address, sizeof(server_address)) ;
         if (ret < 0) {
-            perror("Error en bind: ");
+            perror("Error in bind: ");
             return -1;
         }
 
-        // Buffer de recepción de mensajes y
-        // estructura donde guardar la dirección del cliente
+    // Message reception buffer and
+    // structure where the client address is stored
         struct sockaddr_in client_address;
         unsigned int client_address_len = 0;
         char buffer[1024];
-
-        // Bucle
+        
+     // Loop
         while (true)
         {
-                // borrar memoria del mensaje anterior
+                // Clear memory of previous message
                 memset(buffer, 0, 1024) ;
 
-                // (4) Transferencia de datos
+                // (4) Data transfer
                 ret = recvfrom(sock,
                                buffer, 1024, 0,
                                (struct sockaddr *)&client_address,
                                &client_address_len);
                 if (ret < 0) {
-                    printf("ERROR en recvfrom :-(\n") ;
+                    printf("ERROR in recvfrom :-(\n"); 
                 }
 
-                // Imprimir mensaje
-                printf("mensaje: '%s' desde: %s\n",
+                // Print message
+                printf("message: ‘%s’ from: %s\n",
                        buffer,
                        inet_ntoa(client_address.sin_addr));
         }
 
-        // (5) Cerrar socket
-        close(sock) ;
-
+        // (5) Close socket
+        close(sock);
+        
         return 0;
-}
+   }
    ```
 
-**cliente-base-udp.c**
+**client-base-udp.c**
    ```c
     #include <arpa/inet.h>
     #include <stdio.h>
     #include <string.h>
     #include <sys/socket.h>
     #include <unistd.h>
-
+    
     int main ( int argc, char *argv[] )
     {
         int sock, ret;
 
-        // (1) Creación del socket
+        // (1) Create socket
         sock = socket(PF_INET, SOCK_DGRAM, 0) ;
         if (sock < 0) {
-            perror("Error al crear el socket: ") ;
+            perror("Error creating socket: ");
             return -1;
         }
 
-        // (2) Obtener la dirección del socket
+        // (2) Obtain the socket address
         struct sockaddr_in server_address;
         memset(&server_address, 0, sizeof(server_address));
         server_address.sin_family      = AF_INET;
         server_address.sin_port        = htons(4200);
-        inet_pton(AF_INET, "localhost", &server_address.sin_addr);
+        inet_pton(AF_INET, “localhost”, &server_address.sin_addr) ;
 
 
-        // Mensaje a ser enviado
+        // Message to be sent
         char buffer[1024];
-        strcpy(buffer, "Hola mundo...") ;
+        strcpy(buffer, "Hello world...") ;
 
-        // (3) Transferencia de datos
+        // (3) Data transfer
         ret = sendto(sock,
                      buffer, 1024, 0,
                      (struct sockaddr*)&server_address,
                      sizeof(server_address));
         if (ret < 0) {
-            printf("Error en sendto\n") ;
+            printf("Error in sendto\n");
         }
 
-        // Imprimir mensaje
-        printf("mensaje: '%s'\n", buffer);
+        // Print message
+        printf("message: ‘%s’\n", buffer);
 
-        // (4) Cerrar socket
-        // * close(sock) equivale a shutdown(sock, SHUT_RDWR) ;
-        // SHUT_RD: cierra canal de lectura
-        // SHUT_WR: cierra el canal de escritura,
-        //          al terminar los datos read devolverá 0
-        // SHUT_RDWR: cierra ambos canales
+        // (4) Close socket
+        // * close(sock) is equivalent to shutdown(sock, SHUT_RDWR) ;
+        // SHUT_RD: closes the read channel
+        // SHUT_WR: closes the write channel,
+        //          when data reading is complete, it will return 0
+        // SHUT_RDWR: closes both channels
         close(sock);
 
         return 0;
-    }
+   }
    ```
 
 
-* Para compilar, se puede usar:
-   ```bash
-   gcc -Wall -g  -o servidor-base-udp servidor-base-udp.c
-   gcc -Wall -g  -o cliente-base-udp  cliente-base-udp.c
+* To compile, you can use:
+  ```bash
+  gcc -Wall -g  -o base-udp-server base-udp-server.c
+  gcc -Wall -g  -o base-udp-client  base-udp-client.c
   ```
 
-* Para ejecutar, se puede usar:
-   ```bash
-   user$ ./servidor-base-udp &
-   user$ ./cliente-base-udp
-   mensaje: 'Hola mundo...' desde 127.0.0.1
-   mensaje: 'Hola mundo...'
-   user$  kill -9 %1
+* To run, you can use:
+  ```bash
+  user$ ./base-udp-server &
+  user$ ./base-udp-client
+  message: ‘Hello world...’ from 127.0.0.1
+  message: ‘Hello world...’
+  user$  kill -9 %1
   ```
 
 
-## Ejemplo de uso de sockets NO orientados a conexión (en Python)
+## Example of using connectionless sockets (in Python)
 
   ### server_base_udp.py
   ```python
@@ -1403,7 +1421,7 @@ graph LR;
 
   while True:
        message, addr = sock.recvfrom(1024)  
-       print("mensaje: ", message) 
+       print("message: ", message) 
   ```
 
   ### client_base_udp.py
@@ -1413,82 +1431,84 @@ graph LR;
 
   arguments = len(sys.argv)
   if arguments < 3:
-      print('Uso: client_base_tcp  <host> <port>')
+      print('Usage: client_base_tcp <host> <port>')
       exit()
 
   sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   server_address = (sys.argv[1], int(sys.argv[2]))
-  print('destino con dirección {} y puerto {}'.format(*server_address))
+  print(‘destination with address {} and port {}’.format (*server_address))
 
   try:
-      message = 'Esto es una cadena de prueba\0'
+      message = 'This is a test string\0'
       sock.sendto(bytes(message, "utf-8"), server_address)
   finally:
       sock.close()
-  ```
+```
 
-* Para ejecutar, se puede usar:
-   ```bash
-   user$ python3 server_base_udp.py & 
+* To run, you can use:
+  ```bash
+   user$ python3 server_base_udp.py &
    user$ python3 client_base_udp.py  localhost 10009
-   destino con dirección localhost y puerto 10009
-   mensaje:  b'Esto es una cadena de prueba\x00'
+   destination with address localhost and port 10009
+   message:  b'This is a test string\x00'
    user$  kill -9 %1
   ```
 
 
 
-## Opciones importantes asociadas a un socket
+## Important options associated with a socket
 
-Las funciones setsockopt y getsockopt permiten establecer y consultar (respectivamente) las opciones asociadas a un socket:
+The setsockopt and getsockopt functions allow you to set and query (respectively) the options associated with a socket:
 
-   ```c
+  ```c
   #include <sys/types.h>
   #include <sys/socket.h>
-  int getsockopt (int sd, int nivel, int opcion,       void *valor, socklen_t *len);
-  int setsockopt (int sd, int nivel, int opcion, const void *valor, socklen_t  len);
-   ```
+  int getsockopt (int sd, int level, int option,       void *value, socklen_t *len);
+  int setsockopt (int sd, int level, int option, const void *value, socklen_t  len);
+  ```
 
-Las opciones más importantes son:
+The most important options are:
 
-* SO_REUSEADDR: para poder volver a usar la dirección de inmediato asociada con bind.
+* SO_REUSEADDR: to be able to immediately reuse the address associated with bind.
 
    ```c
    int val = 1;
    setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (void*) &val, sizeof(val));
    ```
 
-   Por defecto cuando se cierra un socket hay que esperar un tiempo (constante TIME_WAIT, normalmente unos 20 segundos) hasta poder volver a hacer bind para utilizar la misma dirección. Si se ejecuta antes normalmente aparece el error **"Address already in use"** que esta opción soluciona.
+   By default, when a socket is closed, you have to wait a certain amount of time (constant TIME_WAIT, usually about 20 seconds) before you can bind again to use the same address. If you try to do so earlier, you will usually get the error **“Address already in use”**, which this option solves.
 
-* TCP_NODELAY: envío inmediato (sin intentar agrupar mensajes relativamente juntos en el tiempo)
-
-   ```c
+* TCP_NODELAY: immediate sending (without attempting to group messages that are relatively close together in time)
+   
+  ```c
   int option = 1 ;
   rc = setsockopt(s, IPPROTO_TCP, TCP_NODELAY, &option, sizeof(option)) ;
-   ```
+  ```
 
-   Por defecto espera un poco de tiempo antes de enviar pocos bytes por si puede agrupar varias pequeñas peticiones. El problema es que la latencia de cada petición particular es mayor. Por eso se recomienda el envío inmediato.
+  By default, it waits a short time before sending a few bytes in case it can group several small requests together.
+ The problem is that the latency of each individual request is greater. That is why immediate sending is recommended.
 
 * SO_RCVBUF, SO_SNDBUF:
-  * Fijar el tamaño del buffer de envío/recepción
-       ```c
+  * Set the size of the send/receive buffer
+    ```c
        int size = 16*1024;
        err = setsockopt(s, SOL_SOCKET, SO_SNDBUF, (char *)&size, sizeof(size));
     ```
-  * Conocer el tamaño del buffer de envío/recepción
+  * Know the size of the send/receive buffer
     ```c
     int size ;
-    err = getsockopt(s, SOL_SOCKET, SO_SNDBUF, (char *)&size, sizeof(size)) ;
-    printf("%d\n", size) ;
+    err = getsockopt(s, SOL_SOCKET, SO_SNDBUF, (char *)&size, sizeof (size));
+    printf(“%d\n”, size);
     ```
 
 
-## Servidor secuencial vs procesos pesados vs hilos
+## Sequential server vs. heavy processes vs. threads
 
-* El servidor base es secuencial: una vez se conecta un cliente, hasta que no termina de atender no acepta conexiones de otros clientes (lo que reduce el rendimiento)
+* The base server is sequential: once a client connects, it does not accept connections from other clients until it has finished serving that client (which reduces performance).
 
-**Esqueleto de servidor-base-tcp.c**
-   ```c
+**Skeleton of server-base-tcp.c**
+   
+  ```c
 
     ...
     int main ( int argc, char **argv )
@@ -1496,134 +1516,139 @@ Las opciones más importantes son:
          ...
          while (1)
          {
-            // (5) aceptar nueva conexión (newsd) desde socket servidor (sd)
-            // * bloquea al servidor hasta que se produce la conexión
-            // * sd permite acceptar conexiones y newsd permitirá trabajar con cliente
+            // (5) accept new connection (newsd) from server socket (sd)
+            // * blocks the server until the connection is made
+            // * sd allows connections to be accepted and newsd will allow working with client
             newsd = accept (sd, (struct sockaddr *) &client_addr, &size);
             if (newsd < 0) {
-                perror("Error en accept: ");
+                perror("Error in accept: ");
                 return(-1);
             }
 
             ...
-
-            // (6) transferir datos sobre newsd
+            
+            // (6) transfer data over newsd
             size_t total    = sizeof(buffer) ;
-            size_t escritos = 0 ;
+            size_t written = 0 ;
             ssize_t result  = 0 ;
-            while (escritos != total) // queda por escribir
+            while (written != total) // remains to be written
             {
-               result = write(newsd, buffer+escritos, total-escritos) ;
+               result = write(newsd, buffer+writes, total-writes) ;
                if (-1 == result) { break; }
-               escritos = escritos + result ;
+               writes = writes + result ;
 
-               // puede que write NO escriba todos los datos solicitados
-               // por ello el bucle hasta que se escriban todos
+               // write may NOT write all the requested data
+               // therefore, loop until all data is written
             }
-            if (escritos != total) { // error, no se ha escrito todo
-                printf("ERROR al escribir buffer\n") ;
+            if (written != total) { // error, not everything has been written 
+                printf("ERROR writing buffer\n");
             }
 
-            // (7) cerrar socket conectado
-            close(newsd);
+            // (7) close connected socket
+            close (newsd); 
          }
 
          ...
-    } /* fin main */
-   ```
+   } /* end main */
+  ```
 
-* El servidor puede ser concurrente usando procesos pesados: una vez se conecta un cliente, se crea un proceso pesado que se encargue de atenderle.
+* The server can be concurrent using heavy processes: once a client connects, a heavy process is created to serve it.
 
-**Esqueleto de servidor-fork-tcp.c**
-   ```c
+**Server skeleton-fork-tcp.c**
+```c
 
-    ...
-    int main ( int argc, char **argv )
-    {
-         ...
-         while (1)
-         {
-            // (5) aceptar nueva conexión (newsd) desde socket servidor (sd)
-            // * bloquea al servidor hasta que se produce la conexión
-            // * sd permite acceptar conexiones y newsd permitirá trabajar con cliente
-            newsd = accept (sd, (struct sockaddr *) &client_addr, &size);
-            if (newsd < 0) {
-                perror("Error en el accept: ");
-                return -1;
-            }
+...
+int main ( int argc, char **argv )
+{
+...
+while (1)
+{
+// (5) accept new connection (newsd) from server socket (sd)
+            
+// * blocks the server until the connection is made
+            // * sd allows connections to be accepted and newsd will allow working with the client
+newsd = accept (sd, (struct sockaddr *) &client_addr, &size);
+if (newsd < 0) {
+perror(“Error in accept: ”);
+return -1;
+}
+            
+...
 
-            ...
-
-            pid_t pid = fork() ;
-            if (pid < 0) {
-                perror("Error en fork: ") ;
-                return -1;
-            }
-            if (0 == pid) // el proceso hijo atiende al cliente
-            {
-                // (6) transferir datos sobre newsd
-                size_t total    = sizeof(buffer) ;
-                size_t escritos = 0 ;
-                ssize_t result  = 0 ;
-                while (escritos != total) // queda por escribir
-                {
-                   result = write(newsd, buffer+escritos, total-escritos) ;
+pid_t pid = fork();
+if (pid < 0) {
+perror(“Error in fork: ”);
+return -1;
+}
+if (0 == pid) // the child process serves the client
+{
+// (6) transfer data over newsd
+size_t total = sizeof(buffer);
+                
+size_t written = 0;
+                ssize_t result  = 0;
+                while (written != total) // still to be written
+{
+                   result = write(newsd, buffer+written, total-written);
                    if (-1 == result) { break; }
-                   escritos = escritos + result ;
+                   written = written + result;
+                   
+// write may NOT write all the requested data
+                   // therefore, loop until all data is written
+}
+if (written != total) { // error, not all data has been written
+printf(“Error writing buffer\n”);
+}
 
-                   // puede que write NO escriba todos los datos solicitados
-                   // por ello el bucle hasta que se escriban todos
-                }
-                if (escritos != total) { // error, no se ha escrito todo
-                    printf("Error al escribir buffer\n") ;
-                }
-
-                // (7) cerrar socket conectado
-                close(newsd);
+(7) close connected socket
+                
+close(newsd);
             }
          }
 
          ...
-    } /* fin main */
+    } /* end main */
    ```
 
-* El servidor puede ser concurrente usando procesos ligeros: una vez se conecta un cliente, se crea un hilo que se encargue de atenderle.
+* The server can be concurrent using lightweight processes: once a client connects, a thread is created to serve it.
 
-**Esqueleto de servidor-thread-tcp.c**
+**Server skeleton-thread-tcp.c**
    ```c
-
-    ...
+    
+...
     int busy = 0 ;
     pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER ;
     pthread_cond_t  c = PTHREAD_COND_INITIALIZER ;
 
-    void *tratar_peticion ( void * arg )
-    {
+    void *handle_request ( void * arg )
+    
+{
          int s_local;
 
-         /// avisar copiado argumentos ////
+         /// notify copied arguments ////
          pthread_mutex_lock(&m);
          s_local = (* (int *) arg);
          busy = 0;
          pthread_cond_signal(&c);
          pthread_mutex_unlock(&m);
-         /////////////////////
+         //////////////////// /
 
-         // (6) transferir datos sobre newsd
+         // (6) transfer data to newsd
          size_t total    = sizeof(buffer) ;
-         size_t escritos = 0 ;
+         size_t written = 0 ;
          ssize_t result  = 0 ;
-         while (escritos != total) // queda por escribir
+         while (written != total) // still to be written
          {
-             result = write(newsd, buffer+escritos, total-escritos) ;
-             if (-1 == result) { break; }
-                 escritos = escritos + result ;
-             }
-             if (escritos != total) { // error, no se ha escrito todo
-                 printf("Error al escribir buffer") ;
-         }
+             result = write(newsd, buffer+written, total-written) ;
+             if (-1 == result) { break ; }
+                 written = written + result ;
+}
+if (written != total) { // error, not everything has been written
+printf(“Error writing buffer”);
+}
 
-         // (7) cerrar socket conectado
+         
+// (7) close connected socket 
          close(s_local);
 
          pthread_exit(NULL);
@@ -1633,113 +1658,117 @@ Las opciones más importantes son:
     int main ( int argc, char **argv )
     {
          pthread_attr_t attr ;
-
-         pthread_attr_init(&attr);
+         
+pthread_attr_init(&attr);
          pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
          ...
-         while (1)
+         
+while (1)
          {
-            // (5) aceptar nueva conexión (newsd) desde socket servidor (sd)
-            // * bloquea al servidor hasta que se produce la conexión
-            // * sd permite acceptar conexiones y newsd permitirá trabajar con cliente
-            newsd = accept (sd, (struct sockaddr *) &client_addr, &size);
-            if (newsd < 0) {
-                perror("Error en el accept: ");
+// (5) Accept new connection (newsd) from server socket (sd)
+// * Blocks the server until the connection is made
+// * sd allows connections to be accepted and newsd will allow working with the client
+newsd = accept (sd, (struct sockaddr *) &client_addr, &size);
+if (newsd < 0) {
+                perror( “Error in accept: ”);
                 return -1;
-            }
+}
 
-            ...
-            pthread_create(&thid, &attr, tratar_peticion, (void *)&newsd);
+...
+pthread_create(&thid, &attr, handle_request, (void *)&newsd);
 
-            /// Esperar copia de argumentos ///
-            pthread_mutex_lock(&m);
-            while (busy == 1) {
+/// Wait for copy of arguments ///
+pthread_mutex_lock(&m);
+            
+while (busy == 1) {
                    pthread_cond_wait(&c, &m);
-            }
-            busy = 1;
-            pthread_mutex_unlock(&m);
-            /////////////////////
-         }
+}
+busy = 1;
+pthread_mutex_unlock(&m);
+/////////////////////
+}
 
-         ...
-    } /* fin main */
-   ```
+...
+} /* end main */
+```
 
 * <details open>
-  <summary>En Python...</summary>
+<summary>In Python...</summary>
 
-  ### Esqueleto de servidor-thread-tcp.py
-  ```python
-  import threading
-  import socket
+### Server-thread-tcp.py skeleton
+```python
+import threading
+import socket
 
-  def worker(sock):
-      try:
+def worker(sock):
+try:
+...
+          
+sock.sendall(message.encode())
           ...
-          sock.sendall(message.encode())
-          ...
-      finally:
-          sock.close()
+finally:
+sock.close()
 
-  sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-  sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-  server_address = ('localhost', 12345)
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+  
+server_address = (‘localhost’, 12345)
   sock.bind(server_address)
   sock.listen(5)
 
-  while True:
+while True:
       connection, client_address = sock.accept()
 
-      t = threading.Thread(target=worker, name='Daemon', args=(connection,))
+      t = threading.Thread (target=worker, name=‘Daemon’, args=(connection,))
       t.start()
   ```
-  </details>
+</details>
 
 
 
-## Trabajar con heterogeneidad en el sistema distribuido
+## Working with heterogeneity in distributed systems
 
-* En general cuando se desarrolla una aplicación con sockets hay que plantear una solución que sea independiente de:
-   * Arquitectura (Little-endian, big-endian)
-   * Lenguaje de programación
-* Emplear soluciones que definan el tamaño de los enteros (por ejemplo: 32 bits) puede ser un problema
-   * Puede existir máquinas en el sistema distribuido que no puedan trabajar con el tamaño seleccionado
-* Posibles soluciones:
-   * **Protocolo con base binaria**: usar biblioteca que permita transformar de un formato binario de red a cualquier formato de host y viceversa.
-      * Ventaja: envío rápido y compacto
-      * Desventaja: tiempo de transformación, dificultad de depurar protocolos binarios, necesidad de biblioteca adicional.
-      * Protocolos de ejemplo: protobuf (opción binaria)
-   * **Protocolo basado en texto**: desarrollar aplicaciones que codifiquen los datos en cadenas de caracteres y envíen cadenas de caracteres
-      * Ventaja: normalmente no se precisa de bibliteca adicional y es fácil de depurar
-      * Desventaja: eficiencia
-      * Protocolos de ejemplo: HTTP, SMTP, etc.
+* In general, when developing an application with sockets, you need to come up with a solution that is independent of:
+  * Architecture (little-endian, big-endian)
+  * Programming language
+* Using solutions that define the size of integers  (e.g., 32 bits) can be a problem
+   * There may be machines in the distributed system that cannot work with the selected size
+* Possible solutions:
+  * **Binary-based protocol**: use a library that allows conversion from a binary network format to any host format and vice versa.
+    * Advantage: fast and compact transmission
+    * Disadvantage: conversion time, difficulty in debugging binary protocols, need for an additional library.
+    * Example protocols: protobuf (binary option)
+  * **Text-based protocol**: develop applications that encode data in character strings and send character strings
+    * Advantage: usually no additional library is required and it is easy to debug
+    * Disadvantage: efficiency
+    * Example protocols: HTTP, SMTP, etc.
 
 
-## Trabajar con heterogeneidad con protocolos basados en texto (1/2)
+## Working with heterogeneity with text-based protocols (1/2)
 
- * Para la lectura de cadenas de caracteres con sockets stream
-    * Cuando una cadena de caracteres finaliza con el código ASCII '\0' no se sabe a priori su longitud (y por tanto cuántos bytes hay que leer a priori)
-    * En este caso hay que leer byte a byte hasta leer el el código ASCII '\0', y se puede usar la función readLine para ello:
-       ```c
+* For reading character strings with stream sockets
+  * When a character string ends with the ASCII code ‘\0’, its length is not known a priori (and therefore how many bytes must be read a priori)
+  * In this case, you must read byte by byte until you read the ASCII code ‘\0’, and you can use the readLine function for this:
+     
+  ```c
 
-        ssize_t readLine ( int fd, void *buffer, size_t n )
-        {
-            ssize_t numRead;  /* num of bytes fetched by last read() */
-            size_t totRead;   /* total bytes read so far */
-            char *buf;
-            char ch;
+    ssize_t readLine ( int fd, void * buffer, size_t n )
+    {
+        ssize_t numRead;  /* num of bytes fetched by last read() */
+        size_t totRead;   /* total bytes read so far */
+        char *buf;
+        char ch;
 
-            if (n <= 0 || buffer == NULL) {
+        if (n <= 0 || buffer == NULL) {
                 errno = EINVAL;
                 return -1;
-            }
+        }
 
-            buf = buffer;
-            totRead = 0;
-            while (1)
-            {
+        buf = buffer;
+        totRead = 0;
+        while (1)
+        {
                 numRead = read(fd, &ch, 1);     /* read a byte */
 
                 if (numRead == -1) {
@@ -1750,65 +1779,69 @@ Las opciones más importantes son:
                         if (totRead == 0)       /* no bytes read; return 0 */
                              return 0;
                         else break;
-                } else {                        /* numRead must be 1 if we get here*/
-                        if (ch == '\n') break;
-                        if (ch == '\0') break;
+                
+        } else {                        /* numRead must be 1 if we get here*/
+                        if (ch == ‘\n’) break;
+                        if (ch == ‘\0’) break;
                         if (totRead < n - 1) {   /* discard > (n-1) bytes */
                              totRead++;
                             *buf++ = ch;
                         }
                 }
-            }
-
-            *buf = '\0';
-            return totRead;
+            
         }
-       ```
 
- * Para la escritura de cadenas de caracteres con sockets stream
-    * Para el envío se puede usar *sendMessage* PERO hay que indicar el número de caracteres incluido el fin de cadena:
-      ```c
+            *buf = ‘\0’;
+        return totRead;
+        }
+   ```
+
+* For writing character strings with stream sockets
+* *sendMessage* can be used for sending, BUT the number of characters including the end of string must be specified:
+```c
 
       int sendMessage ( int socket, char * buffer, int len )
       {
           int r;
           int l = len;
 
-          do
-          {
-               r = write(socket, buffer, l);
-               if (r < 0) {
-                   return (-1);   /* fail */
-               }
-               l = l - r;
+        do
+        {
+         r = write(socket, buffer, l);
+        if (r < 0) {
+                return (-1);   /* fail */
+        }
+               
+        l = l - r;
                buffer = buffer + r;
 
-          } while ((l>0) && (r>=0));
+        } while ((l>0) && (r>=0));
 
-          return 0;
-      }
+        return 0;
+        }
 
-      int writeLine ( int socket, char *buffer )
-      {
-          return sendMessage(socket, buffer, strlen(buffer)+1);
-      }
+int writeLine ( int socket, char * buffer )
+{
+return sendMessage(socket, buffer, strlen(buffer)+1);
+}
 
-      ...
-
-      char buffer[256] ;
-      strcpy(buffer, "Cadena a enviar...") ;
-      writeLine(sd, buffer) ;        // se envía hasta el fin de cadena (incluido)
-      sendMessage(sd, buffer, 256) ; // se envía 256 caracteres (no todos se usan)
+...
+      
+char buffer[256]; 
+      strcpy(buffer, “String to send...”);
+      writeLine(sd, buffer);        // sent to the end of the string (inclusive)
+      sendMessage(sd, buffer, 256); // 256 characters sent (not all are used)
       ```
 
 * <details open>
-  <summary>En Python...</summary>
+<summary>In Python...</summary>
 
-  ```python
-  def read_string(sock):
-      str = ''
-      while True:
-         msg = sock.recv(1)
+```python
+def read_string(sock):
+str = ‘’
+while True:
+         
+msg = sock.recv(1)
          if (msg == b'\0'):
              break;
          str += msg.decode()
@@ -1816,89 +1849,91 @@ Las opciones más importantes son:
 
   def write_string(sock, str):
       sock.sendall(str.encode() + b'\0')  
-  ```
-  </details>
+```
+</details>
 
 
-## Trabajar con heterogeneidad con protocolos basados en texto (2/2)
+## Working with heterogeneity with text-based protocols (2/2)
 
- * Para recibir un número con sockets stream (como cadena)
-    * Usando readLine se lee la cadena de caracteres que lo representa.
-    * A continuación se transforma a número.
-       ```c
+* To receive a number with stream sockets (as a string)
+* Using readLine, the character string that represents it is read.
+* It is then converted to a number.
+```c
 
        int read_int ( int socket, int *number )
        {
           char buffer[1024];
           char *endptr ;
 
-          readLine(socket, buffer, 1024) ;
-          (*number) = strtol(buffer, &endptr, 10) ; // n = atoi(buffer) ;
-          if (endptr[0] != '\0') {
-              printf("Error: %s no es un número en base %d\n", buffer, 10) ;
-              return -1 ;
-          }
+readLine(socket, buffer, 1024) ;
+(*number) = strtol(buffer, &endptr, 10) ; // n = atoi(buffer) ;
+          
+if (endptr[0] != ‘\0’) {
+              printf(“Error: %s is not a number in base %d\n”, buffer, 10) ;
+return -1 ;
+}
 
-          return 0 ;
-       }
+return 0 ;
+}
 
-       ...
+...
 
-       int n = 0 ;
-       int ret = read_int(sd, &n) ;
-       printf("ret=%d y n=%d\n", ret, n) ;
+int n = 0 ;
+int ret = read_int (sd, &n);
+       printf(“ret=%d and n=%d\n”, ret, n);
        ```
 
- * Para enviar un número con sockets stream
-    * Para el envío se puede usar sendMessage PERO hay que indicar el número de caracteres incluido el fin de cadena:
-      ```c
-
-      int write_int ( int socket, int number )
+* To send a number with stream sockets
+* To send it, you can use sendMessage BUT you must indicate the number of characters including the end of string:
+```c
+      
+int write_int ( int socket, int number )
       {
-          char buffer[1024];
+char buffer[1024];
 
-          sprintf(buffer, "%d", number);
-          sendMessage(socket, buffer, strlen(buffer)+1);
-          return 0 ;
-      }
+sprintf(buffer, “%d”, number);
+sendMessage(socket, buffer, strlen(buffer)+1);
+return 0 ;
+}
 
-      ...
+...
 
-      int n = 1234;
-      write_int(sd, n) ;
+int n = 1234;
+write_int
+ (sd, n);
       ```
 
-    * Se puede transformar números en coma flotante, etc. de forma similar.
+* Floating point numbers, etc. can be transformed in a similar way.
 
 * <details open>
-  <summary>En Python...</summary>
+<summary>In Python...</summary>
 
-  ```python
-  def read_string(sock):
-      a = ''
-      while True:
-         msg = sock.recv(1)
-         if (msg == b'\0'):
+```python
+def read_string(sock):
+a = ‘’
+while True:
+msg = sock.recv(1)
+if (msg == b'\0 '):
              break;
          a += msg.decode()
       return a
 
-  def read_number(sock):
+  def read_number (sock):
       a = read_string(sock)
       return(int(a,10))
 
   def write_string(sock, str):
-      sock.sendall(str.encode() + b'\0')  
+      sock.sendall(str.encode() + b'\0')
 
   def write_number(sock, num):
       a = str(num)
       write_string(sock, a)
-  ```
-  </details>
+```
+  
+</details>
 
 
 
-**Material adicional**:
-  * <a href="https://beej.us/guide/bgnet/html/index-wide.html">Beej's Guide to Network Programming</a>
+**Additional material**:  * <a href="https://beej.us/guide/bgnet/html/index-wide.html">Beej's Guide to Network Programming</a>
 
 
