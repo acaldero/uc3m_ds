@@ -1,511 +1,526 @@
   
-# Servicios distribuidos
+# Distributed services
 + **Felix García Carballeira and Alejandro Calderón Mateos** @ arcos.inf.uc3m.es
 + [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
 
-## Contenidos
+## Contents
 
- * [Sincronización en sistemas distribuidos](#sincronización-en-sistemas-distribuidos)
- * [Relojes físicos y lógicos](#relojes-físicos-y-lógicos)
- * [Exclusión mutua distribuida](#exclusión-mutua-distribuida)
- * [Algoritmos de elección](#algoritmos-de-elección)
- * [Comunicación multicast](#comunicación-multicast)
- * [Problemas de consenso](#problemas-de-consenso)
- * [Servicio de nombres](#servicio-de-nombres)
+* [Synchronization in distributed systems](#synchronization-in-distributed-systems)
+* [Physical and logical clocks](#physical-and-logical-clocks)
+* [Distributed mutual exclusion](#distributed-mutual-exclusion)
+* [Choice algorithms](#choice-algorithms)
+* [Multicast communication](#multicast-communication)
+* [Consensus problems](#consensus-problems)
+* [Name service] (#name-service)
 
 
-## Sincronización en sistemas distribuidos
+## Synchronization in distributed systems
 
- * **Más compleja** que en los centralizados ya que usan algoritmos distribuidos
-* Los **algoritmos distribuidos** deben tener las siguientes propiedades:
-  * La **información relevante se distribuye** entre varios procesos en computadores distintos.
-  * Los procesos **toman las decisiones** sólo en base a la **información local**.
-  * Debe evitarse un punto único de fallo.
-  * **No existe un reloj común**.
+* **More complex** than in centralized systems since they use distributed algorithms
+* **Distributed algorithms** must have the following properties:
+  * **Relevant information is distributed** among several processes on different computers.
+  * Processes **make decisions** based only on **local information**.
+  * A single point of failure must be avoided.
+  * **There is no common clock**.
 
-### Modelo del sistema distribuido
 
- * Procesos secuenciales {P<sub>1</sub>, P<sub>2</sub>, ...P<sub>n</sub>} y canales de comunicación
- * Eventos en P<sub>i</sub>
+### Distributed system model
+ 
+* Sequential processes {P<sub>1</sub>, P<sub>2</sub>, ...P<sub>n</sub>} and communication channels
+* Events in P<sub>i</sub>
     * E<sub>i</sub> = {e<sub>i1</sub>, e<sub>i2</sub>, ...e<sub>in</sub>}
-    * Historia(P<sub>i</sub>) = h<sub>i</sub> =  <e<sub>i0</sub>, e<sub>i1</sub>, e<sub>i2</sub>, ... > donde  e<sub>ik</sub>  ->  e<sub>i(k+1)</sub>
-  * Tipos de eventos:
-     * Internos (cambios en el estado de un proceso)
-     * Comunicación:
-        * Envío
-        * Recepción
-           * e<sub>02</sub>  ->  e<sub>12</sub>
-  * Diagramas espacio-tiempo:  
-     ![Ejemplo de diagrama de eventos en el tiempo](/materials/topic-ds/ds/ds_diagrama_eventos.svg)
-
-### Modelos síncronos y asíncronos
-
- * Sistemas distribuidos **asíncronos**:
-    * **No hay un reloj común**
-    * No hacen ninguna suposición sobre las velocidades relativas de los procesos.
-    * Los canales son fiables pero no existe un límite a la entrega de mensajes
-    * La comunicación entre procesos es la única forma de sincronización
- * Sistemas  síncronos:
-    * Hay una perfecta **sincronización**
-    * Hay límites en las latencias de comunicación
-    * Los sistemas del mundo real no son síncronos
-
-### Entrega de mensajes en Internet
-
- * Internet se basa en una red de conmutación de paquetes, donde los paquetes se pueden perder y las copias de mensajes, colas y retardos en la red hace que los tiempos de comunicación no sean predecibles y no estén acotados
- * Internet no usa el concepto de redes de conmutación de circuitos donde sí es predecible y el ancho de banda es asignado estáticamente
- * En Internet el ancho de banda se asigna dinámicamente
-
-### Tiempo en sistemas distribuidos
-
- * Dificultades en el diseño de aplicaciones distribuidas:
-   * Paralelismo entre los procesadores
-   * Velocidades arbitrarias de procesadores
-   * No determinismo en el retardo de los mensajes. Fallos
-   * **Ausencia de tiempo global**
+    * History(P<sub>i</sub>) = h<sub>i</sub> =  <e<sub>i0</sub>, e<sub>i1</sub>, e<sub>i2</sub>, ... > where  e<sub>ik</sub>  ->  e<sub>i(k+1)</sub>
+* Types of events:
+    * Internal (changes in the state of a process)
+    * Communication:
+      * Sending
+      * Receiving
+        * e<sub>02</sub>  ->  e<sub>12</sub>
+* Space-time diagrams:  
+  ![Example of an event diagram over time](/materials/topic-ds/ds/ds_diagrama_eventos.svg)
 
 
-## Relojes físicos y lógicos
+### Synchronous and asynchronous models
 
-+ Marcas de tiempo (*timestamps*):
-  + Relojes físicos
-  + Relojes lógicos
+* **Asynchronous** distributed systems:
+  * **There is no common clock**
+  * They make no assumptions about the relative speeds of processes.
+  * Channels are reliable, but there is no limit to message delivery
+  * Inter-process communication is the only form of synchronization
+* Synchronous systems:
+  * There is perfect **synchronization**
+  * There are limits on communication latencies
+  * Real-world systems are not synchronous
 
-### Relojes físicos
 
-* Para ordenar dos eventos de un proceso basta con asignarles una **marca de tiempo**
-* Para un instante físico **t**:
-   * H<sub>i</sub>(t): valor del reloj **hardware** (oscilador)
-   * C<sub>i</sub>(t): valor del reloj **software** (generado por el sistema operativo):
-      * C<sub>i</sub>(t) = a * H<sub>i</sub>(t) + b
-         * Ej: cantidad de milisegundos o nanosegundos transcurridos desde una fecha de referencia
-      * Resolución del reloj: periodo entre actualizaciones de C<sub>i</sub>(t)
-        * Determina la ordenación de eventos
- * Dos relojes en dos computadores diferentes dan medidas distintas
-    * Necesidad de **sincronizar relojes físicos** de un sistema distribuido
+### Message delivery on the Internet
 
-#### Tiempo del sistema (Linux)
+ * The Internet is based on a packet-switched network, where packets can be lost and message copies, queues, and network delays make communication times unpredictable and unbounded
+ * The Internet does not use the concept of circuit-switched networks, where it is predictable and bandwidth is allocated statically
+ * On the Internet, bandwidth is allocated dynamically
 
-* Uso de la función ```clock_gettime``` y la estructura ```struct timespec``` :
+
+### Time in distributed systems
+
+* Difficulties in designing distributed applications:
+  * Parallelism between processors
+  * Arbitrary processor speeds
+  * Non-determinism in message delays. Failures
+  * **Absence of global time**
+
+
+## Physical and logical clocks
+
++ Timestamps:
+  + Physical clocks
+  + Logical clocks
+
+
+### Physical clocks
+
+* To order two events in a process, simply assign them a **timestamp**
+* For a physical instant **t**:
+  * H<sub>i</sub>(t): value of the **hardware** clock (oscillator)
+  * C<sub>i</sub>(t): value of the **software** clock (generated by the operating system):
+    * C<sub>i</sub>(t) = a * H<sub>i</sub>(t) + b
+      * E.g.: number of milliseconds or nanoseconds elapsed since a reference date
+    * Clock resolution: period between updates of C<sub>i</sub>(t)
+      * Determines the ordering of events
+ * Two clocks on two different computers give different measurements
+   * Need to **synchronize physical clocks** in a distributed system
+
+
+#### System time (Linux)
+
+* Use of the ```clock_gettime``` function and the ```struct timespec``` structure:
   ```c
-   struct  timespec {
-      time_t  tv_sec;  /* seconds */
-      long    tv_nsec; /* nanoseconds */
+  struct  timespec {
+    time_t  tv_sec;  /* seconds */
+    long    tv_nsec; /* nanoseconds */
    } ;
-
-   int clock_gettime (clockid_t         clk_id, 
+   
+  int clock_gettime (clockid_t         clk_id, 
                       struct timespec * tp);
   ```
 
-* La función ```clock_gettime```:
-  * Devuelve el número de segundos  transcurridos  **desde 1 de Enero de 1970** y el número de nanosegundos dentro del actual segundo
-  * Valores posibles para ```clk_id```:
-     * **CLOCK_REALTIME**: Reloj del sistema. Este reloj puede sufrir ajustes para corregir la fecha.
-     * **CLOCK_MONOTONIC**: Igual que CLOCK_REALTIME pero no se realizan ajustes, por tanto su cuenta es creciente sin saltos bruscos. Útil para medir duraciones de eventos
+* The ```clock_gettime``` function:
+  * Returns the number of seconds  elapsed  **since January 1, 1970** and the number of nanoseconds within the current second
+  * Possible values for ```clk_id```:
+     * **CLOCK_REALTIME**: System clock. This clock may be adjusted to correct the date.
+     * **CLOCK_MONOTONIC**: Same as CLOCK_REALTIME but no adjustments are made, so its count increases without sudden jumps. Useful for measuring event durations
 
-+ Ejemplo de uso de la función ```clock_gettime```:
++ Example of using the ```clock_gettime``` function:
   ```c
-  /* 1) Medición antes y después */
-  struct timespec  T_ini, T_fin ;
-  clock_gettime(CLOCK_MONOTONIC , &T_ini);
-  /* <tarea a medir> */
+  /* 1) Measurement before and after */
+  struct timespec  T_start, T_end ;
+  clock_gettime(CLOCK_MONOTONIC , &T_start);
+  /* <task to be measured> */
   clock_gettime(CLOCK_MONOTONIC , &T_fin);
   
-  /* 2) Cálculo de diferencia de tiempos */
-  double A1, A2, Tiempo ;
+  /* 2) Calculation of time difference */
+  double A1, A2, Time ;
   A1 = (T_fin.tv_sec  – T_ini.tv_sec);
-  A2 = (T_fin.tv_nsec – T_ini.tv_nsec) / (double)1000000000;
-  Tiempo = A1 + A2;
-  printf(“Tiempo en segundos = %lf\n, Tiempo);
+  A2 = (T_end.tv_nsec – T_start.tv_nsec) / (double)1000000000;
+  Time = A1 + A2;
+  printf(“Time in seconds = %lf\n, Time”);
   ```
 
-#### Sincronización de relojes físicos
 
-* Los computadores de un **sistema distribuido** poseen **relojes** que **no están sincronizados** (**derivas**)
- * Importante asegurar una correcta sincronización:
-   * En **aplicaciones de tiempo real**
-   * Ordenación natural de eventos distribuidos (fechas de ficheros)
-   * **Análisis de rendimiento**
-* Sincronización:
-  * Tradicionalmente se han empleado protocolos de sincronización que intercambian mensajes
-  * Actualmente se puede mejorar mediante GPS:
-    * Los computadores de un sistema poseen todos un GPS
-    * Uno o dos computadores utilizan un GPS y el resto se sincroniza mediante protocolos clásicos
+#### Synchronization of physical clocks
 
-#### Sincronización externa versus interna
+* Computers in a **distributed system** have **clocks** that **are not synchronized** (**drift**)
+* It is important to ensure correct synchronization:
+   * In **real-time applications**
+   * Natural ordering of distributed events (file dates)
+   * **Performance analysis**
+* Synchronization:
+  * Traditionally, synchronization protocols that exchange messages have been used
+  * Currently, this can be improved using GPS:
+    * All computers in a system have GPS
+    * One or two computers use GPS and the rest are synchronized using classic protocols
 
-* **D**: Cota máxima de sincronización
-* **S**: fuente del tiempo UTC, t
-  * UTC: Estándar de tiempo que regula los relojes y el tiempo en el mundo
-* **Sincronización  externa**:
-   * Los relojes están sincronizados si **|S(t) - C<sub>i</sub>(t)| < D**
-   * Los relojes se consideran sincronizados dentro de D
-* **Sincronización interna** entre los relojes de los computadores de un sistema distribuido:
-   * Los relojes están sincronizados si **|C<sub>i</sub>(t) - C<sub>j</sub>(t)| < D**
-   * Dados dos eventos de dos computadores se puede establecer su orden en función de sus relojes si están sincronizados
-* Sincronización externa -> sincronización interna (ok sí) pero <br>Sincronización externa <-/- sincronización interna (ko no solo sí)
 
-#### Métodos de sincronización de relojes
+#### External versus internal synchronization
 
- * Sincronización en un sistema síncrono
- * Algoritmo de Cristian
- * Algoritmo de Berkeley
- * Network time protocol
+* **D**: Maximum synchronization limit
+* **S**: UTC time source, t
+  * UTC: Time standard that regulates clocks and time around the world
+* **External synchronization**:
+  * Clocks are synchronized if **|S(t) - C<sub>i</sub>(t)| < D**
+  * Clocks are considered synchronized within D
+* **Internal synchronization** between the clocks of computers in a distributed system:
+  * Clocks are synchronized if **|Ci(t) - Cj(t)| < D**
+  * Given two events from two computers, their order can be established based on their clocks if they are synchronized
+* External synchronization -> internal synchronization (ok yes) but <br>External synchronization <-/- internal synchronization (ko not only yes)
 
-#### Sincronización en un sistema síncrono
 
-* **P1** envía el valor de su reloj local t a **P2**:
-   * P2 puede actualizar su reloj al valor **t + T<sub>transmit</sub>  si T<sub>transmit</sub>** es el tiempo que lleva enviar un mensaje
-   * Sin embargo, T<sub>transmit</sub>  puede desconocerse
-     * Se compite por el uso de la red
-     * Congestión de la red
- * En un **sistema síncrono** se conoce el tiempo mínimo y máximo de transmisión de un mensaje
- * u = (max - min)
-   * Si P2 fija su reloj al valor t + (max+min)/2, entonces la deriva máxima es <= u/2
-   * El problema es que en un sistema asíncrono T<sub>transmit</sub>  no está acotado
+#### Clock synchronization methods
 
-#### Algoritmo de Cristian
-  ![Algoritmo de Cristian](/materials/topic-ds/ds/ds_rf_cristian.svg)
+* Synchronization in a synchronous system
+* Cristian algorithm
+* Berkeley algorithm
+* Network time protocol
 
-* El cliente realiza una petición para obtener el tiempo
-* El servidor responde con el tiempo de su reloj (T<sub>s</sub>)
-* El cliente actualiza su reloj a tiempo T<sub>s</sub> +  (T<sub>1</sub> - T<sub>0</sub>) / 2
-* Para mejorar la precisión se pueden hacer varias mediciones y descartar cualquiera en la que T<sub>1</sub> - T<sub>0</sub> exceda de un límite
-* Precisión del resultado = +/-  (T<sub>1</sub> - T<sub>0</sub>) / 2
+#### Synchronization in a synchronous system
 
-##### Mejorando la precisión
+* **P1** sends the value of its local clock t to **P2**:
+   * P2 can update its clock to the value **t + T<sub>transmit</sub>  if T<sub>transmit</sub>** is the time it takes to send a message
+   * However, Ttransmit may be unknown
+     * There is competition for network usage
+     * Network congestion
+* In a **synchronous system**, the minimum and maximum transmission times for a message are known
+* u = (max - min)
+   * If P2 sets its clock to the value t + (max+min)/2, then the maximum drift is <= u/2
+   * The problem is that in an asynchronous system Ttransmit  is not bounded
 
-* Min: tiempo mínimo de transmisión de un mensaje
-* El valor que obtiene el servidor T<sub>s</sub> se encuentra en el intervalo [T’<sub>s</sub>, T’’<sub>s</sub>] = [T<sub>1</sub> + Min, T<sub>2</sub> - Min]
-* La precisión del resultado en este caso es: +/- (T<sub>1</sub> - T<sub>0</sub>) / 2 - T<sub>min</sub>
 
-#### Algoritmo de Berkeley
+#### Cristian's algorithm
+![Cristian's algorithm](/materials/topic-ds/ds/ds_rf_cristian.svg)
 
-* El **servidor de tiempo** realiza un **muestreo periódico** de todas las máquinas para pedirles el tiempo
-* **Calcula el tiempo promedio** y le indica a todas las máquinas que avancen su reloj a la nueva hora o que disminuyan la velocidad de actualización
+* The client makes a request to obtain the time
+* The server responds with the time on its clock (T<sub>s</sub>)
+* The client updates its clock to time T<sub>s</sub> + (T<sub>1</sub> - T<sub>0</sub>) / 2
+* To improve accuracy, several measurements can be taken and any where T<sub>1</sub> - T<sub>0</sub> exceeds a limit can be discarded
+* Accuracy of the result = +/- (T1 - T0) / 2
 
-![Algoritmo de Berkeley](/materials/topic-ds/ds/ds_rf_berkeley.svg)
+
+##### Improving accuracy
+
+* Min: minimum message transmission time
+* The value obtained by the server T<sub>s</sub> is in the range [T’<sub>s</sub>, T’’<sub>s</sub>] = [T<sub>1</sub> + Min, T<sub>2</sub> - Min]
+* The accuracy of the result in this case is: +/- (T<sub>1</sub> - T<sub>0</sub>) / 2 - T<sub>min</sub>
+
+#### Berkeley algorithm
+
+* The **time server** performs **periodic sampling** of all machines to request the time
+* **It calculates the average time** and instructs all machines to advance their clocks to the new time or to decrease the update speed
+
+![Berkeley algorithm](/materials/topic-ds/ds/ds_rf_berkeley.svg)
+
 
 #### Network time protocol (NTP)
 
-* Servicio para **sincronizar a máquinas en Internet** con el UTC
-* 3 modos de sincronización:
-   * **multicast**: para redes LAN de alta velocidad
-   * **RPC**: similar al algoritmo de Cristian
-   * **simétrico**: entre pares de procesos
-* Se utilizan servidores localizados a través de Internet con mensajes **UDP**
+* Service for **synchronizing machines on the Internet** with UTC
+* 3 synchronization modes:
+  * **multicast**: for high-speed LAN networks
+  * **RPC**: similar to Cristian's algorithm
+  * **symmetric**: between pairs of processes
+* Servers located across the Internet are used with **UDP** messages
 
 
-### Relojes lógicos
+### Logical clocks
 
-* Dado que no se pueden sincronizar perfectamente los relojes físicos en un sistema distribuido, no se pueden utilizar relojes físicos para ordenar eventos
-* ¿Podemos ordenar los eventos de otra forma?
-  * Empleando el concepto de reloj lógico
+* Since physical clocks cannot be perfectly synchronized in a distributed system, physical clocks cannot be used to order events
+* Can we order events in another way?
+  * Using the concept of a logical clock
 
-![Ejemplo de diagrama de eventos](/materials/topic-ds/ds/ds_diagrama_eventos.svg)
-
-#### Causalidad potencial
-
-* En ausencia de un reloj global la **relación causa-efecto** es la única posibilidad de ordenar eventos
-* Relación de causalidad potencial (**Lamport,1978**) se basa en dos observaciones:
-  1. Si dos eventos ocurren en el mismo proceso (pi(i=1..N)), entonces ocurrieron en el mismo orden en que se observaron
-  2. Si un proceso hace **send(m)** y otro **receive(m)**, entonces send  se produjo antes que el evento **receive**
-* Entonces, Lamport define la relación de causalidad potencial
-  * **Precede a** (**&rarr;**) entre cualquier par de eventos del SD
-     * Ej: a -> b
-* **Orden parcial**: reflexiva, anti-simétrica y transitiva
-  * Dos eventos son **concurrentes** (a || b) si **no se puede deducir** entre ellos una relación de causalidad potencial
-
-#### Importancia de la causalidad potencial
-
-* Sincronización de relojes lógicos
-* Depuración distribuida
-* Registro de estados globales
-* Monitorización
-* Entrega causal
-* Actualización de réplicas
-
-#### Relojes lógicos (algoritmo de Lamport)
-
-* Útiles para **ordenar eventos** en ausencia de un reloj común
-* **Algoritmo de Lamport** (1978):
-  * Cada proceso **P** mantiene una variable entera **RL<sub>p</sub>**  (reloj lógico)
-  * Cuando un proceso **P** genera un evento, **RL<sub>p</sub>=RL<sub>p+1</sub>**
-  * Cuando un proceso **envía** un **mensaje m**  a otro le añade el valor de su reloj
-  * Cuando un proceso **Q**  **recibe** un **mensaje m** con un valor de **tiempo t**, el proceso actualiza su reloj, **RL<sub>p</sub>=max(RL<sub>p</sub>,t) + 1**
-  * El algoritmo asegura que si **a &rarr; b** entonces  **RL(a) < RL(b)**
-  * **Lo contrario no se puede demostrar**
-
-+ Ejemplo:
-  * Ordenado:
-  
-    ![Ejemplo de eventos vistos de forma ordenada](/materials/topic-ds/ds/ds_rl_o.svg)
-  * No ordenado:
-  
-    ![Ejemplo de eventos vistos de forma NO ordenada](/materials/topic-ds/ds/ds_rl_no.svg)
+![Example of an event diagram](/materials/topic-ds/ds/ds_diagrama_eventos.svg)
 
 
-#### Relojes lógicos totalmente ordenados
+#### Potential causality
 
-* Los relojes lógicos de Lamport imponen sólo una relación **de orden parcial**:
-   * Eventos de distintos procesos pueden tener asociado una misma marca de tiempo
-* Se puede extender la relación de orden para conseguir una relación de orden total añadiendo el **identificador de proceso**:
-   * (T<sub>a</sub> , P<sub>a</sub>): marca de tiempo del evento a del proceso P
-* (T<sub>a</sub>, P<sub>a</sub>) < (T<sub>b</sub>, P<sub>b</sub>) sí y solo si:
-   * T<sub>a</sub> < T<sub>b</sub>  o
-   * T<sub>a</sub>=Tb y P<sub>a</sub><P<sub>b</sub>
-
-#### Problemas de los relojes lógicos
-
-* No bastan para caracterizar la causalidad:
-  * Dados RL(a) y RL(b) no podemos saber:
-     * si a precede a b
-     * si b precede a a
-     * si a y b son concurrentes
-* Se necesita una relación (F(e), <) tal que:
-  * a &rarr; b si y sólo si F(a) < F(b)
-  * Los **relojes vectoriales** permiten representar de forma precisa la relación de **causalidad potencial**
-
-![Problema de los relojes lógicos](/materials/topic-ds/ds/ds_prl.svg)
-
-Problemas de los relojes lógicos:
- * C(e11) < C(e22),  y e11 -> e22  es cierto
- * C(e11) < C(e32),  pero e11 -> e32  es falso (son concurrentes)
+* In the absence of a global clock, the **cause-effect relationship** is the only way to order events
+* Potential causality (**Lamport, 1978**) is based on two observations:
+   1. If two events occur in the same process (pi(i=1..N)), then they occurred in the same order in which they were observed
+   2. If one process does **send(m)** and another does **receive(m)**, then send  occurred before the **receive** event
+* Lamport then defines the potential causality relationship
+  * **Precedes** (**→**) between any pair of events in the DS
+    * Ex: a → b
+* **Partial order**: reflexive, antisymmetric, and transitive
+  * Two events are **concurrent** (a || b) if **no potential causality relationship can be deduced** between them
 
 
-### Relojes vectoriales
+#### Importance of potential causality
 
-* Desarrollado independientemente por **Fidge**, **Mattern** y **Schmuck**
-* Todo proceso lleva asociado un vector de enteros **RV**
-* **RV<sub>i</sub>[a]** es el valor del reloj vectorial del proceso i cuando ejecuta el evento a
-* Mantenimiento de los relojes vectoriales (RV<sub>i</sub>):
-   * Inicialmente:
-     * RV<sub>i</sub>= 0   &forall; i
-   * Cuando un proceso i genera un evento:
-     * RV<sub>i</sub>[ i ] = RV<sub>i</sub>[ i ] + 1
-   * Todos los mensajes llevan el RV del envío
-   * Cuando un proceso **j** recibe un mensaje con RV<sub>i</sub>:
-     * RV<sub>j</sub>  = max( RV<sub>j</sub> , RV<sub>i</sub> ) (componente a componente)
-     * RV<sub>j</sub>[ j ] = RV<sub>j</sub>[ j ] + 1 (evento de recepción)
-* Ejemplo:
-
-   ![Ejemplo de relojes vectoriales](/materials/topic-ds/ds/ds_rv.svg)
-
-#### Propiedades de los relojes vectoriales
-
-* RV < RV´ si y solo si:
-   * RV  &ne; RV´ y
-   * RV[i ] &le; RV´[i ], &forall; i
-* Dados dos eventos a y b:
-   * a &rarr; b si y solo si RV(a) < RV(b)
-   * a y b son concurrentes cuando
-     * Ni RV(a) &le; RV(b)  ni  RV(b ) &le; RV(a)
+* Logical clock synchronization
+* Distributed debugging
+* Global state logging
+* Monitoring
+* Causal delivery
+* Replica updating
 
 
-## Exclusión mutua distribuida
+#### Logical clocks (Lamport algorithm)
 
-* Los procesos ejecutan el siguiente fragmento de código:
-    ```c
-    entrada()
-    SECCIÓN CRÍTICA
-    salida()
-    ```
-* Requisitos para resolver el problema de la sección crítica:
-   * **Exclusión mutua**
-   * **Progreso**
-   * **Espera acotada**
-/
+* Useful for **ordering events** in the absence of a common clock
+* **Lamport algorithm** (1978):
+  * Each process **P** maintains an integer variable **RL<sub>p</sub>**  (logical clock)
+  * When a process **P** generates an event, **RL<sub>p</sub>=RL<sub>p+1</sub>**
+  * When a process **sends** a **message m**  to another, it adds the value of its clock
+  * When a process **Q**  **receives** a **message m** with a **time value t**, the process updates its clock, **RL<sub>p</sub>=max(RL<sub>p</sub>,t) + 1**
+  * The algorithm ensures that if **a → b** then  **RL(a) < RL(b)**
+  * **The opposite cannot be proven**
 
-#### Principales algoritmos para la exclusión mutua distribuida
-
-   * Algoritmo **centralizado**:
-      * Existe un proceso coordinador
-      * Problemas: 
-        * Cuello de botella 
-          * Posible arreglo: reparto estático entre número prefijado de coordinadores
-        * Punto único de fallo
-          * Posible arreglo: uso de temporizadores: el cerrojo se libera transcurrido un cierto tiempo
-   * Algoritmo **distribuido**:
-     * Algoritmo de **Ricart y Agrawala**
-       * Requiere la existencia de  un orden total de todos los mensajes en el sistema
-       * Estudiar bibliografía para más detalles
-   * **Anillo con testigo**:
-     * Los procesos se ordenan conceptualmente como un anillo
-     * Por el anillo circula un testigo
-     * Cuando un proceso quiere entrar en la SC debe esperar a recoger el testigo
-     * Cuando sale de la SC envía el testigo al nuevo proceso del anillo
-   * Algoritmo basado en **quorum**:
-     * Algoritmo de **Maekawa**
-       * Estudiar bibliografía para más detalles
++ Example:
+  * Ordered:
+    ![Example of events viewed in an ordered manner](/materials/topic-ds/ds/ds_rl_o.svg)
+  * Unordered:
+    ![Example of events viewed in a NOT ordered manner](/materials/topic-ds/ds/ds_rl_no.svg)
 
 
-## Algoritmos de elección
+#### Fully ordered logical clocks
 
-* Útil en aplicaciones donde es necesario la existencia de un coordinador
-* El algoritmo debe ejecutarse cuando **falla el coordinador**
-* El objetivo del algoritmo es que la elección sea única aunque el algoritmo se inicie de forma concurrente en varios procesos
-* Algoritmos **de elección**:
-   * **Algoritmo del matón**
-       * Estudiar bibliografía para más detalles
-   * **Algoritmo basado en anillo**
-       * Estudiar bibliografía para más detalles
-
-
-#### Interbloqueo distribuido
-
-* **Interbloqueos** en la **asignación de recursos**.
-   Existe interbloqueo cuando se cumplen las siguientes condiciones:
-   * Exclusión mutua
-   * Retención y espera
-   * No expulsión
-   * Condición de espera circular
-* **Interbloqueos** en el **mal uso de operaciones de sincronización**
-* **Interbloqueos** en **las comunicaciones**
-  * Todos los procesos están esperando un mensaje de otro miembro del grupo y no hay mensajes de camino
+* Lamport's logical clocks impose only a **partial order** relationship:
+   * Events from different processes can have the same timestamp associated with them
+* The order relationship can be extended to achieve a total order relationship by adding the **process identifier**:
+   * (T<sub>a</sub> , P<sub>a</sub>): timestamp of event a of process P
+* (T<sub>a</sub>, P<sub>a</sub>) < (T<sub>b</sub>, P<sub>b</sub>) if and only if:
+   * T<sub>a</sub> < T<sub>b</sub>  or
+   * T<sub>a</sub>=Tb and P<sub>a</sub><P<sub>b</sub>
 
 
-## Comunicación multicast
+#### Problems with logical clocks
 
-* Tipos de comunicación:
-  * **Punto a punto** (uno a uno)
-    * Las primitivas de comunicación básicas soportan la comunicación uno a uno
-  * **Multipunto** (uno a varios, varios a uno o varios a varios) 
-    * Estas operaciones se implementan normalmente mediante operaciones punto a punto (aunque pueden estar optimizadas por el hardware subyacente)
-    * Tipos más conocidos:
-      * *Broadcast*: el emisor envía un mensaje a todos los nodos del sistema 
-      * *Multicast*: el emisor envía un mensaje a un subconjunto de todos los nodos
+* They are not sufficient to characterize causality:
+  * Given RL(a) and RL(b), we cannot know:
+    * whether a precedes b
+    * whether b precedes a
+    * whether a and b are concurrent
+* A relation (F(e), <) is needed such that:
+  * a → b if and only if F(a) < F(b)
+  * **Vector clocks** allow us to accurately represent the relationship of **potential causality**
 
-+ Utilidad de la comunicación multipunto:
-  + **Servidores  replicados**:
-     + Un servicio replicado consta de un grupo de servidores.
-     + Las peticiones de los clientes se envían a todos los miembros del grupo.
-        Aunque algún miembro del grupo falle la operación se realizará.
-  + **Mejor rendimiento**:
-     + Replicando datos.
-     + Cuando se cambia un dato, el nuevo valor se envía a todos los procesos que gestionan las réplicas.
-     
-* Tipos de multicast:
-  + **Multicast no fiable**: no hay garantía de que el mensaje se entregue a todos los nodos.
-  + **Multicast  fiable**: el mensaje es recibido por todos los nodos en funcionamiento.
-  + **Multicast  atómico**: el protocolo asegura que todos los miembros del grupo recibirán los mensajes de diferentes nodos en el mismo orden.
-     + Preciso en, por ejemplo, transacciones bancarias donde el orden importa.
-  + **Multicast  causal**: asegura que los mensaje se entregan de acuerdo con las relaciones de causalidad.
+![Problem with logical clocks](/materials/topic-ds/ds/ds_prl.svg)
 
-+ Implementación de un multicast:
-    * Estudiar bibliografía para más detalles
+Problems with logical clocks:
+ * C(e11) < C(e22),  and e11 -> e22  is true
+ * C(e11) < C(e32),  but e11 -> e32  is false (they are concurrent)
 
 
-## Problemas de consenso
+### Vector clocks
 
-* Dado un conjunto de proceso P<sub>1</sub>….P<sub>n</sub>  que se comunican  mediante paso de mensajes, el  objetivo es alcanzar un acuerdo  sobre un determinado valor aun  en  presencia de fallos
+* Developed independently by **Fidge**, **Mattern**, and **Schmuck**
+* Every process has an associated vector of integers **RV**
+* **RV<sub>i</sub>[a]** is the value of the vector clock of process i when it executes event a
+* Maintenance of vector clocks (RV<sub>i</sub>):
+  * Initially:
+    * RV<sub>i</sub>= 0   &forall; i
+  * When a process i generates an event:
+    * RV<sub>i</sub>[ i ] = RV<sub>i</sub>[ i ] + 1
+  * All messages carry the RV of the sender
+  * When a process **j** receives a message with RV<sub>i</sub>:
+    * RV<sub>j</sub>  = max( RV<sub>j</sub> , RV<sub>i</sub> ) (component by component)
+    * RV<sub>j</sub>[ j ] = RV<sub>j</sub> [ j ] + 1 (reception event)
+* Example:
 
-- Tipos de fallo:
-   * Fallo parada: el sistema que falla deja de funcionar
-   * Fallo con recuperación: el sistema que falla vuelve a funcionar en algún momento
-   * Fallos bizantinos: el componente que falla genera fallos arbitrarios
+   ![Example of vector clocks](/materials/topic-ds/ds/ds_rv.svg)
 
-### Acuerdo bizantino
 
-* En la mayoría de las ocasiones cuando un componente o sistema falla, su funcionamiento es arbitrario.
-   * Pueden enviar información diferente a diferentes componentes con los que se comunica.
-   * Alcanzar un acuerdo entre las observaciones que hacen diferentes componentes puede ser complicado en presencia de fallos.
-* El **objetivo** con **acuerdo bizantino** es alcanzar un **acuerdo sobre un determinado valor** **en un sistema donde los componentes pueden fallar** de forma arbitraria**.
-* Importancia:
-   * Permite enmascarar fallos arbitrarios.
-   * Permite construir procesadores con fallos de tipo fallo-parada
+#### Properties of vector clocks
 
-+ Definición del problema: Problema de los Generales Bizantinos
-   * Sistema distribuido compuesto por una serie de nodos (generales) que intercambian información entre ellos.
-   * Los componentes pueden exhibir fallos bizantinos (generales traidores)
-     * Un nodo con fallo puede enviar información diferente a diferentes nodos (para un mismo dato).
-   * **Objetivo**: que los nodos sin fallo alcancen un acuerdo o consenso sobre un determinado valor (ataque, retirada, espera). Es decir que vean el mismo valor para un dato.
-   * ¿Cuántos nodos hacen falta para hacer frente a m fallos?
-     * Se necesitan **3*m + 1** nodos para hacer frente a m fallos bizantinos.
-     * Utilizando 3 nodos, si uno falla el problema no puede resolverse.
+* RV < RV´ if and only if:
+  * RV  &ne; RV´ and
+  * RV[i ] &le; RV´[i ], &forall; i
+* Given two events a and b:
+  * a &rarr; b if and only if RV(a) < RV(b)
+  * a and b are concurrent when
+    * Neither RV(a) ≤ RV(b)  nor  RV(b) ≤ RV(a)
+
+
+## Distributed mutual exclusion
+
+* The processes execute the following code snippet:
+  ```c
+  input()
+  CRITICAL SECTION
+  output()
+  ```
+* Requirements for solving the critical section problem:
+  * **Mutual exclusion**
+  * **Progress**
+  * **Bounded wait**
+
+
+#### Main algorithms for distributed mutual exclusion
+
+* **Centralized** algorithm:
+  * There is a coordinating process
+  * Problems:
+    * Bottleneck
+      * Possible fix: static distribution among a predetermined number of coordinators
+    * Single point of failure
+      * Possible fix: use of timers: the lock is released after a certain amount of time
+* **Distributed** algorithm:
+  * **Ricart and Agrawala** algorithm
+    * Requires the existence of  a total order of all messages in the system
+    * Study the bibliography for more details
+* **Ring with token**:
+  * Processes are conceptually ordered as a ring
+  * A token circulates around the ring
+  * When a process wants to enter the SC, it must wait to collect the token
+  * When it leaves the SC, it sends the token to the new process in the ring
+* **Quorum**-based algorithm:
+  * **Maekawa** algorithm
+  * See bibliography for more details
+
+
+## Election algorithms
+
+* Useful in applications where a coordinator is necessary
+* The algorithm must be executed when **the coordinator fails**
+* The objective of the algorithm is for the election to be unique even though the algorithm is started concurrently in several processes
+* **Election** algorithms:
+  * **Bully algorithm**
+    * Study the literature for more details
+  * **Ring-based algorithm**
+    * Study the literature for more details
+
+
+#### Distributed deadlock
+
+* **Deadlocks** in **resource allocation**.
+   Deadlock occurs when the following conditions are met:
+   * Mutual exclusion
+   * Holding and waiting
+   * No expulsion
+   * Circular wait condition
+* **Deadlocks** in **misuse of synchronization operations**
+* **Deadlocks** in **communications**
+   * All processes are waiting for a message from another member of the group and there are no messages on the way
+
+
+## Multicast communication
+
+* Types of communication:
+  * **Point-to-point** (one-to-one)
+    * Basic communication primitives support one-to-one communication
+  * **Multipoint** (one-to-many, many-to-one, or many-to-many)
+    * These operations are typically implemented using point-to-point operations (although they may be optimized by the underlying hardware)
+    * Most well-known types:
+      * *Broadcast*: the sender sends a message to all nodes in the system 
+      * *Multicast*: the sender sends a message to a subset of all nodes
+
++ Usefulness of multipoint communication:
+  + **Replicated servers**:
+     + A replicated service consists of a group of servers.
+     + Client requests are sent to all members of the group.
+       Even if a member of the group fails, the operation will be performed.
+  + **Better performance:**
+     + Replicating data.
+     + When data is changed, the new value is sent to all processes that manage the replicas.
+
+* Types of multicast:
+  + **Unreliable multicast:** there is no guarantee that the message will be delivered to all nodes.
+  + **Reliable multicast**: the message is received by all functioning nodes.
+  + **Atomic multicast**: the protocol ensures that all members of the group will receive messages from different nodes in the same order.
+     + Accurate in, for example, banking transactions where order matters.
+  + **Causal multicast**: ensures that messages are delivered according to causal relationships.
+
++ Implementation of a multicast:
+  * Study bibliography for more details
+
+
+## Consensus problems
+
+* Given a set of processes P<sub>1</sub>….P<sub>n</sub>  that communicate  by passing messages, the  goal is to reach agreement  on a certain value even  in the  presence of failures
+
+- Types of failure:
+  * Stoppage failure: the failing system stops working
+  * Failure with recovery: the failing system resumes working at some point
+  * Byzantine failures: the failing component generates arbitrary failures
+
+
+### Byzantine agreement
+
+* In most cases, when a component or system fails, its behavior is arbitrary.
+   * They can send different information to different components with which they communicate.
+   * Reaching agreement between the observations made by different components can be complicated in the presence of faults.
+* The **goal** with **Byzantine agreement** is to reach **agreement on a certain value** **in a system where components can fail** arbitrarily**.
+* Importance:
+  * It allows arbitrary failures to be masked.
+  * It allows processors with stop-fail type failures to be built.
+
++ Problem definition: Byzantine Generals Problem
+  * Distributed system composed of a series of nodes (generals) that exchange information with each other.
+  * Components may exhibit Byzantine failures (traitorous generals)
+    * A node with a failure may send different information to different nodes (for the same data).
+  * **Objective**: for the fault-free nodes to reach an agreement or consensus on a certain value (attack, retreat, wait). In other words, for them to see the same value for a piece of data.
+  * How many nodes are needed to deal with m failures?
+     * **3*m + 1** nodes are needed to deal with m Byzantine failures.
+     * Using 3 nodes, if one fails, the problem cannot be solved.
 
 
 </br>
 
-Implementación de consenso:
-    * Estudiar bibliografía para más detalles
-
-## Servicio de nombres
-
-* Objetivo: descubrir recursos en sistemas distribuido
-* Tipos de recursos:
-  * Ficheros, usuarios, grupos, procesos, dispositivos, máquinas, …
-* El nombre del recurso permite referirse a una entidad única en un sistema distribuido (aunque pueda estar replicada y haya varios nombres para la misma entidad)
-  * Ejemplo: en sockets se identifica con IP + puerto
-
-+ Los **nombres** utilizados en sistemas distribuidos son específicos de algún **servicio** concreto
-+ Ejemplos:
-   + Nombre de fichero
-   + Nombres de usuarios
-   + Nombres de hosts
-   + Nombres de objetos remotos o servicios remotos en caso de servicios de llamadas a procedimientos remotos o invocaciónón de métodos remotos
+Consensus implementation:
+* Study the bibliography for more details
 
 
+## Name service
 
-* Estructura general: 
-   * Cliente: precisa localizar un servidor usando un servidor de nombre
-   * Servidor: servidor a ser usado por un cliente
-   * Servidor de nombre:
-     * Un servicio de nombres almacena de forma  general pares <nombre, atributos>
+* Objective: to discover resources in distributed systems
+* Types of resources:
+   * Files, users, groups, processes, devices, machines, etc.
+* The name of the resource allows a unique entity to be referred to in a distributed system (even though it may be replicated and there may be several names for the same entity)
+   * Example: in sockets, it is identified by IP + port
 
-* Funcionamiento general: 
-   * Registro: el servidor contacta con el *servicio de nombre* para almacenar su identificador unívoco (información fija) y su dirección IP, etc. (información variable)
-   * Búsqueda: el cliente cuando precisa contactar con el servidor primero pregunta al *servicio de nombre* por el registro asociado (par <nombre, atributos>). 
-      El *servicio de nombre* contesta con la información o error en caso de no haber registro asociado.
-    * El cliente contacta con el servidor y pide los servicios (no intervención del  *servicio de nombre* )
-    * Dar de baja: antes del servidor dejar de estar activo para los clientes, se da de baja en el  *servicio de nombre*.
++ The **names** used in distributed systems are specific to a particular **service**
++ Examples:
+   + File name
+   + User names
+   + Host names
+   + Names of remote objects or remote services in the case of remote procedure calls or remote method invocation
+
+* General structure:
+  * Client: needs to locate a server using a name server
+  * Server: server to be used by a client
+  * Name server:
+    * A name service generally stores <name, attributes> pairs
+
+* General operation:
+  * Registration: the server contacts the *name service* to store its unique identifier (fixed information) and its IP address, etc. (variable information)
+  * Search: when the client needs to contact the server, it first asks the *name service* for the associated record (pair <name, attributes>).
+    The *name service* responds with the information or an error if there is no associated record.
+  * The client contacts the server and requests the services (no intervention by the  *name service* )
+  * Deregistration: before the server ceases to be active for clients, it is deregistered from the  *name service*.
 
 
-#### Espacio de nombres
+#### Namespace
 
-* El espacio de nombres es el conjunto de nombres válidos reconocidos por un servicio particular
-   * Plano
-   * Jerárquico
+* The namespace is the set of valid names recognized by a particular service
+  * Flat
+  * Hierarchical
 
-- Ejemplo de nombrado jerárquico: URI
-   * URI (*Uniform Resource Identifier*): 
-      * Una URI identifica recursos en Internet
-      * URI = URL | URN (puede ser una URL o un URN)
-   * URL (*Uniform Resource locators*): 
-      * URI que proporcionan información para localizar recursos
-      * Puede verse afectado si el recurso se mueve
-      * Ejemplo: http://tools.ietf.org/html/rfc3187.html
-   * URN (*Uniform  resource  names*)
-      * URI que solo utilizan nombres sin incluir información de localización
-      * Requiere un proceso de traducción
-      * Ejemplo: urn:ietf:rfc:3187
+- Example of hierarchical naming: URI
+  * URI (*Uniform Resource Identifier*):
+     * A URI identifies resources on the Internet
+     * URI = URL | URN (can be a URL or a URN)
+  * URL (*Uniform Resource locators*):
+     * URIs that provide information for locating resources
+     * May be affected if the resource moves
+     * Example: http://tools.ietf.org/html/rfc3187.html
+  * URN (*Uniform resource names*)
+     * URIs that only use names without including location information
+     * Requires a translation process
+     * Example: urn:ietf:rfc:3187
 
-#### Resolución de nombres
 
-* Proceso  iterativo que permite a un cliente obtener  los  atributos de interés a partir de un determinado nombre:
-  * Resolución iterativa guiada por el cliente
-  * Resolución guiada por el servidor
-* Empleo de cachés en el cliente
+#### Name resolution
 
-#### Ejemplos de servicios de nombres
+* Iterative process that allows a client to obtain  the  attributes of interest from a given name:
+  * Client-guided iterative resolution
+  * Server-guided resolution
+* Use of caches on the client
 
-* **DNS**: traduce nombres de dominio a direcciones IP 
-  * Base de datos  jerárquica que almacena información sobre nombres de dominio
-* **LDAP (Lighweight  Directory Access Protocol)**: servicio de directorio que consta de una base de datos con información sobre nombres de personas. Habitualmente almacena información de autenticación (usuario y contraseña)
-* **portmapper**: servidor de nombres utilizado en RPC. Obtiene el puerto asociado a servicios RPC registrados
-* **rmiregistry**: servicio de registro de objetos remotos en Java
+
+#### Examples of name services
+
+* **DNS**: translates domain names to IP addresses
+   * Hierarchical database that stores information about domain names
+* **LDAP (Lightweight Directory Access Protocol)**: directory service consisting of a database with information about people's names. It usually stores authentication information (username and password)
+* **portmapper**: name server used in RPC. Obtains the port associated with registered RPC services
+* **rmiregistry**: remote object registry service in Java
 
 
 </br>
 
-####  Implementación de un servicio de nombres
+####  Implementation of a name service
 
-* Almacenamiento de la información: servicio de directorios, base de datos
-* Migración del servicio de nombres
-* Replicación del servicio
-* Cache de la información en los clientes
-* Localización del servicio de nombres
+* Information storage: directory service, database
+* Migration of the name service
+* Replication of the service
+* Caching of information on clients
+* Location of the name service
 
--- Estudiar bibliografía para más detalles
-
-
+-- Study the bibliography for more details
