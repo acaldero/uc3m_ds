@@ -4,33 +4,33 @@
 + [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
 
-## Servicio distribuido basado en colas POSIX
+## Distributed service based on POSIX queues
 
 #### To compile
 
-Hay que introducir:
+Please enter:
 ```
 cd kv-distributed-mqueue
 make
 ```
 
-Y la salida debería ser similar a:
+The output should be similar to:
 ```
 gcc -g -Wall -c app-d.c
 gcc -g -Wall -c lib-client.c
 gcc -g -Wall -c lib.c
-gcc -g -Wall -lrt app-d.o lib.o lib-client.o       -o app-d  -lrt
+gcc -g -Wall -lrt app-d.o lib.o lib-client.o -o app-d -lrt
 gcc -g -Wall -c lib-server.c
-gcc -g -Wall            lib.o lib-client.o lib-server.o  -o lib-server  -lrt
+gcc -g -Wall    lib.o lib-client.o lib-server.o -o lib-server -lrt
 ```
 
-#### Ejecutar
+#### Run
 
-*TIP: Las colas POSIX se utilizan para comunicar procesos en la misma máquina*
+*TIP: POSIX queues are used to communicate processes on the same machine*
 
 <html>
 <table>
-<tr><th>Paso</th><th>Cliente</th><th>Servidor</th></tr>
+<tr><th>Step</th><th>Client</th><th>Server</th></tr>
 <tr>
 <td>1</td>
 <td></td>
@@ -49,8 +49,8 @@ $ ./lib-server
 
 ```
 $ ./app-d
-d_set("nombre", 1, 0x123)
-d_get("nombre", 1) -> 0x123
+d_set("name", 1, 0x123)
+d_get("name", 1) -> 0x123
 ```
 
 </td>
@@ -58,9 +58,9 @@ d_get("nombre", 1) -> 0x123
 
 ```
 
- 1 = init(nombre, 10);
- 1 = set(nombre, 1, 0x123);
- 1 = get(nombre, 1, 0x123);
+1 = init(name, 10);
+1 = set(name, 1, 0x123);
+1 = get(name, 1, 0x123);
 ```
 
 </td>
@@ -80,7 +80,7 @@ d_get("nombre", 1) -> 0x123
 </table>
 </html>
 
-*TIP: Las colas POSIX pueden ser visibles desde la línea de comando:*
+*TIP: POSIX queues can be viewed from the command line:*
 
 ``` bash
 sudo mkdir /dev/mqueue
@@ -92,11 +92,11 @@ ls -las /dev/mqueue
 
 ```mermaid
 sequenceDiagram
-    app-d          ->> lib-client.c: request lib.h API in a distributed way
-    lib-client.c   ->> lib-server.c: request remote API
-    lib-server.c   ->> lib.c: request lib.h API call
-    lib.c          ->> lib-server.c: return API call result
-    lib-server.c   ->> lib-client.c: return remote result
-    lib-client.c   ->> app-d: return result of the distributed API call
+   app-d ->> lib-client.c: request lib.h API in a distributed way
+   lib-client.c ->> lib-server.c: request remote API
+   lib-server.c ->> lib.c: request lib.h API call
+   lib.c ->> lib-server.c: return API call result
+   lib-server.c ->> lib-client.c: return remote result
+   lib-client.c ->> app-d: return result of the distributed API call
 ```
 
