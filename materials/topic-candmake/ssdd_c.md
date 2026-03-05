@@ -1,7 +1,7 @@
 
 # Summary of the main aspects of the C language for Distributed Systems
 + **Felix García Carballeira, Alejandro Calderón Mateos, and Carlos Gómez Carrasco**
-+ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue. svg)](https://github.com/acaldero/uc3m_sd/blob/main/LICENSE)
++ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_sd/blob/main/LICENSE)
 
 
 ## Contents
@@ -11,15 +11,15 @@
   * [Compilation and execution process](#a1--compilation-and-execution-process)
   * [Debugging](#a2-and-if-there-are-problems-we-debug)
 * B. Organized control statements:
-  * [Control statements](#b1--control-statements-in-c)
+  * [Control statements](#b1--flow-control-statements-in-c)
   * [Organized alternative statements](#b2--organized-control-statements)
 * C. Registers in C and peculiarities:
   * [struct in C](#c1--use-of-structures-struct-in-c)
-  * [Peculiarities of using struct](# c2--peculiarities-of-struct-structures-in-c)
+  * [Peculiarities of using struct](#c2--special-features-of-structures-struct-in-c)
 * D. Pointers:
   * [What is a pointer?](#d1--use-of-pointers-i-what-is-a-pointer)
-  * [Dynamic memory](#d2--use-of-pointers-ii-dynamic-memory)
-  * [Passing parameters](#d3--use-of-pointers-iii-passing-parameters-to-functions)
+  * [Dynamic memory](#d2--using-pointers-ii-dynamic-memory)
+  * [Passing parameters](#d3--using-pointers-iii-passing-parameters-to-functions)
 * E. Multi-file projects: dynamic and static libraries:
   * [Header files and multi-file projects](#e1--header-files-and-multi-file-projects)
 
@@ -81,7 +81,7 @@ gcc -g -Wall -o main      main.o
 ```
 
 * <details>
-  <summary>About -g, -Wall, ... (click)</summary>
+  <summary>About -g, -Wall, ... (click here)</summary>
 
   * When compiling, the following modifiers (flags) are used:
     * "-g" to add debugging information that is useful if a debugger is used
@@ -115,7 +115,7 @@ Common problems arise:
     </details>
 * When executing: execution errors because the expected behavior is not the same as the actual behavior.
   * <details>
-    <summary>Recommendations for debugging execution problems... (click)</summary>
+    <summary>Recommendations for debugging execution problems... (click here)</summary>
 
       * Use “brute force” with print messages (small programs and/or use of threads):
         * Message of the points where the execution passes: ```printf(“Here 1\n”); ... printf(“Here 2\n”); ...```
@@ -164,7 +164,7 @@ ddd ./main &
 
 
 <details>
-  <summary>Debugging with seer... (click)</summary>
+  <summary>Debugging with seer... (click here)</summary>
   <br>
 
   * NOTE: I would like to take this opportunity to thank Adolfo for the information about seer and recommend its use
@@ -760,7 +760,7 @@ To remember in C:
   ```
 
 **Recommended information**:
- * [Introduction to Pointers I (YouTube)] (http://www.youtube.com/watch?embed=no&v=iQF-2vUNEJk&feature=related)
+ * [Introduction to Pointers  I (YouTube)](http://www.youtube.com/watch?embed=no&v=iQF-2vUNEJk&feature=related)
  * [Introduction to Pointers II (YouTube)](http://www.youtube.com/watch?embed=no&v=m6sdKI3zhKg&feature=related)
 
 
@@ -1056,7 +1056,7 @@ There are three main compilation alternatives:
 
 
 **Recommended information**:
-  * [Library example (YouTube)](https://youtu.be/B_7jBxe_VOQ& t=2m34s)
+  * [Library example (YouTube)](https://youtu.be/B_7jBxe_VOQ&t=2m34s)
   * [Solving multiple inclusions (YouTube)](https://youtu.be/B_7jBxe_VOQ&t=5m04s)
   * [Example of static libraries (YouTube)](https://youtu.be/B_7jBxe_VOQ&t=7m42s)
   * [Example of dynamic libraries (YouTube)](https://youtu.be/B_7jBxe_VOQ&t=10m05s)
@@ -1070,14 +1070,14 @@ There are three main compilation alternatives:
   <tr><td rowspan="2">1</td>
       <td>Introduction to <br>Linux/Ubuntu</td>
       <td><ul>
-        <li> <a href="https://acaldero.github.io/uc3m_so/transparencias/clase_w0-ubuntu-instalacion. pdf">instalacion.pdf</a></li>
+        <li> <a href="https://acaldero.github.io/uc3m_so/transparencias/clase_w0-ubuntu-instalacion.pdf">instalacion.pdf</a></li>
         <li> <a href="https://acaldero.github.io/uc3m_so/transparencias/clase_w0-ubuntu-fichydirs.pdf">ficheros-y-directorios.pdf</a></li>
         <li> <a href="https://acaldero.github.io/uc3m_so/transparencias/clase_w0-ubuntu-procesos.pdf">process-management.pdf</a></li>
       </ul></td>
       <td><ul type="1">
         <li><a href="https://www.youtube.com/watch?v=MwfB9lnB0_A">Installing Ubuntu</a></li>
         <li><a href="https://youtu.be/2U5bJKUX_6s">Files and directories in command lines</a></li>
-        <li><a href= “https://youtu.be/ym3BeppIE8I”>Command line job and process management</a></li>
+        <li><a href="https://youtu.be/ym3BeppIE8I">Command line job and process management</a></li>
       </ul></td>
   </tr>
   <tr><td>Introduction to <br>C language</td>
