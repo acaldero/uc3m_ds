@@ -1,176 +1,175 @@
 
-# Ejemplo de transformación de aplicación monolítica a aplicación distribuida
-+ **Felix García Carballeira and Alejandro Calderón Mateos**
+# Example of transforming a monolithic application into a distributed application
++ **Felix Garcia Carballeira and Alejandro Calderon Mateos**
 + [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
 
-## Aplicación centralizado inicial
+## Initial centralized application
 
-Partimos de una abstracción de *calculadora básica* con la siguiente interfaz:
-```
-  // Sumar dos números enteros.
+We start with an abstraction of a *basic calculator* with the following interface:
+```c
+  // Add two integers.
   int add ( int a, int b ) ;
 
-  // Resta dos números enteros.
+  // Subtract two integers.
   int sub ( int a, int b ) ;
 
-  // Cambio de signo de un número entero.
+  // Change the sign of an integer.
   int neg ( int a ) ;
 ```
 
-Y tenemos la siguiente función que usa dicha abstracción:
-```
+And we have the following function that uses this abstraction:
+```c
 int main ( int argc, char *argv[] )
 {
-    int   N1 = 20 ;
-    int   N2 = 10 ;
-    int   val ;
+    int N1 = 20 ;
+    int N2 = 10 ;
+    int val ;
 
     // add
     val = add(N1, N2) ;
     printf("%d + %d = %d\n", N1, N2, val) ;
 
     // sub
-    val = sub(N1, N2) ;
-    printf("%d - %d = %d\n", N1, N2, val) ;
+    val = sub(N1, N2);
+    printf("%d - %d = %d\n", N1, N2, val);
 
     // neg
-    val = neg(N2) ;
-    printf("-%d = %d\n", N2, val) ;
+    val = neg(N2);
+    printf("-%d = %d\n", N2, val);
 
-    return 0 ;
+    return 0;
 }
 ```
 
-Dicha abstracción se diseña e implementa inicialmente:
-  * En ún único fichero fuente (monolítico) y
-  * Se despliega como único ejecutable (centralizado)
+This abstraction is initially designed and implemented:
+  * In a single source file (monolithic) and
+  * Deployed as a single executable (centralized)
 
-El código fuente, las instrucciones de compilación y las instrucciones para la ejecución están en:
-  * [Servicio centralizado monolítico](/pc-calculator/cal-centralized-monolithic#readme)
+The source code, compilation instructions, and execution instructions are in:
+  * [Centralized monolithic service](/pc-calculator/cal-centralized-monolithic#readme)
 
-Partiendo de esta versión inicial monolítica centralizada,
-para transformar a un servicio distribuidos, se aconseja seguir los siguientes pasos:
- ```mermaid
-  flowchart LR
-    A[monolítico] --> B[librería]
-    B[librería]   --> C{Patrón proxy y <br>mecanismo...}
-    C -- mqueue   --> D[colas POSIX]
-    C -- sockets  --> E[sockets]
-    C -- RPC      --> F[RPC]
-    C -- GSOAP    --> G[GSOAP]
-  ```
-
-La primera transformación consiste en que la abstracción esté en una librería y el programa principal haga uso de esta librería.
-
-Para la siguiente transformacion, el [patrón proxy](https://es.wikipedia.org/wiki/Proxy_(patr%C3%B3n_de_dise%C3%B1o)) es importante para que el programa principal crea estar trabajando con una librería local cuando realmente la implementación será remota.
-La librería local realmente es un suplente (*stub*) que se comunica con la implementación remota utilizando algún mecanismo de comunicación de entre los disponibles (colas POSIX, sockets, etc.)
-
-
-## Servicio centralizado con librería
-
-Dicha abstracción se diseña e implementa inicialmente:
-  * En varios fichero fuente (librería + aplicación) y
-  * Se despliega como único ejecutable (centralizado)
-
-El código fuente, las instrucciones de compilación y las instrucciones para la ejecución están en:
-  * [Servicio centralizado con librería](/pc-calculator/cal-centralized-library#readme)
-
-La arquitectura se puede resumir como:
-  ```mermaid
-  sequenceDiagram
-      app-c   ->> lib.c: request lib.h API
-      lib.c   ->> app-c: return result of API call
-  ```
-
-
-## Servicio distribuido basado en colas POSIX
-
-Dicha abstracción se diseña e implementa inicialmente:
-  * En varios fichero fuente (librería y ejecutables) y
-  * Se despliega como varios ejecutables (distribuidos) usando colas POSIX
-
-El código fuente, las instrucciones de compilación y las instrucciones para la ejecución están en:
-  * [Servicio distribuido basado en colas POSIX](/pc-calculator/cal-distributed-mqueue#readme)
-
-La arquitectura se puede resumir como:
+Starting from this initial centralized monolithic version,
+to transform it into a distributed service, it is advisable to follow these steps:
 ```mermaid
-sequenceDiagram
-    app-d          ->> lib-client.c: request lib.h API in a distributed way
-    lib-client.c   ->> lib-server.c: request remote API
-    lib-server.c   ->> lib.c: request lib.h API call
-    lib.c          ->> lib-server.c: return API call result
-    lib-server.c   ->> lib-client.c: return remote result
-    lib-client.c   ->> app-d: return result of the distributed API call
+flowchart LR
+  A[monolithic] --> B[library]
+  B[library] --> C{Proxy pattern and <br>mechanism...}
+  C -- mqueue --> D[POSIX queues]
+  C -- sockets --> E[sockets]
+  C -- RPC --> F[RPC]
+  C -- GSOAP --> G[GSOAP]
+```
+
+The first transformation consists of placing the abstraction in a library and having the main program make use of this library.
+
+For the next transformation, the [proxy pattern](https://en.wikipedia.org/wiki/Proxy_pattern) is important so that the main program believes it is working with a local library when in fact the implementation will be remote.
+The local library is actually a stub that communicates with the remote implementation using one of the available communication mechanisms (POSIX queues, sockets, etc.).
+
+
+## Centralized service with library
+
+This abstraction is initially designed and implemented:
+  * In several source files (library + application) and
+  * Deployed as a single executable (centralized)
+
+The source code, compilation instructions, and execution instructions are in:
+  * [Centralized service with library](/pc-calculator/cal-centralized-library#readme)
+
+The architecture can be summarized as:
+```mermaid
+ sequenceDiagram
+    app-c ->> lib.c: request lib.h API
+    lib.c ->> app-c: return result of API call
 ```
 
 
-## Servicio distribuido basado en sockets
+## Distributed service based on POSIX queues
 
-Dicha abstracción se diseña e implementa inicialmente:
-  * En varios fichero fuente (librería y ejecutables) y
-  * Se despliega como varios ejecutables (distribuidos) usando sockets
+This abstraction is initially designed and implemented:
+  * In several source files (library and executables) and
+  * Deployed as several (distributed) executables using POSIX queues
 
-El código fuente, las instrucciones de compilación y las instrucciones para la ejecución están en:
-  * [Servicio distribuido basado en sockets](/pc-calculator/cal-distributed-sockets#readme)
+The source code, compilation instructions, and execution instructions are in:
+  * [Distributed service based on POSIX queues](/pc-calculator/cal-distributed-mqueue#readme)
 
-La arquitectura se puede resumir como:
+The architecture can be summarized as:
 ```mermaid
-sequenceDiagram
-    app-d          ->> lib-client.c: request lib.h API in a distributed way
-    lib-client.c   ->> lib-server.c: request remote API
-    lib-server.c   ->> lib.c: request lib.h API call
-    lib.c          ->> lib-server.c: return API call result
-    lib-server.c   ->> lib-client.c: return remote result
-    lib-client.c   ->> app-d: return result of the distributed API call
+ sequenceDiagram
+    app-d ->> lib-client.c: request lib.h API in a distributed way
+    lib-client.c ->> lib-server.c: request remote API
+    lib-server.c ->> lib.c: request lib.h API call
+    lib.c ->> lib-server.c: return API call result
+    lib-server.c ->> lib-client.c: return remote result
+    lib-client.c ->> app-d: return result of the distributed API call
 ```
 
 
-## Servicio distribuido basado en RPC
+## Socket-based distributed service
 
-Dicha abstracción se diseña e implementa inicialmente:
-  * En varios fichero fuente (librería y ejecutables) y
-  * Se despliega como varios ejecutables (distribuidos) usando RPC
+This abstraction is initially designed and implemented:
+  * In several source files (library and executables) and
+  * Deployed as several (distributed) executables using sockets
 
-El código fuente, las instrucciones de compilación y las instrucciones para la ejecución están en:
-  * [Servicio distribuido basado en RPC](/pc-calculator/cal-distributed-rpc#readme)
+The source code, compilation instructions, and execution instructions are in:
+  * [Distributed socket-based service](/pc-calculator/cal-distributed-sockets#readme)
 
-La arquitectura se puede resumir como:
+The architecture can be summarized as:
 ```mermaid
-sequenceDiagram
-    app-d          ->> lib-client.c: request lib.h API in a distributed way
-    lib-client.c   ->> lib-server.c: request remote API
-    lib-server.c   ->> lib.c: request lib.h API call
-    lib.c          ->> lib-server.c: return API call result
-    lib-server.c   ->> lib-client.c: return remote result
-    lib-client.c   ->> app-d: return result of the distributed API call
+ sequenceDiagram
+    app-d ->> lib-client.c: request lib.h API in a distributed way
+    lib-client.c ->> lib-server.c: request remote API
+    lib-server.c ->> lib.c: request lib.h API call
+    lib.c ->> lib-server.c: return API call result
+    lib-server.c ->> lib-client.c: return remote result
+    lib-client.c ->> app-d: return result of the distributed API call
 ```
 
 
-## Servicio distribuido basado en GSOAP
+## RPC-based distributed service
 
-Dicha abstracción se diseña e implementa inicialmente:
-  * En varios fichero fuente (librería y ejecutables) y
-  * Se despliega como varios ejecutables (distribuidos) usando GSOAP
+This abstraction is initially designed and implemented:
+  * In several source files (library and executables) and
+  * Deployed as several (distributed) executables using RPC
 
-El código fuente, las instrucciones de compilación y las instrucciones para la ejecución están en:
-  * [Servicio distribuido basado en GSOAP](/pc-calculator/cal-distributed-gsoap-standalone#readme)
+The source code, compilation instructions, and execution instructions are in:
+  * [Distributed service based on RPC](/pc-calculator/cal-distributed-rpc#readme)
 
-La arquitectura se puede resumir como:
+The architecture can be summarized as:
 ```mermaid
-sequenceDiagram
-    app-d          ->> lib-client.c: request lib.h API in a distributed way
-    lib-client.c   ->> lib-server.c: request remote API
-    lib-server.c   ->> lib.c: request lib.h API call
-    lib.c          ->> lib-server.c: return API call result
-    lib-server.c   ->> lib-client.c: return remote result
-    lib-client.c   ->> app-d: return result of the distributed API call
+ sequenceDiagram
+    app-d ->> lib-client.c: request lib.h API in a distributed way
+    lib-client.c ->> lib-server.c: request remote API
+    lib-server.c ->> lib.c: request lib.h API call
+    lib.c ->> lib-server.c: return API call result
+    lib-server.c ->> lib-client.c: return remote result
+    lib-client.c ->> app-d: return result of the distributed API call
 ```
 
 
-## Información adicional
+## GSOAP-based distributed service
 
- * [Introducción al lab 1](https://www.youtube.com/watch?v=LWeuoihcKyI)
- * [Introducción al lab 2](https://www.youtube.com/watch?v=tmFu_JenEi0)
+This abstraction is initially designed and implemented:
+  * In several source files (library and executables) and
+  * Deployed as several (distributed) executables using GSOAP
 
+The source code, compilation instructions, and execution instructions are in:
+  * [GSOAP-based distributed service](/pc-calculator/cal-distributed-gsoap-standalone#readme)
+
+The architecture can be summarized as:
+```mermaid
+sequenceDiagram
+    app-d ->> lib-client.c: request lib.h API in a distributed way
+    lib-client.c ->> lib-server.c: request remote API
+    lib-server.c ->> lib.c: request lib.h API call
+    lib.c ->> lib-server.c: return API call result
+    lib-server.c ->> lib-client.c: return remote result
+    lib-client.c ->> app-d: return result of the distributed API call
+```
+
+
+## Additional information
+
+* [Introduction to lab 1](https://www.youtube.com/watch?v=LWeuoihcKyI)
+* [Introduction to lab 2](https://www.youtube.com/watch?v=tmFu_JenEi0)
 
