@@ -8,8 +8,8 @@
 
 * [Statement](#statement)
 * [Guide to help solve distributed application design exercises](#guide-to-help-solve-distributed-application-design-exercises)
-* [Example of socket-based distributed calculator design](#example-of-socket-based-distributed-calculator-design)
-* [Example of distributed calculator service implementation with TCP](#example-of-implementation-of-distributed-calculator-service-with-tcp)
+* [Example of socket-based distributed calculator design](#example-of-a-distributed-calculator-design-based-on-sockets)
+* [Example of distributed calculator service implementation with TCP](#example-of-distributed-calculator-service-implementation-with-tcp)
 
 
 ## Statement
@@ -155,12 +155,12 @@ Final design
 
 * One possible implementation would be based on the following structure:
 
-![Calculator implementation structure](/materials/topic-sockets/exercise_sockets_calculator/calc-arq.svg)
+    ![Calculator implementation structure](/materials/topic-sockets/exercise_sockets_calculator/calc-arq.svg)
 
-* calc-server-tcp.c -> implementation of a calculator service with TCP sockets.
-* calc-client-tcp.c -> implementation of a calculator client with TCP sockets.
-* comm.h -> communications library interface.
-* comm.c -> implementation of the communications library.
+  * calc-server-tcp.c -> implementation of a calculator service with TCP sockets.
+  * calc-client-tcp.c -> implementation of a calculator client with TCP sockets.
+  * comm.h -> communications library interface.
+  * comm.c -> implementation of the communications library.
 
 
 * To compile, you can use:
@@ -295,16 +295,16 @@ int main ( int argc, char *argv[] )
             continue;
         }
 
-    // process request
-    service(sc);
+        // process request
+        service(sc);
 
-    // close connection with client
-    closeSocket(sc);
+        // close connection with client
+        closeSocket(sc);
     }
 
     closeSocket(sd);
     return 0;
-    }
+}
 ```
 
 </details>
@@ -386,7 +386,7 @@ int main ( int argc, char *argv[] )
 
     closeSocket(sd);
     return 0;
-    }
+  }
 ```
 
 </details>
@@ -547,9 +547,9 @@ ssize_t writeLine ( int fd, char *buffer )
 
 ssize_t readLine ( int fd, char *buffer, size_t n )
 {
-   ssize_t numRead; /* bytes read in last read () */ 
+   ssize_t numRead; /* bytes read in last read(...) */ 
  
-   size_t totRead; /* bytes read so far */
+   size_t totRead;  /* bytes read so far */
    char *buf;
    char ch;
 
@@ -616,7 +616,7 @@ ssize_t readLine ( int fd, char *buffer, size_t n )
   Error in clientSocket with localhost:4201
 
   $ pkill -n -f calc-server-tcp
-```
+  ```
 
 * To run on two machines, you can use:
   <table>
