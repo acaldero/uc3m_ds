@@ -1,130 +1,130 @@
 
 ## Distributed Systems: Supplementary Materials
-+ **Felix García Carballeira and Alejandro Calderón Mateos** @ arcos.inf.uc3m.es
++ **Felix Garcia Carballeira and Alejandro Calderon Mateos** @ arcos.inf.uc3m.es
 + [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
 
-## Servicio distribuido basado en RPC
+## Distributed service based on RPC
 
-### (0) Pasos iniciales para tener las RPC en una distribución Linux compatible con Ubuntu 22.04:
+### (0) Initial steps to have RPCs in a Linux distribution compatible with Ubuntu 22.04:
 
-  1) Instalar software y sus pre-requisitos:
+1) Install software and its prerequisites:
+   ```
+   sudo apt-get install libtirpc-common libtirpc-dev libtirpc3 rpcbind build-essential
+   ```
+2) Configure software and prerequisites:
+   ```
+   sudo mkdir -p /run/sendsigs.omit.d/
+   sudo /etc/init.d/rpcbind restart
+   ```
+
+
+### (1) Steps to create a distributed application with RPCs:
+
+1) Create the IDL file using XDR language (which is similar to C but not exactly C).
+   * Our example of [message.x](message.x) is:
      ```
-     sudo apt-get install libtirpc-common libtirpc-dev libtirpc3  rpcbind build-essential
+     struct result
+     {
+        int value ; /* value to return */
+        int status ; /* whether or not the process of obtaining the value to return was successful */
+     } ;
+
+     program CALC
+     {
+        version CALC_VERSION
+        {
+           struct result d_add ( int a, int b ) = 1 ;
+           struct result d_divide ( int a, int b ) = 2 ;
+           struct result d_neg ( int a ) = 3 ;
+        } = 1 ;
+
+     } = 55555 ;
      ```
-  2) Configurar software y pre-requisitos:
+
+2) Use rpcgen with the IDL file:
+   * For our example, it is:
      ```
-     sudo mkdir -p /run/sendsigs.omit.d/
-     sudo /etc/init.d/rpcbind restart
+     rpcgen -a -N -M message.x
      ```
+   * This command should generate the following files:
 
+     | **File**         | **Should be edited or used as a template**  | **Where it is used**  | **Meaning**   |
+     |:-----------------|:-------------------------------------------:|:---------------------:|:--------------|
+     | message.h        | No     | Client and server  | Definition of types and functions based on what is indicated in message.x  |
+     | message_xdr.c    | No     | Client and server  | Responsible for *marshalling* and *unmarshalling* data                     |
+     | message_clnt.c   | No     | Client             | RPC stub or substitute on the client side                                  |
+     | message_svc.c    | No     | Server             | RPC stub or substitute on the server side                                  |
+     | message_server.c | Yes    | Server             | Skeleton for implementing the interface on the server.<br>Used as a template for lib-server.c  |
+     | message_client.c | Yes    | Client             | Example client program that makes RPC calls                                |
+     | Makefile.message | Yes    | For compiling      | Template for compilation file.<br>You must add the extra files from the project and check that the options match the project   |
 
-### (1) Pasos para crear una aplicación distribuida con las RPC:
+3) Complete the code that rpcgen generates on the **server** side:
+   * In the example, you have *lib-server.c + lib.c + lib.h*:
+      * **[lib-server.c](lib-server.c)**: implementation of the RPC interface using **message_server.c** as the initial template
+      * **[lib.c](lib.c)**: implementation of the interface to be used on the server side
+      * **[lib.h](lib.h)**: interface to be used on the server side
 
-  1) Crear el archivo IDL usando lenguaje XDR (que es parecido a C pero no exactamente C).
-     * Nuestro ejemplo de [message.x](message.x) es:
-       ```
-       struct result
-       {
-         int value ;   /* valor a devolver */
-         int status ;  /* ha ido bien o no el proceso de obtener el valor a devolver */
-       } ;
+4) Complete the code that rpcgen generates on the **client** side:
+   * In the example, we have *lib-client.c + lib-client.h + app-d.c*:
+      * **[lib-client.c](lib-client.c)**: implementation of the proxy that uses the RPC interface, using fragments of **message_client.c**
+      * **[lib-client.h](lib-client.h)**: implementation of the lib.h interface on the client, using **lib.h**
+      * **[app-d.c](app-d.c)**: implementation of the client program that uses the lib-client.c interface (the lib.h interface on the client)
 
-       program CALC
-       {
-          version CALC_VERSION
-          {
-                struct result  d_add    ( int a, int b ) = 1 ;
-                struct result  d_divide ( int a, int b ) = 2 ;
-                struct result  d_neg    ( int a )        = 3 ;
-          } = 1 ;
-
-       } = 55555 ;
-       ```
-
-  2) Uso de rpcgen con el archivo IDL:
-     * Para nuestro ejemplo es:
-       ```
-       rpcgen -a -N -M message.x
-       ```
-     * Este mandato debería generar los siguientes ficheros:
-
-       |    **Fichero**   	| **Debería editarse o usarse como plantilla**     	| **Dónde se utiliza** 	| **Significado**                                                                                                                             	|
-       |:----------------	|:------------------------------------------------:	|:--------------------:	|:------------------------------------------------------------------------------------------------------------------------------------------- |
-       | message.h        	|                        No                        	| Cliente y servidor   	| Definición de tipos y funciones a partir de lo indicado en message.x                                                                        	|
-       | message_xdr.c    	|                        No                        	| Cliente y servidor   	| Encargado del *marshalling* y *unmarshalling* de los datos                                                                                  	|
-       | message_clnt.c   	|                        No                        	| Cliente              	| *stub* o suplente RPC en el lado del cliente                                                                                                	|
-       | message_svc.c    	|                        No                        	| Servidor             	| *stub* o suplente RPC en el lado del servidor                                                                                               	|
-       | message_server.c 	|                        Si                        	| Servidor             	| Esqueleto para implementar la interfaz en el servidor.<br>Se utiliza como plantilla para lib-server.c                                       	|
-       | message_client.c 	|                        Si                        	| Cliente              	| Ejemplo de programa cliente que hace llamadas RPC                                                                                           	|
-       | Makefile.message 	|                        Si                        	| Para compilar        	| Plantilla para archivo de compilación.<br>Hay que añadir los archivos extras del proyecto y revisar que las opciones se ajusten al proyecto 	|
-
-  3) Completar el código que rpcgen genera en el lado del **servidor**:
-     * En el ejemplo se tiene *lib-server.c + lib.c + lib.h*:
-       * **[lib-server.c](lib-server.c)**: implementación de la interfaz RPC usando **message_server.c** como plantilla inicial
-       * **[lib.c](lib.c)**: implementación de la interfaz a ser usada en el lado del servidor
-       * **[lib.h](lib.h)**: interfaz a ser usada en el lado del servidor
-
-  4) Completar el código que rpcgen genera en el lado del **cliente**:
-     * En el ejemplo se tiene *lib-client.c + lib-client.h + app-d.c*:
-       * **[lib-client.c](lib-client.c)**: implementación del proxy que usa la interfaz RPC, usando fragmentos de **message_client.c**
-       * **[lib-client.h](lib-client.h)**: implementación de la interfaz de lib.h en el cliente, usando **lib.h**
-       * **[app-d.c](app-d.c)**: implementación de programa cliente que usa la interfaz de lib-client.c (la de lib.h en el cliente)
-
-  5) Crear **Makefile.rpc** usando **Makefile.message** como plantilla y revisar los siguientes aspectos:
-     * En el caso de usar Linux Ubuntu 22.04 o compatible, hay que revisar que CFLAGS y LDFLAGS usan tirpc:
-       ```
-       ...
-       CFLAGS  += -g -I/usr/include/tirpc         # añadir -I/usr/include/tirpc
-       LDFLAGS += -lnsl -lpthread -ldl -ltirpc    # añadir -ltirpc
-       ...
-       ```
-     * Añadir los archivos adicionales necesarios para el proyecto:
-        ```
-       TARGETS_SVC.c  = lib-server.c lib.c    message_svc.c  message_xdr.c
-       TARGETS_CLNT.c = app-d.c lib-client.c  message_clnt.c message_xdr.c
-       ```
-     * Cambiar el nombre de los archivos ejecutables:
-        ```
-       SERVER = lib-server   # message_server
-       CLIENT = app-d        # message_client
-       ```
-     * Si se modifica **message_server.c** y/o **message_client.c** entoces mejor quitar *$(TARGETS)* de la regla *clean:*:
-       ```
-       clean:
-               # $(RM) core $(TARGETS) $(OBJECTS_CLNT) $(OBJECTS_SVC) $(CLIENT) $(SERVER)
-                 $(RM) core            $(OBJECTS_CLNT) $(OBJECTS_SVC) $(CLIENT) $(SERVER)
-       ```
-       De otra forma cada vez que se haga "make clean" se borran los archivos modificados.
+5) Create **Makefile.rpc** using **Makefile.message** as a template and check the following aspects:
+   * If using Linux Ubuntu 22.04 or compatible, check that CFLAGS and LDFLAGS use tirpc:
+     ```
+     ...
+     CFLAGS  += -g -I/usr/include/tirpc       # add -I/usr/include/tirpc
+     LDFLAGS += -lnsl -lpthread -ldl -ltirpc  # add -ltirpc
+     ...
+     ```
+   * Add the additional files needed for the project:
+     ```
+     TARGETS_SVC.c  = lib-server.c lib.c message_svc.c message_xdr.c
+     TARGETS_CLNT.c = app-d.c lib-client.c message_clnt.c message_xdr.c
+     ```
+   * Rename the executable files:
+     ```
+     SERVER = lib-server   # message_server
+     CLIENT = app-d        # message_client
+     ```
+   * If **message_server.c** and/or **message_client.c** are modified, then it is best to remove *$(TARGETS)* from the *clean:* rule:
+     ```
+     clean:
+     # $(RM) core $(TARGETS) $(OBJECTS_CLNT) $(OBJECTS_SVC) $(CLIENT) $(SERVER)
+       $(RM) core            $(OBJECTS_CLNT) $(OBJECTS_SVC) $(CLIENT) $(SERVER)
+     ```
+     Otherwise, every time you run "make clean", the modified files will be deleted.
 
 
 
 ### (2) To compile
 
-* A continuación hay que compilar:
+* Next, you need to compile:
   ```
   make -f Makefile.rpc
   ```
 
-* Y la salida debería ser similar a:
+* And the output should be similar to:
   ```
   gcc -g -Wall -I/usr/include/tirpc -c app-d.c
   gcc -g -Wall -I/usr/include/tirpc -c lib-client.c
   gcc -g -Wall -I/usr/include/tirpc -c message_clnt.c
   gcc -g -Wall -I/usr/include/tirpc -c message_xdr.c
-  gcc -g -Wall -I/usr/include/tirpc lib-client.o app-d.o message_clnt.o message_xdr.o  -o app-d -lnsl -lpthread -ldl -ltirpc
+  gcc -g -Wall -I/usr/include/tirpc lib-client.o app-d.o message_clnt.o message_xdr.o -o app-d -lnsl -lpthread -ldl -ltirpc
   gcc -g -Wall -I/usr/include/tirpc -c lib.c
   gcc -g -Wall -I/usr/include/tirpc -c lib-server.c
   gcc -g -Wall -I/usr/include/tirpc -c message_svc.c
-  gcc -g -Wall -I/usr/include/tirpc lib-server.o  lib.o  message_svc.o  message_xdr.o  -o lib-server -lnsl -lpthread -ldl -ltirpc
+  gcc -g -Wall -I/usr/include/tirpc lib-server.o lib.o message_svc.o message_xdr.o -o lib-server -lnsl -lpthread -ldl -ltirpc
   ```
 
 
-### (3) Ejecutar
+### (3) To run
 
 <html>
 <table>
-<tr><th>Paso</th><th>Cliente</th><th>Servidor</th></tr>
+<tr><th>Step</th><th>Client</th><th>Server</th></tr>
 <tr>
 <td>1</td>
 <td></td>
@@ -163,7 +163,7 @@ $ env SERVER_IP=localhost ./app-d
 <td></td>
 <td>
 
-Para parar el servidor hay que presionar Control-C:
+To stop the server, press Control-C:
 
 ```
 ^Caccept: Interrupted system call
@@ -179,11 +179,10 @@ Para parar el servidor hay que presionar Control-C:
 
 ```mermaid
 sequenceDiagram
-    app-d          ->> lib-client.c: request lib.h API in a distributed way
-    lib-client.c   ->> lib-server.c: request remote API
-    lib-server.c   ->> lib.c: request lib.h API call
-    lib.c          ->> lib-server.c: return API call result
-    lib-server.c   ->> lib-client.c: return remote result
-    lib-client.c   ->> app-d: return result of the distributed API call
+   app-d ->> lib-client.c: request lib.h API in a distributed way
+   lib-client.c ->> lib-server.c: request remote API
+   lib-server.c ->> lib.c: request lib.h API call
+   lib.c ->> lib-server.c: return API call result
+   lib-server.c ->> lib-client.c: return remote result
+   lib-client.c ->> app-d: return result of the distributed API call
 ```
-
