@@ -3,29 +3,34 @@
 + **Felix García Carballeira and Alejandro Calderón Mateos** @ arcos.inf.uc3m.es
 + [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
+## Distributed service based on sockets
 
-## Servicio distribuido basado en sockets
-
-*NOTA: Antes de ejecutar en dos máquinas diferentes por favor actualice la dirección IP del servidor en el archivo lib-client.c*
+*NOTE: Before running on two different machines, please update the server IP address in the lib-client.c file*
 
 ### To compile
 
-```
+Please enter the following commands in the terminal:
+```bash
 $ cd cal-distributed-sockets
 $ make
+```
+
+The expected output should be similar to:
+```bash
 gcc -g -Wall -c app-d.c
 gcc -g -Wall -c lib-client.c
 gcc -g -Wall -c lib.c
-gcc -g -Wall  app-d.o lib.o lib-client.o       -o app-d
+gcc -g -Wall app-d.o lib.o lib-client.o -o app-d
 gcc -g -Wall -c lib-server.c
-gcc -g -Wall  lib.o lib-client.o lib-server.o  -o lib-server
+gcc -g -Wall lib.o lib-client.o lib-server.o -o lib-server
 ```
 
-### Ejecutar
+
+### To run
 
 <html>
 <table>
-<tr><th>Paso</th><th>Cliente</th><th>Servidor</th></tr>
+<tr><th>Step</th><th>Client</th><th>Server</th></tr>
 <tr>
 <td>1</td>
 <td></td>
@@ -54,9 +59,9 @@ $ ./app-d
 
 ```
 
- 0 = add(30, 20, 10);
- -1 = divide(0, 10, 0);
- 0 = neg(-10, 10);
+0 = add(30, 20, 10);
+-1 = divide(0, 10, 0);
+0 = neg(-10, 10);
 ```
 
 </td>
@@ -76,21 +81,21 @@ $ ./app-d
 </table>
 </html>
 
+
 ### Architecture
 
 ```mermaid
 sequenceDiagram
-    app-d          ->> lib-client.c: request lib.h API in a distributed way
-    lib-client.c   ->> lib-server.c: request remote API
-    lib-server.c   ->> lib.c: request lib.h API call
-    lib.c          ->> lib-server.c: return API call result
-    lib-server.c   ->> lib-client.c: return remote result
-    lib-client.c   ->> app-d: return result of the distributed API call
+   app-d ->> lib-client.c: request lib.h API in a distributed way
+   lib-client.c ->> lib-server.c: request remote API
+   lib-server.c ->> lib.c: request lib.h API call
+   lib.c ->> lib-server.c: return API call result
+   lib-server.c ->> lib-client.c: return remote result
+   lib-client.c ->> app-d: return result of the distributed API call
 ```
 
 
-
-**Material adicional**:
-  * <a href="https://beej.us/guide/bgnet/html/index-wide.html">Beej's Guide to Network Programming</a>
-  * <a href="https://beej.us/guide/bgnet0/html/index-wide.html">Beej's Guide to Network Concepts (más teoría)</a>
+**Additional material**:
+* <a href="https://beej.us/guide/bgnet/html/index-wide.html">Beej's Guide to Network Programming</a>
+* <a href="https://beej.us/guide/bgnet0/html/index-wide.html">Beej's Guide to Network Concepts (more theory)</a>
 
