@@ -1,63 +1,65 @@
 
-# Resumen de los principales aspectos del uso de Make para Sistemas Distribuidos
-+ **Felix García Carballeira and Alejandro Calderón Mateos**
+# Summary of the main aspects of using Make for Distributed Systems
++ **Felix Garcia Carballeira and Alejandro Calderon Mateos**
 + [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
 
-## Contenidos
+## Contents
 
- * Puesta en marcha:
-   * [Requisitos](#requisitos)
-   * [Ejemplo de código para compilar con Makefile](#ejemplo-de-c%C3%B3digo-para-compilar-con-makefile)
- * De la compilación a mano al uso de Makefile con reglas:
-   * [Compilación SIN Makefile](#compilaci%C3%B3n-sin-makefile-compilaci%C3%B3n-manual)
-   * [Compilación con Makefile sencillo](#compilaci%C3%B3n-con-makefile-primera-versi%C3%B3n)
-   * [Compilación con Makefile con variables](#compilaci%C3%B3n-con-makefile-segunda-versi%C3%B3n-con-variables)
-   * [Compilación con Makefile con reglas](#compilaci%C3%B3n-con-makefile-tercera-versi%C3%B3n-con-reglas)
-   * [Compilación con Makefile con reglas especiales](#compilaci%C3%B3n-con-makefile-cuarta-versi%C3%B3n-con-reglas-especiales)
- * [Materiales adicionales](#material-recomendado)
+* Getting started:
+  * [Requirements](#requirements)
+  * [Sample code for compiling with Makefile](#sample-code-for-compiling-with-makefile)
+* From manual compilation to using Makefile with rules:
+   * [Compilation WITHOUT Makefile](#compilation-without-makefile-manual-compilation)
+   * [Compilation with simple Makefile](#compilation-with-makefile-first-version)
+   * [Compilation with Makefile with variables](#compilation-with-makefile-second-version-with-variables)
+   * [Compilation with Makefile with rules](#compilation-with-makefile-third-version-with-rules)
+   * [Compilation with Makefile with special rules](#compilation-with-makefile-fourth-version-with-special-rules)
+* [Additional materials](#recommended-materials)
 
-## Requisitos
 
- Los principales requisitos son:
- * Tener conexión a Internet para consultar documentación.
- * Tener acceso a una máquina con Linux con software de desarrollo instalado:
-   * Puede usar las Aulas Virtuales del Laboratorio del Departamento de Informática:
+## Requirements
+
+The main requirements are:
+* An Internet connection to consult documentation.
+* Access to a Linux machine with development software installed:
+   * You can use the Virtual Classrooms of the Computer Science Department Laboratory:
      * ["https://www.lab.inf.uc3m.es/servicios/aulas-virtuales-del-laboratorio/](https://www.lab.inf.uc3m.es/servicios/aulas-virtuales-del-laboratorio/)
-   * Puede usar su Debian/Ubuntu con: ```sudo apt-get install build-essential gdb ddd```
+   * You can use your Debian/Ubuntu with: ```sudo apt-get install build-essential gdb ddd```
 
 
-## Ejemplo de código para compilar con Makefile
+## Example code to compile with Makefile
 
-Usaremos tres archivos:
+We will use three files:
 
 * lib_hola.h
   ```c
   void di_hola ( void ) ;
   ```
 
-* lib_hola.c
+* lib_hello.c
   ```c
-  void di_hola ( void )
+  void say_hello ( void )
   {
-     printf("Hola Mundo...") ;
+     printf("Hello World...") ;
   }
   ```
 
 * main.c
   ```c
-  #include <lib_hola.h>
+  #include "lib_hello.h"
 
   int main ( int argc, char *argv[] )
   {
-     di_hola() ;
-     return 0 ;
+      say_hello() ;
+      return 0 ;
   }
   ```
 
-## Compilación SIN Makefile (compilación manual)
 
-Para compilar los anteriores archivos hay que ejecutar los siguientes mandatos:
+## Compilation WITHOUT Makefile (manual compilation)
+
+To compile the above files, execute the following commands:
 
 ```bash
 gcc -g -Wall -c lib_hola.c -o lib_hola.o
@@ -66,41 +68,42 @@ gcc -g -Wall -o main main.o lib_hola.o
 ```
 
 
-## Compilación con Makefile (primera versión)
+## Compilation with Makefile (first version)
 
-Usaremos el siguiente archivo inicialmente:
+We will initially use the following file:
 
 * Makefile:
   ```bash
   all:
-  	gcc -g -Wall -c lib_hola.c -o lib_hola.o
-  	gcc -g -Wall -c main.c     -o main.o
-  	gcc -g -Wall -o main main.o lib_hola.o
+		gcc -g -Wall -c lib_hola.c -o lib_hola.o
+		gcc -g -Wall -c main.c     -o main.o
+		gcc -g -Wall -o main main.o lib_hola.o
   ```
 
-Para usar el archivo Makefile hay que ejecutar:
-  ```bash
-  make
-  ```
+To use the Makefile file, you must execute:
+```bash
+make
+```
 
-### Estructura básica del archivo Makefile
+### Basic structure of the Makefile file
 
-El esqueleto del Makefile anterior es:
+The skeleton of the previous Makefile is:
 ```bash
 targets: prerequisites
 	command 1
 	command 2
 	command 3
 ```
-Donde para obtener un objetivo (targets) se indica 2 elementos:
-  * Prerequisitos (prerequisites): que son objetivos que hay que cumplir primero
-  * Mandatos (command 1/2/3): una vez se tengan los prerequisitos la forma de tener el objetivo es ejecutar los mandatos uno detrás de otro
-    > Importante: no vale usar espacios en blanco antes de cada "gcc -g ...", solo vale tabuladores.
+To obtain a target, two elements are indicated:
+  
+* Prerequisites: these are targets that must be met first
+  * Commands (command 1/2/3): once the prerequisites are met, the way to achieve the target is to execute the commands one after the other
+    > Important: do not use spaces before each "gcc -g ...", **only tabs**.
 
 
-## Compilación con Makefile (segunda versión con variables)
+## Compiling with Makefile (second version with variables)
 
-Usaremos el siguiente archivo makefile:
+We will use the following makefile file:
 
 * Makefile:
   ```bash
@@ -108,34 +111,35 @@ Usaremos el siguiente archivo makefile:
   CFLAGS=-g -Wall
 
   all:
-  	$(CC) $(CFLAGS) -c lib_hola.c -o lib_hola.o
-  	$(CC) $(CFLAGS) -c main.c     -o main.o
-  	$(CC) $(CFLAGS) -o main main.o lib_hola.o
+		$(CC) $(CFLAGS) -c lib_hola.c -o lib_hola.o
+		$(CC) $(CFLAGS) -c main.c     -o main.o
+		$(CC) $(CFLAGS) -o main main.o lib_hola.o
   ```
 
-Para usar el archivo Makefile hay que ejecutar:
+To use the Makefile file, run:
 ```bash
 make
 ```
 
-### Variables en el archivo Makefile
 
-Para definir una variable se puede utilizar:
+### Variables in the Makefile file
+
+To define a variable, you can use:
 ```bash
-VARIABLE=valor
+VARIABLE=value
 ```
 
-Para usar el valor de la variable hay que usar:
+To use the value of the variable, use:
 ```bash
 $(VARIABLE)
 ```
 
-> Importante: El nombre de la variable no puede tener espacios.
+> Important: The variable name cannot contain spaces.
 
 
-## Compilación con Makefile (tercera versión con reglas)
+## Compiling with Makefile (third version with rules)
 
-Usaremos el siguiente archivo makefile:
+We will use the following makefile file:
 
 * Makefile:
   ```bash
@@ -144,27 +148,27 @@ Usaremos el siguiente archivo makefile:
   OBJS=main.o lib_hola.o
 
   all: $(OBJS)
-  	$(CC) $(CFLAGS) -o main $(OBJS)
-
+  $(CC) $(CFLAGS) -o main $(OBJS)
+  
   lib_hola.o: lib_hola.c
-  	$(CC) $(CFLAGS) -c lib_hola.c -o lib_hola.o
+      $(CC) $(CFLAGS) -c lib_hola.c -o lib_hola.o
 
   main.o: main.c
-  	$(CC) $(CFLAGS) -c main.c     -o main.o
-	
+      $(CC) $(CFLAGS) -c main.c     -o main.o
+	  
   clean: $(OBJS)
-  	rm -fr $(OBJS)
+      rm -fr $(OBJS)
   ```
 
-Para usar el archivo Makefile se recomienda ejecutar:
+To use the Makefile file, it is recommended to run:
 ```bash
 make clean; make
 ```
 
 
-## Compilación con Makefile (cuarta versión con reglas especiales)
+## Compilation with Makefile (fourth version with special rules)
 
-* Archivo Makefile:
+* Makefile file:
   ```bash
   CC=gcc
   CFLAGS=-g -Wall
@@ -173,38 +177,36 @@ make clean; make
   .PHONY: all clean
 
   all: $(OBJS)
-  	$(CC) $(CFLAGS) -o main $(OBJS)
-
+  $(CC) $(CFLAGS) -o main $(OBJS)
+  
   %.o: %.c
-  	@echo "Compiling... $<"
-  	$(CC) $(CFLAGS) -c $< -o $@
+      @echo "Compiling... $<"
+      $(CC) $(CFLAGS) -c $< -o $@
 
   clean: $(OBJS)
-  	@echo "Removing $(OBJS)..."
-  	rm -fr $(OBJS)
+      @echo "Removing $(OBJS)..."
+      rm -fr $(OBJS)
   ```
 
-Para usar el archivo Makefile se recomienda ejecutar:
+To use the Makefile file, it is recommended to run:
 ```bash
 make clean; make
 ```
 
-Hay dos reglas especiales:
-* La regla de ignorar ficheros que se llamen all y clean (de otra forma hacer un make all si hay un archivo all supone que se cumple la regla y no se ejecuta):
+There are two special rules:
+* The rule to ignore files called all and clean (otherwise, doing a make all if there is an all file assumes that the rule is fulfilled and is not executed):
   ```bash
-    .PHONY: all clean
+  .PHONY: all clean
   ```
-* Usar una única regla para indicar que cada archivo .o (%.o) precisa un archivo .c asociado (%.c) y se compila con ```-c $< -o $@``` donde ```$<``` es el nombre del archivo .c y ```$@``` es el nombre del archivo .o:
+* Use a single rule to indicate that each .o file (%.o) requires an associated .c file (%.c) and is compiled with ```-c $< -o $@``` where ```$<``` is the name of the .c file and ```$@``` is the name of the .o file:
   ```bash
-    %.o: %.c
-    	@echo "Compiling... $<"
-  	$(CC) $(CFLAGS) -c $< -o $@
+  %.o: %.c
+	  	@echo “Compiling... $<”
+		$(CC) $(CFLAGS) -c $< -o $@
   ```
 
 
-
-## Material recomendado
-  * https://makefiletutorial.com/
-  * https://www3.nd.edu/~zxu2/acms60212-40212/Makefile.pdf
-
+## Recommended material
+* https://makefiletutorial.com/
+* https://www3.nd.edu/~zxu2/acms60212-40212/Makefile.pdf
 
