@@ -17,7 +17,7 @@ make
 And the expected output should be:
 ```
 gcc -g -Wall -c app-c.c
-gcc -g -Wall app-c.o  -o app-c
+gcc -g -Wall app-c.o -o app-c
 ```
 
 ### To execute
@@ -38,6 +38,6 @@ And the expected output should be similar to:
 
 ```mermaid
 sequenceDiagram
-    app-c ->> app-c: request API call and return result of API call
+  app-c ->> app-c: request API call and return result of API call
 ```
 
