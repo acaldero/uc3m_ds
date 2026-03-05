@@ -46,11 +46,11 @@
         Exercises:
         <ul>
         <li>
-          <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/ejercicio_pasomensajes_vector.md">Vectors with POSIX queues</a>
+          <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/exercise_messagepassing_vector.md">Vectors with POSIX queues</a>
           <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/e2-pasomensajes.pdf">(in PDF)</a>
         </li>
         <li> Date and hour <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/e1-pasomensajes.pdf">(in PDF)</a> </li>
-        <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/ejercicio_pasomensajes_upgraded.md">Naming and communication</a> </li>
+        <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-messagepassing/exercise_messagepassing_upgraded.md">Naming and communication</a> </li>
         </ul>
       </td>
   </tr>
