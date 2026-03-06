@@ -1,49 +1,49 @@
 
-# Ejemplo de paso de mensajes
+# Example of message passing
 + **Felix García Carballeira and Alejandro Calderón Mateos** @ arcos.inf.uc3m.es
-+ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
++ [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_sd/blob/main/LICENSE)
 
 
-## Contenidos
+## Contents
 
- * [Enunciado](#enunciado)
- * [Diseño progresivo de monolítico a aplicación distribuida](#diseño-progresivo-de-monolítico-a-aplicación-distribuida)
- * [Diseño de la versión inicial monolítica](#diseño-de-la-versión-inicial-monolítica)
- * [Paso de monolítico a distribuido general](#paso-de-monolítico-a-distribuido-general)
- * [Distribuido general a distribuido con colas de mensajes POSIX](#distribuido-general-a-distribuido-con-colas-de-mensajes-posix)
- * [Ejecución concurrente en el servidor](#ejecución-concurrente-en-el-servidor)
-
-
-## Enunciado
-
-Se desea diseñar un modelo de vector distribuido. 
-Sobre un vector distribuido se definen los siguientes servicios:
-* int **init** ( char *nombre, int N )
-  Este servicio permite inicializar un array distribuido de N números enteros.
-  La función devuelve 1 cuando el array se ha creado por primera vez. En caso de que el array ya esté creado, la función devuelve 0. La función devuelve -1 en caso de error.
-* int **set** ( char *nombre, int i, int valor )
-  Este servicio inserta el valor en la posición i del array nombre.
-* int **get** ( char*nombre, int i, int *valor )
-  Este servicio permite recuperar el valor del elemento i del array nombre.
-
-Diseñe un **sistema** **distribuido** que implemente el servicio con **colas POSIX** de forma que permita trabajar con varios clientes **concurrentemente**.
+ * [Statement](#statement)
+ * [Progressive design from monolithic to distributed application](#progressive-design-from-monolithic-to-distributed-application)
+ * [Design of the initial monolithic version](#design-of-the-initial-monolithic-version)
+ * [Transition from monolithic to general distributed](#transition-from-monolithic-to-general-distributed)
+ * [General distributed to distributed with POSIX message queues](#general-distributed-to-distributed-with-posix-message-queues)
+ * [Concurrent execution on the server](#concurrent-execution-on-the-server)
 
 
-## Diseño progresivo de monolítico a aplicación distribuida
+## Statement
 
-Es importante hacer un diseño progresivo, un diseño que se comience por la funcionalidad básica y al que se pueda ir añadiendo poco a poco los aspectos de sistema distribuido, con colas de mensaje POSIX y concurrente.
+We want to design a distributed vector model.
+The following services are defined on a distributed vector:
+* int **init** ( char *name, int N )
+  This service allows you to initialize a distributed array of N integers.
+  The function returns 1 when the array has been created for the first time. If the array has already been created, the function returns 0. The function returns -1 in case of error.
+* int **set** ( char *name, int i, int value )
+  This service inserts the value at position i of the name array.
+* int **get** ( char*name, int i, int *value )
+  This service allows you to retrieve the value of element i of the name array.
 
-Por tanto los pasos que se siguen son:
-1. Diseño de un sistema monolítico con la funcionalidad pedida.
-2. Modificar el diseño anterior para que pase de sistema monolítico a sistema distribuido mediante el patrón *proxy*.
-3. Modificar el diseño anterior para que el sistema distribuido utilice colas de mensajes POSIX como primitivas de comunicación.
-4. Modificar el diseño anterior para que los servidores sean concurrentes.
+Design a **distributed system** that implements the service with **POSIX queues** so that it allows you to work with multiple clients **concurrently**.
 
 
-## Diseño de la versión inicial monolítica
+## Progressive design from monolithic to distributed application
 
-El primer diseño a realizar no es distribuido ni tiene concurrencia. 
-Empezaremos por diseñar una biblioteca **vector** que implementa el API indicado el enunciado y aplicación **main** que hace uso de la biblioteca:
+It is important to use a progressive design, one that starts with basic functionality and to which aspects of a distributed system can be added little by little, with POSIX message queues and concurrency.
+
+Therefore, the steps to follow are:
+1. Design a monolithic system with the requested functionality.
+2. Modify the previous design to change from a monolithic system to a distributed system using the *proxy* pattern.
+3. Modify the previous design so that the distributed system uses POSIX message queues as communication primitives.
+4. Modify the previous design so that the servers are concurrent.
+
+
+## Design of the initial monolithic version
+
+The first design to be made is neither distributed nor concurrent.
+We will start by designing a **vector** library that implements the API indicated in the statement and the **main** application that uses the library:
 
 ```mermaid
 ---
@@ -58,134 +58,132 @@ graph LR;
     M <--->|set| L
 ```
 
-De esta forma podremos probar que la implementación de estos componentes del sistema funcionan más fácilmente.
+This will allow us to test that the implementation of these system components works more easily.
 
-Para dicho diseño haremos los siguientes pasos:
+For this design, we will take the following steps:
 
-1. Ejemplo de programa principal de prueba en ```main.c```:
+1. Example of the main test program in ```main.c```:
    ```c
    #include <stdio.h>
    #include <stdlib.h>
    #include "lib.h"
-
-   char *A = "nombre" ;
-   int   V = 0x123 ;
    
+   char *A = "name" ;
+   int   V = 0x123 ;
    int main ( int argc, char *argv[] )
    {
-      int ret, val ;
+       int ret, val ;
 
-      ret = init(A, 10) ;
-      if (ret < 0) { printf("init: error code %d\n", ret); exit(-1); }
+       ret = init(A, 10) ;
+       if (ret < 0) { printf("init: error code %d\n", ret); exit(-1); }
 
-      ret = set (A, 1, V) ;
-      if (ret < 0) { printf("set: error code %d\n", ret); exit(-1); }
+       ret = set (A, 1, V) ;
+       if (ret < 0) { printf("set: error code %d\n", ret); exit(-1); }
+      
+       ret = get(A, 1, &val);
+       if (ret < 0) { printf(2get: error code %d\n", ret); exit(-1); }
 
-      ret = get (A, 1, &val) ;
-      if (ret < 0) { printf("get: error code %d\n", ret); exit(-1); }
-
-      if (V != val) { printf("set %d but get %d\n", V, val); exit(-1); }
-
-      printf("OK\n") ;
-      return 0 ;
+       if (V != val) { printf("set %d but get %d\n", V, val); exit(-1); }
+      
+       printf("OK\n");
+       return 0;
    }
    ```
 
-2. Estructuras de datos a utilizar en ```lib.c```:
+2. Data structures to be used in ```lib.c```:
    ```c
    #include "lib.h"
 
    int    a_neltos= 0 ;
    int  * a_values[100] ; // = [ [0…N1], [0…N2], ... [0…NN] ] ;
-   char * a_keys[100] ;   // = [ "key1", "key2", ... "keyN" ] ;
+   
+   char * a_keys[100];   // = [ "key1", "key2", ... "keyN" ];
    ```
 
-3. Funciones auxiliares de<br>
-    (a) buscar un nombre en el array *a_keys* de claves y <br>
-    (b) insertar un nuevo array con *nombre* y *N* elementos de tipo entero:
+3. Auxiliary functions of<br>
+   (a) search for a name in the *a_keys* array of keys and <br>
+   (b) insert a new array with *name* and *N* elements of type integer:
    ```c
-   int buscar ( char *nombre )
+   int search ( char *name )
    {
-       int index= -1 ;
-    
-       for ( int i=0; i<a_neltos; i++ ) {
-           if (!strcmp(a_keys[i], nombre)) {
+      int index= -1 ;
+           
+      for ( int i=0; i<a_neltos; i++ ) {
+           if (!strcmp(a_keys[i], name)) {
                return i;
            }
-       }
-    
-       return index;
-   }
-
-   int insertar ( char *nombre, int N )
-   {
-       a_values[a_neltos] = malloc(N*sizeof(int)) ;
-       if (NULL == a_values[a_neltos]) {
-           return -1 ; // en caso de error => -1
-       }
-
-       a_keys[a_neltos] = strdup(nombre) ;
-       if (NULL == a_keys[a_neltos]) {
-           free(a_values[a_neltos]);
-           return -1 ; // en caso de error => -1
-       }
-    
-       a_neltos++ ;
-       return 1 ; // todo bien => devolver 1
-   }
-   ```
-
-4. Funciones pedidas (basadas en lo desarrollado anteriormente):
-   ```c
-   // Inicializar un array distribuido de N números enteros.
-   int init ( char *nombre, int N )
-   {
-      int index = buscar(nombre) ;
-      if (index != -1) return 0 ; // Si array ya esté creado => devolver 0
-      
-      index = insertar(nombre, N) ;
-      if (index == -1) return -1; // en caso de error => -1
-      
-      return 1 ; // el array se ha creado por primera vez => devolver 1
-   }
-
-   // Inserta el valor en la posición i del array nombre.
-   int set ( char *nombre, int i, int valor )
-   {
-      int index = buscar(nombre) ;
-      if (index == -1) return -1 ; // Si error => devolver -1
-      
-      a_values[index][i] = valor ;
-      return 1;
+      }
+      return index;
    }
    
-   // Recuperar el valor del elemento i del array nombre.
-   int get ( char*nombre, int i, int *valor )
+   int insert(char *name, int N)
    {
-      int index = buscar(nombre) ;
-      if (index == -1) return -1 ; // Si error => devolver -1
-      
-      *valor = a_values[index][i] ;
-      return 1;
+       a_values[a_neltos] = malloc(N*sizeof(int));
+       if (NULL == a_values[a_neltos]) {
+           return -1; // in case of error => -1
+       }
+       
+       a_keys[a_neltos] = strdup(name);
+       if (NULL == a_keys[a_neltos]) {
+           free(a_values[a_neltos]);
+           return -1; // in case of error => -1
+       }
+       a_neltos++;
+       return 1; // all good => return 1
    }
    ```
 
-5. Interfaz de las funciones pedidas (basadas en lo desarrollado anteriormente) en ```lib.h```:
+4. Requested functions (based on what has been developed previously):
+   ```c
+   // Initialize a distributed array of N integers.
+   int init ( char *name, int N )
+   {
+      int index = search(name) ;
+      if (index != -1) return 0 ; // If array is already created => return 0
+   
+      index = insert(name, N);
+      if (index == -1) return -1; // in case of error => -1
+   
+      return 1; // the array has been created for the first time => return 1
+   }
+   
+   // Insert the value in position i of the name array. 
+   int set ( char *name, int i, int value )
+   {
+       int index = search(name) ;
+       if (index == -1) return -1 ; // If error => return -1
+   
+       a_values[index][i] = value ;
+       return 1; 
+   }
+   
+   // Retrieve the value of element i of the name array.
+   int get(char*name, int i, int *value)
+   {
+      int index = search(name);
+      if (index == -1) return -1; // If error => return -1
+   
+      *value = a_values[index][i];
+      return 1; 
+   }
+   ```
+
+5. Interface of the requested functions (based on what was developed previously) in ```lib.h```:
    ```c
    #include <stdlib.h>
    #include <string.h>
-
-   // Inicializar un array distribuido de N números enteros.
-   int init ( char *nombre, int N ) ;
-
-   // Inserta el valor en la posición i del array nombre.
-   int set ( char *nombre, int i, int valor ) ;
    
-   // Recuperar el valor del elemento i del array nombre.
-   int get ( char*nombre, int i, int *valor ) ;
+   // Initialize a distributed array of N integers.
+   int init ( char *name, int N ) ;
+
+   // Insert the value at position i of the name array.
+   int set ( char *name, int i, int value ) ;
+   
+   // Retrieve the value of element i of the name array.
+   int get ( char*name, int i, int *value ) ;
    ```
 
-Para compilar y ejecutar:
+To compile and execute:
 ```bash
 gcc -g -Wall -o lib.o  -c lib.c
 gcc -g -Wall -o main.o -c main.c
@@ -194,10 +192,10 @@ gcc -o main main.o lib.o
 ```
 
 
-## Paso de monolítico a distribuido general
+## Transition from monolithic to general distributed
 
-Para transformar el diseño inicial monolítico a un diseño de aplicación distribuida en general vamos a utilizar el patrón de diseño llamado **proxy**.
-En la siguiente figura se puede apreciar su aplicación:
+To transform the initial monolithic design into a distributed application design, we will use the design pattern called **proxy**.
+The following figure shows its application:
 
 ```mermaid
 ---
@@ -208,97 +206,101 @@ graph LR;
     D{{"main"}}
     PXC("<br>proxy<br>client<br>&nbsp;")
     PXS("➰ <br>proxy<br>server")
-    L2("v<br>e<br>c<br>t<br>o<br>r")
+    
+L2(“v<br>e<br>c<br>t<br>o<br>r”)
     D <--->|init| PXC
     D <--->|get| PXC
     D <--->|set| PXC
-    PXC <--->|"do for me<br> init/get/set<br> and bring me back<br> the result"| PXS
+    
+PXC <--->|"do for me<br> init/get/set<br> and bring me back<br> the result"| PXS
     PXS <--->|init| L2
     PXS <--->|get| L2
     PXS <--->|set| L2
 ```
 
-Como se puede apreciar, la aplicación **main** en lugar de interactuar con vector directamente lo va a hacer con un nuevo componente llamado *proxy* en el lado del cliente que tiene la misma interfaz que **vector**. 
-Para **main** se le hace creer que está actuando con **vector** pero en su lugar lo hace con la parte cliente del *proxy*. <br>
-Este cliente *proxy* se encarga de enviar una petición remota a otro componente nuevo llamado *proxy* en el lado del servidor al que le pide que haga la petición de **main** en su nombre y le devuelva el resultado. 
-El *proxy* en el lado del servidor tiene acceso a la biblioteca **vector** original del diseño monolítico y se encarga de recibir las peticiones del *proxy* en el lado del cliente y hacer la invocación en su nombre, para enviar de vuelta el resultado de dicha invocación.
+As you can see, instead of interacting directly with vector, the **main** application will interact with a new component called *proxy* on the client side that has the same interface as **vector**.
+**main** is made to believe that it is interacting with **vector**, but instead it is interacting with the client side of the *proxy*. <br>
+This client *proxy* is responsible for sending a remote request to another new component called *proxy* on the server side, which it asks to make the **main** request on its behalf and return the result.
+The proxy on the server side has access to the original vector library from the monolithic design and is responsible for receiving requests from the proxy on the client side and making the invocation on its behalf, to send back the result of that invocation.
 
-De esta forma es posible transformar una parte de una aplicación monolítica en una parte distribuida, facilitando las pruebas dado que los componentes **main** y **vector** son los mismos de la aplicación monolítica, que ya han sido probados.
+In this way, it is possible to transform part of a monolithic application into a distributed part, facilitating testing since the **main** and **vector** components are the same as those in the monolithic application, which have already been tested.
 
-Para dicho diseño haremos los siguientes pasos:
+For this design, we will take the following steps:
 
-1. *Proxy* en el lado del cliente:
+1. Client-side proxy:
    ```c
-   int send_recv ( mensaje *msg )
+   int send_recv ( message *msg )
    {
-      c1 = “colamsg_conectar” /SERVIDOR
-      “colamsg_enviar”  c1 msg
-      “colamsg_recibir” c1 msg
-      “colamsg_desconectar”c1
-      return msg
+       c1 = "colamsg_connect" /SERVER
+       "colamsg_send"       c1 msg
+       "colamsg_receive"    c1 msg
+       "colamsg_disconnect" c1
+       return msg
    }
    
-   int init ( char *nombre, int N )
+   int init ( char *name, int N )
    {
-      petición  = (init, nombre, N)
-      respuesta = send_recv(petición)
-      return respuesta.status
+       request  = (init, name, N)
+       response = send_recv(request)
+       return response.status
    }
 
-   int set(char *nombre, int i, int valor)
+   int set(char *name, int i, int value)
    {
-      petición  = (set, nombre, i, valor)
-      respuesta = send_recv(petición)
-      return respuesta.status
+       request  = (set, name, i, value)
+       response = send_recv(request)
+       return response.status
    }
    
-   int get(char*nombre, int i, int *valor)
+   int get(char*name, int i, int *value)
    {
-      petición  = (get, nombre, i)
-      respuesta = send_recv(petición)
-      *valor = respuesta.valor
-      return respuesta.status
+       request  = (get, name, i)
+       response = send_recv(request)
+      *value = response.value
+      
+       return response.status
    }
    ```
 
-2. *Proxy* en el lado del servidor:
+2. *Proxy* on the server side:
    ```c
    int main( int argc, char *argv)
    {
-      c1 = “colamsg_crear” /SERVIDOR
-      
+      c1 = "colamsg_create" /SERVER
+   
       while(TRUE)
       {
-         “colamsg_recibir” c1 petición
-         switch( petición.operación)
+         "colamsg_receive" c1 request
+         switch( request.operation)
          {
-            case INIT: respuesta.status= _init(petición.nombre, petición.N) ;
+            case INIT: response.status= _init(request.name, request.N) ;
                        break;
-            case GET: respuesta.status= _get(petición.nombre, petición.i, &respuesta.valor) ;
-                      break;
-            case SET: respuesta.status= _set(petición.nombre, petición.i, petición.valor) ;
-                      break;
+            case GET:  response.status= _get(request.name, request.i, &response.value) ;
+                       break;
+            case SET:  response.status= _set(request.name, request.i, request.value) ;
+                       break;
          }
-         
-         “colamsg_enviar” c1 respuesta
+   
+         "colamsg_send" c1 response
       }
    }
    ```
 
 
-## Distribuido general a distribuido con colas de mensajes POSIX
+## General distributed to distributed with POSIX message queues
 
-Las colas de mensajes POSIX permiten interconectar dos procesos de forma distribuida, pero tienen unas peculiaridades que hace que haya que adaptar el diseño anterior que es un para un sistema distribuido genérico. <br>
-Las principales *peculiaridades* que afectan inicialmente al diseño son:
-* Son unidireccionales
-* Para simplificar su uso se precisa diseñar un mismo mensaje que valga para todas las operaciones
-* Usan el sistema de ficheros de la máquina donde se ejecutan los procesos (lo que no lo hace tan distribuido pero sirve de comienzo)
+POSIX message queues allow two processes to be interconnected in a distributed manner, but they have some peculiarities that require adapting the previous design, which is for a generic distributed system. <br>
+The main *peculiarities* that initially affect the design are:
+* They are unidirectional
+* To simplify their use, it is necessary to design a single message that is valid for all operations
+* They use the file system of the machine where the processes are executed (which makes it less distributed but serves as a starting point)
 
-Para dicho diseño se pueden usar los siguientes pasos:
-1. Los tipo de datos principales a utilizar son una estructura para petición (que será una fusión de todos los campos necesarios en todas las operaciones) y otra para respuesta (que será también una fusión de todas respuestas):
+The following steps can be used for this design:
+1. The main data types to be used are a structure for requests (which will be a fusion of all the fields necessary in all operations) and another for responses (which will also be a fusion of all responses):
+   
    ```c
-   // petición = op + q_name + (nombre, N) + (nombre, i, valor) + (nombre, i)
-   struct peticion
+   // request = op + q_name + (name, N) + (name, i, value) + (name, i)
+   struct request
    {
       int   op;
       char  name[MAX] ;
@@ -307,164 +309,164 @@ Para dicho diseño se pueden usar los siguientes pasos:
       char  q_name[MAX];
    } ;
    
-   // respuesta = (valor, status)
-   struct respuesta
+   // response = (value, status)
+   struct response
    {
       int  value;
       char status;
    } ;
    ```
 
-1. *Proxy* en el lado del cliente (en el que en la petición le envía el nombre de la cola que usará el cliente para la respuesta):
+1. *Proxy* on the client side (in which the request sends the name of the queue that the client will use for the response):
    ```c
-   // Función *get* como ejemplo, el resto serían similares
-   int get ( char *nombre, int i, int *valor )
+   // *get* function as an example, the rest would be similar
+   int get ( char *name, int i, int *value )
    {
-      struct petición p;
-      struct respuesta r;
-      unsigned int prio= 0;  // Colas POSIX
-      
-      // preparar mensaje
-      p.op = 2;  // el valor 2 identifica "get" en el ejemplo
-      p.i  = i;  // el valor i es la clave
-      strcpy(p.nombre, nombre); // nombre del vector
-      sprintf(p.q_name, "%s%d", "/CLIENTE_", getpid()) ;
-
-        // inicialización colas POSIX
-        int qs = mq_open("/SERVIDOR", O_WRONLY, 0700, NULL) ;
+      struct request  p;
+      struct response r;
+      unsigned int prio = 0;  // POSIX queues
+   
+      // prepare message
+      p.op = 2;  // the value 2 identifies "get" in the example
+      p.i  = i;  // the value i is the key
+      strcpy(p.name, name); // name of the vector
+      sprintf(p.q_name, "%s%d", "/CLIENT_", getpid()) ;
+   
+        // Initialize POSIX queues
+        int qs = mq_open("/SERVER", O_WRONLY, 0700, NULL) ;
         if (qs == -1) { return-1 ; }
         int qr = mq_open(p.q_name, O_CREAT|O_RDONLY, 0700, NULL) ;
-        if (qr == -1) { mq_close(qs) ; return-1; }
+        if (qr == -1) { mq_close(qs); return-1; }
       
-        // envío de petición y recepción de respuesta con colas POSIX
-        mq_send   (qs, (char *)&(p), sizeof(structpetición),  0) ;
-        mq_receive(qr, (char *)&(r), sizeof(structrespuesta), &prio) ;
+        // sending request and receiving response with POSIX queues
+        mq_send   (qs, (char *)&(p), sizeof(structrequest),  0) ;
+        mq_receive(qr, (char *)&(r), sizeof(structresponse), &prio) ;
    
-        // finalización colas POSIX
+        // closing POSIX queues
         mq_close(qs); mq_close(qr);
         mq_unlink(qr_name);
-      
-      *valor = r.value;
-      return (int)(r.status) ;
+   
+      *value = r.value;
+      return (int)(r.status);
    }
    ```
 
-1. *Proxy* en el lado del servidor:
+1. *Proxy* on the server side:
    ```c
-   int fin_ejecutar = 0 ;
+   int end_execute = 0;
 
-   void tratar_petición ( struct petición * p ) ;
+   void handle_request ( struct request * p );
 
    int main( int argc, char *argv[] )
    {
-      struct petición p;
+      struct request p;
       unsigned int prio;
-      
-      int qs = mq_open("/SERVIDOR", O_CREAT | O_RDONLY, 0700, NULL) ;
-      if (qs == -1) { return-1 ; }
-      while (fin_ejecutar != 1)
+            
+      int qs = mq_open("/SERVER", O_CREAT | O_RDONLY, 0700, NULL);
+      if (qs == -1) { return-1; }
+      while (fin_execute != 1)
       {
-          mq_receive(qs, &p, sizeof(p), &prio) ;
-          tratar_petición(&p) ;
+          mq_receive(qs, &p, sizeof(p), &prio); 
+          handle_request(&p);
       }
    }
 
-   void tratar_petición ( struct petición * p )
+   void handle_request(struct request *p)
    {
-      struct respuesta r ;
+      struct response r;
    
-      // tratar petición...
+      // handle request...
       switch (p->op)
       {
          case 0: // INIT
-              r.status= real_init(p->name, p->value) ;
-              break ;
+              r.status = real_init (p->name, p->value);
+              break;
          case 2: // GET
-              r.status= real_get(p->name, p->i, &(r.value)) ;
-              break ;
+              r.status= real_get(p->name, p->i, &(r.value));
+              break;
          case 3: // SET
-              r.status= real_set(p->name, p->i, p->value) ;
-              break ;
+              r.status= real_set(p->name, p->i, p->value));
+              break;
       }
-
-      // enviar respuesta de vuelta al cliente
+      
+      // send response back to client
       int qr = mq_open(p->q_name, O_WRONLY, 0700, NULL) ;
-      mq_send(qr, &r, sizeof(structrespuesta), 0) ; // prio== 0
+      mq_send(qr, &r, sizeof(structresponse), 0) ; // prio== 0
       mq_close(qr);
    }
    ```
 
 
-## Ejecución concurrente en el servidor
+## Concurrent execution on the server
 
-Añadir concurrencia en el *proxy* en el lado servidor supone que por cada petición que llega hay que crear un hilo para atenderla:
-
+Adding concurrency to the proxy on the server side means that for each request that arrives, a thread must be created to handle it:
+   
    ```c
-    int main ( int argc, char *argv[] )
-    {
-        struct petición p;
-        unsigned int prio; // y algunas variables más…
+   int main ( int argc, char *argv[] )
+   {
+        struct request p;
+        unsigned int prio; // and some more variables...
 
-        ///// Inicializar atributos para hilos a crear
+        ///// Initialize attributes for threads to be created
         pthread_attr_init(&attr) ;
         pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED) ;  
 
-        // crear cola de servidor para leer peticiones
-        int qs= mq_open("/SERVIDOR", O_CREAT | O_RDONLY, 0700, NULL) ;
+        // create server queue to read requests
+        int qs= mq_open("/SERVER", O_CREAT | O_RDONLY, 0700, NULL) ;
         if (qs == -1) { return-1 ; }
 
         while(1)
         {
-            mq_receive(qs, &p, sizeof(struct petición), &prio) ;
+            mq_receive(qs, &p, sizeof(struct request), &prio) ;
 
-            ///// En lugar de ejecutar "tratar_petición(&p);" aquí, se crea un hilo para ello
-            pthread_create(&thid, &attr, tratar_petición, (void*)&p) ;
-         
-            ///// Importante: parar el main hasta terminar 2 tareas en tratar_petición: hilo creado y copia de parámetro "&p"
-            <código de espera a que se haya creado el hilo y copiado &p>
+            ///// Instead of executing “treat_request(&p);” here, a thread is created for this purpose
+            pthread_create(&thid, &attr, process_request, (void*)&p);
+
+            ///// Important: pause main until two tasks in process_request are completed: thread created and parameter "&p" copied
+            <code to wait until the thread has been created and &p copied>
         }
    }
    ```
 
-La función **tratar_petición** se modifica para ser el código del hilo:
+The **treat_request** function is modified to be the thread code:
 
    ```c
    pthread_mutex_t mutex_2 = PTHREAD_MUTEX_INITIALIZER; ///// API mutex
 
-   void tratar_petición ( struct petición * p )
+   void treat_request ( struct request * p )
    {
-      struct respuesta r ;
-      
-      // Importante: copiar parámetro "*p" y despertar al hilo main
-      <código de sincronización para "p_local= *p" y señalizar que copiado>  
+      struct response r ;
+            
+      // Important: copy parameter "*p" and wake up the main thread
+      <synchronization code for "p_local= *p" and signal that it has been copied>
 
-      pthread_mutex_lock(&mutex_2) ; ///// API lock
+      pthread_mutex_lock(&mutex_2); ///// API lock
       switch (p->op)
       {
          case 0: // INIT
-              r.status= real_init(p->name, p->value) ;
-              break ;
+              r.status= real_init(p->name, p->value);
+              break;
          case 2: // GET
-              r.status= real_get(p->name, p->i, &(r.value)) ;
-              break ;
+              r.status= real_get(p->name, p->i, &(r.value));
+              break;
          case 3: // SET
-              r.status= real_set(p->name, p->i, p->value) ;
-              break ;
+              r.status= real_set(p->name, p->i, p->value);
+              break; 
       }
-      pthread_mutex_unlock(&mutex_2) ; ///// API unlock
-      
-      int qr= mq_open(p->q_name, O_WRONLY, 0700, NULL) ;
-      mq_send(qr, &r, sizeof(structrespuesta), 0) ; // prio== 0
+      pthread_mutex_unlock(&mutex_2); ///// API unlock
+
+      int qr= mq_open(p->q_name, O_WRONLY, 0700, NULL);
+      mq_send(qr, &r, sizeof(structresponse), 0); // prio== 0
       mq_close(qr);
-      
-      pthread_exit(NULL) ;
+
+      pthread_exit(NULL);
    }
    ```
 
-La siguiente tabla detalla dichos puntos:
+The following table details these points:
 
-| <código de espera a que se haya <br>creado el hilo y copiado &p>  | Código de sincronización para <br>"p_local= *p" y señalizar que copiado |
-|-------------------------------------------------------------------|-----------------------------------------------------------------------|
+| <code to wait for the thread to be created and copied &p>           | Synchronization code for <br>"p_local= *p" and signal that copied   |
+|---------------------------------------------------------------------|---------------------------------------------------------------------|
 | pthread_mutex_lock(&sync_mutex);                                    |                                                                     |
 | while (sync_copied == FALSE) {                                      | pthread_mutex_lock(&sync_mutex);                                    |
 | &nbsp;&nbsp;&nbsp;&nbsp;pthread_cond_wait(&sync_cond, &sync_mutex); | p_local = *p;                                                       |
@@ -474,75 +476,75 @@ La siguiente tabla detalla dichos puntos:
 
 <br>
 
-Con dichos cambios, la función **main** quedará:
+With these changes, the **main** function will be:
 
    ```c
-    int main ( int argc, char *argv[] )
-    {
-        struct petición p;
-        unsigned int prio; // y algunas variables más…
-    
+   int main ( int argc, char *argv[] )
+   {
+        struct request p;
+        unsigned int prio; // and some more variables...
+
         pthread_attr_init(&attr) ;
         pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED) ;  
-        int qs= mq_open("/SERVIDOR", O_CREAT | O_RDONLY, 0700, NULL) ;
+        int qs= mq_open("/SERVER", O_CREAT | O_RDONLY, 0700, NULL) ;
         if (qs == -1) { return-1 ; }
 
         while (1)
         {
-           mq_receive(qs, &p, sizeof(struct petición), &prio) ;
+             mq_receive(qs, &p, sizeof(struct request), &prio);
 
-           // En lugar de ejecutar "tratar_petición(&p);" aquí, se crea un hilo para ello
-           pthread_create(&thid, &attr, tratar_petición, (void*)&p) ;
-         
-            ///// <código de espera a que se haya creado el hilo y copiado &p>
-            pthread_mutex_lock(&sync_mutex) ;
-            while (sync_copied == FALSE) {
-               pthread_cond_wait(&sync_cond, &sync_mutex) ;
-            }
-            sync_copied= FALSE ;
-            pthread_mutex_unlock(&sync_mutex) ;
-            ///// </fin código de espera>
+             // Instead of executing "process_request(&p);" here, a thread is created for this purpose
+             pthread_create(&thid, &attr, process_request, (void*)&p);
+
+             ///// <code to wait until the thread has been created and &p copied>
+             pthread_mutex_lock(&sync_mutex);
+             while (sync_copied == FALSE) {
+                    pthread_cond_wait(&sync_cond, &sync_mutex) ;
+             }
+             sync_copied= FALSE ;
+             pthread_mutex_unlock(&sync_mutex) ;
+             ///// </end wait code>
         }
    }
    ```
 
-La función **tratar_petición** se modifica para ser el código del hilo:
+The **treat_request** function is modified to be the thread code:
 
    ```c
-   pthread_mutex_t mutex_2 = PTHREAD_MUTEX_INITIALIZER; ///// API mutex
-
-   void tratar_petición ( struct petición * p )
+   pthread_mutex_t mutex_2 = PTHREAD_MUTEX_INITIALIZER; ///// mutex API
+   
+   void handle_request ( struct request * p )
    {
-      struct respuesta r ;
-      
-           ///// <código de sincronización para "p_local= *p" y señalizar que copiado>  
+      struct response r ;
+
+           ///// <synchronization code for "p_local= *p" and signal that copied>
            pthread_mutex_lock(&sync_mutex) ;
            p_local= *p ;
-           sync_copied= TRUE ;
-           pthread_cond_signal(&sync_cond) ;
-           pthread_mutex_unlock(&sync_mutex) ;    
-           ///// </fin código de sincronización>
+           sync_copied = TRUE;
+           pthread_cond_signal(&sync_cond);
+           pthread_mutex_unlock(&sync_mutex);    
+           ///// </end synchronization code>
 
-      pthread_mutex_lock(&mutex_2) ; ///// API lock
+      pthread_mutex_lock(&mutex_2); ///// API lock
       switch (p->op)
       {
          case 0: // INIT
-              r.status= real_init(p->name, p->value) ;
-              break ;
+              r.status= real_init(p->name, p->value);
+              break;
          case 2: // GET
-              r.status= real_get(p->name, p->i, &(r.value)) ;
+              r.status= real_get(p->name, p->i, &(r.value) ;
               break ;
          case 3: // SET
               r.status= real_set(p->name, p->i, p->value) ;
-              break ;
+              break; 
       }
-      pthread_mutex_unlock(&mutex_2) ; ///// API unlock
-      
-      int qr= mq_open(p->q_name, O_WRONLY, 0700, NULL) ;
-      mq_send(qr, &r, sizeof(structrespuesta), 0) ; // prio== 0
+      pthread_mutex_unlock(&mutex_2); ///// API unlock
+
+      int qr= mq_open(p->q_name, O_WRONLY, 0700, NULL);
+      mq_send(qr, &r, sizeof(structresponse), 0); // prio== 0
       mq_close(qr);
-      
-      pthread_exit(NULL) ;
+
+      pthread_exit(NULL);
    }
    ```
 
