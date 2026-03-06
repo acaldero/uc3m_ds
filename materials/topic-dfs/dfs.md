@@ -1,203 +1,201 @@
 
-# Sistemas de ficheros distribuidos
+# Distributed file systems
 + **Felix García Carballeira and Alejandro Calderón Mateos** @ arcos.inf.uc3m.es
 + [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
 
-## Contenidos
+## Contents
 
-* Introducción a sistemas de ficheros  distribuidos:
-  * [Sistema de ficheros](#sistema-de-ficheros)
-  * [Funcionamiento básico de un sistema de ficheros](#funcionamiento-básico-de-un-sistema-de-ficheros)
-  * [Arquitectura básica de un sistema de ficheros](#arquitectura-básica-de-un-sistema-de-ficheros)
-  * [Posibles opciones para almacenamiento remoto](#posibles-opciones-para-almacenamiento-remoto)
-* Sistemas de almacenamiento distribuidos:
-  * [Sistema de ficheros distribuido](#sistema-de-ficheros-distribuido)
-  * [Sistema de ficheros paralelo](#sistema-de-ficheros-paralelo)
+* Introduction to distributed file systems:
+  * [File system](#file-system)
+  * [Basic operation of a file system](#basic-operation-of-a-file-system)
+  * [Basic architecture of a file system](#basic-architecture-of-a-file-system)
+  * [Possible options for remote storage](#possible-options-for-remote-storage)
+* Distributed storage systems:
+  * [Distributed file system](#distributed-file-system)
+  * [Parallel file system](#parallel-file-system)
 
 
 
-## Sistema de ficheros
+## File system
 
-* En una máquina Von Neumann, tanto los datos como el código de un programa ha de estar cargado en memoria principal para ejecutar:
+* In a Von Neumann machine, both the data and the program code must be loaded into main memory in order to execute:
   ```mermaid
   flowchart TD
-  A[CPU] <--> B(Memoria principal)
+  A[CPU] <--> B(Main memory)
   ```
 
-* A día de hoy hay dos tecnologías principales para el almacenamiento:
+* Today, there are two main technologies for storage:
   ```mermaid
   flowchart TD
-  A[CPU] <--> B(Memoria RAM)
-  B[Memoria RAM] <--> C(SSD, disco duro)
+  A[CPU] <--> B(RAM memory)
+  B[RAM memory] <--> C(SSD, hard drive)
   ```
-  * Memoria RAM
-    * **Volátil** (se pierde contenido si falta electricidad)
-    * **Menor** capacidad (orden de Gigabyte)
-    * Direccionamiento a nivel de **byte**
-  * Disco
-    * **NO Volátil** (permanente)
-    * **Mayor** capacidad (orden de Terabytes)
-    * Direccionamiento a nivel de **bloque**
+  * RAM memory
+    * **Volatile** (content is lost if power is lost)
+    * **Lower** capacity (gigabyte range)
+    * **Byte** level addressing
+  * Disk
+    * **Non-volatile** (permanent)
+    * **Higher** capacity (terabyte range)
+    * **Block** level addressing
 
-* **Problema**:
-  * Que cada programador/a tengan que ocuparse de tratar con los bloques de disco para buscar en qué bloque están los datos que precisa su programa, recuperar o guardar datos de un bloque, etc.
-* **Objetivo**:
-  * En lugar de trabajar con bloques trabajar con una abstracción de datos intermedia de alto nivel que internamente se traduzca a bloques de manera que:
-    * Sea independiente del dispositivo físico.
-    * Ofrezca una visión lógica unificada.
-    * Sea lo suficientemente simple pero completa.
+* **Problem**:
+  * Each programmer has to deal with disk blocks to find the block containing the data their program needs, retrieve or save data from a block, etc.
+* **Objective**:
+  * Instead of working with blocks, work with a high-level intermediate data abstraction that is internally translated into blocks so that:
+    * It is independent of the physical device.
+    * It offers a unified logical view.
+    * It is sufficiently simple but complete.
+```mermaid
+flowchart TD
+A(Process)---|"(1) Data abstraction"|B("(2) Abstraction manager")
+B --- C("Disk<br>(b1, b2, ...)")
+```
+
+* The operating system integrates a <u>basic and generic abstraction</u> (**files and directories**) and there is a component in the operating system that is the <u>manager of that abstraction</u> (**file system**).
   ```mermaid
   flowchart TD
-  A(Proceso)---|"(1) Abstracción de datos"|B("(2) Gestor de abstracción")
-  B --- C("Disco<br>(b1, b2, ...)")
+  A(Process)---|"files and directories"|B("file system")
+  B --- C("Disk<br>(b1, b2, ...)")
   ```
-
-* El sistema operativo integra una <u>abstracción básica y genérica</u> (**ficheros y directorios**) y hay un componente en el sistema operativo que es el <u>gestor de dicha abstracción</u> (**sistema de ficheros**).
+  * Normally, the **files and directories** abstraction provided by the operating system is sufficient for normal data access
+  * The operating system itself uses this **files and directories** abstraction to manage its components, which helps to demonstrate its potential.
+* Although there are other abstractions, such as a database where <u>the abstraction</u> **is based on the use of tables** and there is a component that is the <u>manager of that abstraction</u> **which is the database manager**.
   ```mermaid
   flowchart TD
-  A(Proceso)---|"ficheros y directorios"|B("sistema de ficheros")
-  B --- C("Disco<br>(b1, b2, ...)")
+  A(Process)---|"database"|B("DB manager")
+  B --- C("Disk<br>(b1, b2, ...)")
   ```
-  * Normalmente con la abstracción de **ficheros y directorios** que tiene el sistema operativo de serie es suficiente para el acceso habitual a los datos
-  * El propio sistema operativo usa dicha abstracción de **ficheros y directorios** para la gestión de sus componentes, lo que ayuda a demostrar su potencial.
-* Aunque hay otras abstracciones, como una base de datos donde <u>la abstracción</u> **se basa en el uso de tablas** y hay un componente que es el <u>gestor de dicha abstracción</u> **que es el gestor de base de datos**.
-  ```mermaid
-  flowchart TD
-  A(Proceso)---|"base de datos"|B("gestor BBDD")
-  B --- C("Disco<br>(b1, b2, ...)")
-  ```
-* A día de hoy se trabajan con distintas abstracciones a la vez:
-   * Se pueden combinar el uso de abstracciones, por ejemplo en un gestor de canciones puede usar una base de datos para la gestión de autores, títulos, etc. y guardar en la base de dato el nombre del fichero donde está la propia canción.
-   * El sistema operativo habitualmente utiliza un sistema de ficheros específico pero ofrece varios sistemas de ficheros adicionales que es posible usar.
-* La *Storage Networking Industry Association* (SNIA) propone el [*The SNIA Shared Storage Model*](https://www.snia.org/education/storage_networking_primer/shared_storage_model):<br>
-     ![SNIA storage model v2](./dfs/snia_model_v2.gif)<br>
-   * Donde una aplicación puede usar un gestor de base de datos, o bien un sistema de ficheros (o bien ambos, por ejemplo un reproductor de canciones con una base de datos con la información de las canciones del usuario y las propias canciones guardadas en archivos).
-   * Sería posible sistemas gestores de base de datos que usan ficheros por debajo y también sería posible sistemas de ficheros que usan bases de datos por debajo.
-   * Este subsistema de ficheros/registros utiliza por debajo un almacenamiento basado en bloques, donde los bloques pueden ser resultado de una agregación en tres niveles: dispositivo, SAN o *host*.
+* Today, different abstractions are worked with at the same time:
+  * The use of abstractions can be combined. For example, in a song manager, you can use a database to manage authors, titles, etc., and save the name of the file where the song itself is located in the database.
+  * The operating system usually uses a specific file system but offers several additional file systems that can be used.
+* The Storage Networking Industry Association (SNIA) proposes [The SNIA Shared Storage Model](https://www.snia.org/education/storage_networking_primer/shared_storage_model):<br>
+![SNIA storage model v2](./dfs/snia_model_v2.gif)<br>
+   * Where an application can use a database manager or a file system (or both, for example, a music player with a database containing information about the user's songs and the songs themselves stored in files).
+   * Database management systems that use files underneath would be possible, and file systems that use databases underneath would also be possible.
+   * This file/record subsystem uses block-based storage underneath, where the blocks can be the result of aggregation at three levels: device, SAN, or *host*.
 
-#### Para más información:
-  * Puede repasar de sistemas operativos el tema ["sistema de ficheros (1/3)"](https://acaldero.github.io/uc3m_so/transparencias/clase_w12-sf-ficheros.pdf#page9)
+#### For more information:
+* You can review the topic [“file system (1/3)”](https://acaldero.github.io/uc3m_so/transparencias/clase_w12-sf-ficheros.pdf#page9) in operating systems.
 
 
-## Funcionamiento básico de un sistema de ficheros
+## Basic operation of a file system
 
-* **Un sistema de ficheros es un software de sistema que establece una correspondencia lógica entre los ficheros y directorios y los dispositivos de almacenamiento**.
+* **A file system is system software that establishes a logical correspondence between files and directories and storage devices**.
 
-* **Funciones principales**: organización, almacenamiento, recuperación, gestión de nombres, coutilización y protección de los ficheros.
-  * Relativo al almacenamiento y recuperación, ofrece un mecanismo de abstracción que oculta todos los detalles relacionados con el almacenamiento y distribución de la información en los dispositivos, así como el funcionamiento de los mismos.
-  * Relativo a la gestión de nombres, ofrece una traducción transparente entre el nombre de fichero usado por los programas basados en cadenas de caracteres (representación más cómoda para personas) a la representación numérica interna basada en el identificador de i-nodo donde internamente están los detalles del fichero.
+* **Main functions**: organization, storage, retrieval, name management, sharing, and protection of files.
+  * With regard to storage and retrieval, it provides an abstraction mechanism that hides all details related to the storage and distribution of information on devices, as well as their operation.
+  * Regarding name management, it offers a transparent translation between the file name used by string-based programs (a more convenient representation for humans) and the internal numerical representation based on the inode identifier where the file details are stored internally.
 
-* **Organización básica**:
-   * Un **dispositivo** permite almacenar bloques de datos.
-     * Puede ejecutar  ```lsblk``` para ver todos los dispositivos de bloque.
-   * En dicho dispositivo se pueden tener una o varias **particiones** o **volúmenes**. Las particiones o volúmenes permiten dividir de forma lógica un dispositivo físico en espacios de almacenamientos con los que trabajar.
-     * Puede ejecutar  ```cat /proc/partitions``` para ver todas las particiones reconocidas.
-   * Por cada **partición** o **volumen** se tiene formateado con un **sistema de ficheros en disco**, que son las estructuras de datos que precisa en disco para localizar la información.
-   * Cada **sistema de ficheros en disco** permite trabajar con **ficheros** y **directorios**.
-     * Un fichero es una abstracción en la que el contenido de un archivo se trabaja como una secuencia de bytes.
-     * Un directorio es una colección de ficheros agrupados por algún criterio de el/la usuario/a.
-       * Importante: en UNIX/Linux un directorio permite asociar el número de i-nodo al nombre de un fichero.
-       * Si ejecuta ```ls -i1``` se puede ver tanto los nombres como los número de i-nodos del directorio actual.
+* **Basic organization**:
+ * A **device** allows blocks of data to be stored.
+   * You can run ```lsblk``` to see all block devices.
+ * Such a device can have one or more **partitions** or **volumes**. Partitions or volumes allow a physical device to be logically divided into storage spaces to work with.
+   * You can run ```cat /proc/partitions``` to see all recognized partitions.
+ * Each **partition** or **volume** is formatted with a **disk file system**, which are the data structures required on disk to locate information.
+ * Each **disk file system** allows you to work with **files** and **directories**.
+     * A file is an abstraction in which the contents of a file are treated as a sequence of bytes.
+     * A directory is a collection of files grouped together according to some criterion chosen by the user.
+       * Important: in UNIX/Linux, a directory allows the inode number to be associated with a file name.
+       * If you run ls -i1, you can see both the names and the inode numbers of the current directory.
 
-* Operaciones básicas:
-  * **Crear el sistema de ficheros** (```mkfs```): crea en una partición o volumen un sistema de ficheros vacío. Reserva parte del almacenamiento para guardar las estructuras de datos que posteriormente permiten la gestión de la información en disco (metadatos en disco).
-  * **Montar** (```mount```): añade el árbol de directorio contenido en un sistema de ficheros a un directorio de un árbol ya montado.
-  * **Desmontar** (```unmount```): quita el árbol de directorio de un directorio de montaje, volviendo a poder acceder al contenido inicial de ese directorio.
+* Basic operations:
+  * Create the file system (mkfs): creates an empty file system on a partition or volume. Reserves part of the storage to save the data structures that later allow the management of information on disk (metadata on disk).
+  * **Mount** (```mount```): adds the directory tree contained in a file system to a directory in an already mounted tree.
+  * **Unmount** (```unmount```): removes the directory tree from a mount directory, allowing access to the original contents of that directory again.
 
 
-## Arquitectura básica de un sistema de ficheros
+## Basic architecture of a file system
 
-* Repasando la arquitectura general de un sistema de ficheros, tenemos:
-  <html>
-  <table>
-  <tr>
-  <td>
-    <img src="/materials/topic-dfs/dfs/dfs_intro_1.svg">
-  </td>
-  <td>
+* Reviewing the general architecture of a file system, we have:
+<html>
+<table>
+<tr>
+<td>
+<img src="/materials/topic-dfs/dfs/dfs_intro_1.svg">
+</td>
+<td>
+<ul>
+<li><b>Virtual file/archive server</b>:
+<ul>
+<li>Provides an I/O call interface.
+<li>Independent of any particular file system.
+</ul>
+<li><b>File organization module</b>:
+<ul>
+<li>Transforms logical requests into physical ones.
+<li>Different for each particular file system.
+</ul>
+<li><b>Block server</b>:
+<ul>
+<li>Manages requests for block operations on devices.
+<li>Maintains a cache of blocks or pages.
+</ul>
+<li><b>Device handler:
+<ul>
+<li>Transforms block requests into device requests.
+</ul> 
+</ul>
+</td>
+</tr>
+</table>
+</html>
 
-  <ul>
-  <li><b>Servidor de ficheros/archivos virtual</b>:
-  <ul>
-  <li>Proporciona interfaz de llamadas de E/S.
-  <li>Independiente de sistema de ficheros particular.
-  </ul>
-  <li><b>Módulo de organización de archivos</b>:
-  <ul>
-  <li>Transforma peticiones lógicas en físicas.
-  <li>Distinto para cada sistema de ficheros particular.
-  </ul>
-  <li><b>Servidor de bloques</b>:
-  <ul>
-  <li>Gestiona las peticiones de operaciones de bloques sobre dispositivos.
-  <li>Mantiene una caché de bloques o páginas.
-  </ul>
-  <li><b>Manejador de dispositivo</b>:
-  <ul>
-  <li>Transforma peticiones de bloques en peticiones de dispositivo.
-  </ul> 
-  
-  </ul>
-  </td>
-  </tr>
-  </table>
-  </html>
-
-* En dicha arquitectura general, el software está organizado por capas, de forma que las capas superiores usan la funcionalidad de las capas inferiores para implementar su funcionalidad.<br/>
-  Las principales capas de software son: <br/>
-  ![Arquitectura básica del software en un sistema de ficheros Unix](./dfs/dfs_intro_2.svg)
-  * La caché de bloques tiene las siguientes operaciones habitualmente:
-    * **getblk**: busca/reserva en caché un bloque (a partir de un v-nodo, desplazamiento y tamaño dado).
-    * **brelse**: libera un bloque y lo pasa a la lista de libres.
-    * **bwrite**: escribe un bloque de la caché a disco.
-    * **bread**: lee un bloque de disco a caché.
-    * **breada**: lee un bloque (y el siguiente) de disco a caché.
-  * Los algoritmos de bajo nivel son:
-    * **namei**: convierte una ruta al i-nodo asociado.
-    * **iget**: devuelve un i-nodo de la tabla de i-nodos y si no está lo lee de memoria secundaria, lo añade a la tabla de i-nodos y lo devuelve.
-    * **iput**: libera un i-nodo de la tabla de i-nodos, y si es necesario lo actualiza en memoria secundaria.
-    * **ialloc**: asignar un i-nodo a un fichero.
-    * **ifree**: libera un i-nodo previamente asignado a un fichero.
-    * **bmap**: calcula el bloque de disco asociado a un desplazamiento del fichero. Traduce direcciones lógicas (*offset* de fichero) a físicas (bloque de disco).
-    * **alloc**: asigna un bloque a un fichero.
-    * **free**: libera un bloque previamente asignado a un fichero.
-  * Las llamadas al sistema de archivos son las habituales en el estándar POSIX:
+* In this general architecture, the software is organized in layers, so that the upper layers use the functionality of the lower layers to implement their functionality.
+  The main software layers are:
+  ![Basic software architecture in a Unix file system](./dfs/dfs_intro_2.svg)
+  * The block cache typically has the following operations:
+    * **getblk**: searches for/reserves a block in the cache (based on a given v-node, offset, and size).
+    * **brelse**: frees a block and passes it to the free list.
+    * **bwrite**: writes a block from the cache to disk.
+    * **bread**: reads a block from disk to cache.
+    * **breada**: reads a block (and the next one) from disk to cache.
+* The low-level algorithms are:
+    * **namei**: converts a path to the associated inode.
+    * **iget**: returns an inode from the inode table and, if it is not there, reads it from secondary memory, adds it to the inode table, and returns it.
+    * **iput**: frees an inode from the inode table and, if necessary, updates it in secondary memory.
+    * **ialloc**: assigns an inode to a file.
+    * **ifree**: frees an inode previously assigned to a file.
+    * **bmap**: calculates the disk block associated with a file offset. Translates logical addresses (file *offset*) to physical addresses (disk block).
+    * **alloc**: assigns a block to a file.
+    * **free**: frees a block previously assigned to a file.
+* File system calls are the usual ones in the POSIX standard:
     * **open**
     * **write**
     * **read**
     * **close**
     * Etc.
 
-#### Para más información:
-  * Puede repasar de sistemas operativos el tema ["sistema de ficheros (3/3)"](https://acaldero.github.io/uc3m_so/transparencias/clase_w12-sf-ficheros.pdf#page18)
-  * Dispone de un ejemplo de un mínimo sistema de ficheros de ejemplo en [nanofs](https://github.com/acaldero/nanofs)
+#### For more information:
+  * You can review the topic [“file system (3/3)”](https://acaldero.github.io/uc3m_so/transparencias/clase_w12-sf-ficheros.pdf#page18) in operating systems.
+  * An example of a minimal file system is available at [nanofs](https://github.com/acaldero/nanofs).
 
 
-## Posibles opciones para almacenamiento remoto
+## Possible options for remote storage
 
-* A la hora de hacer remoto el acceso a los datos en un sistema de ficheros, tenemos varios puntos en la arquitectura donde podemos aplicar un patrón de software **proxy** para pedir la funcionalidad a una máquina remota.
-* Entre las principales opciones (puede haber más opciones o mezcla de opciones) se tiene:
+* When making data access in a file system remote, there are several points in the architecture where we can apply a **proxy** software pattern to request functionality from a remote machine.
+* Among the main options (there may be more options or a combination of options) are:
 
 <html>
 <table>
 <tr>
   <td>
-    Opción
-  </td>
+    Option
+</td>
   <td>
-    Figura
-  </td>
+    Figure
+</td>
   <td>
-    Ejemplo:
-  </td>
+    Example:
+</td>
 </tr>
 <tr>
   <td>
-    Acceso remoto a dispositivos de bloques que están en otras máquinas
+    Remote access to block devices on other machines
   </td>
   <td>
-     <img alt="Acceso a discos remotos" src="./dfs/dfs_remoto_1.svg">
+     <img alt="Access to remote disks" src="./dfs/dfs_remoto_1.svg">
   </td>
   <td>
      <a href="https://en.wikipedia.org/wiki/Distributed_Replicated_Block_Device">DRBD</a>
@@ -205,10 +203,10 @@
 </tr>
 <tr>
   <td>
-    Acceso remoto a los servicios de sistema de ficheros del sistema operativo en otra máquina
+    Remote access to operating system file system services on another machine
   </td>
   <td>
-    <img alt="Acceso a discos remotos" src="./dfs/dfs_remoto_2.svg">
+     <img alt="Access to remote disks" src="./dfs/dfs_remoto_2.svg">
   </td>
   <td>
     <a href="https://es.wikipedia.org/wiki/Network_File_System">NFS</a>
@@ -216,10 +214,10 @@
 </tr>
 <tr>
   <td>
-    Acceso remoto a servicio de directorio (i-nodos), a servicio de bloques y servicio de coherencia de caché
+    Remote access to directory service (i-nodes), block service, and cache coherence service
   </td>
   <td>
-    <img alt="Acceso bloques, inodos y caché remotos" src="./dfs/dfs_remoto_4.svg">
+    <img alt="Remote block, inode, and cache access" src="./dfs/dfs_remoto_4.svg">
   </td>
   <td>
     <a href="https://www.researchgate.net/publication/4658185_The_Sprite_Network_Operating_System">Sprite</a>
@@ -229,283 +227,284 @@
 </html>
 
 
+## Distributed File System
 
-## Sistema de ficheros distribuido
+* In very general terms, a distributed file system (DFS) is a *file system* that *allows access to files from multiple machines* through an interconnection network, *enabling multiple users* from multiple machines to *share* files (and therefore storage resources).
 
-* De forma muy general, un sistema de ficheros distribuidos (DFS) es un *sistema de ficheros* que *permite el acceso a ficheros de múltiples máquinas* a través de una red de interconexión *haciendo posible a múltiples usuarios* de múltiples máquinas *compartir* ficheros (y por tanto, recursos de almacenamiento).
+* The requirements of a distributed file system are:
+  * Transparency:
+    * Same operations for local and remote access
+    * Single image of the file system
+  * Efficiency.
+    * An SFD has additional overheads: communication network, protocols, possible need to make more copies, etc.
+ * Fault tolerance:
+    * Replication, degraded operation, etc.
+* Ease of growth (scalability)
+    * Eliminate bottlenecks
+* Consistency
+* Concurrent updates
+* Security
 
-* Los requisitos de un sistema de ficheros distribuido son:
-   * Transparencia:
-      * Mismas operaciones para acceso locales y remotos
-      * Imagen única del sistema de ficheros
-   * Eficiencia.
-      * Un SFD tiene sobrecargas adicionales: red de comunicación, protocolos, posible necesidad de realizar más copias, etc.
-   * Tolerancia a fallos:
-      * Replicación, funcionamiento degradado, etc.
-   * Facilidad de crecimiento (escalabilidad)
-      * Eliminar los cuellos de botella
-   * Consistencia
-   * Actualizaciones concurrentes
-   * Seguridad
+* A distributed file system seeks to make its behavior similar to a local file system for client programs, offering “transparency” in a number of aspects:
+   * **Access transparency**: client programs are unaware that the files are distributed across other machines; they work with the files as if they were local.
+   * **Location transparency**: client programs use directory and file names that do not include the explicit location of those files in the distributed system.
+   * * *Heterogeneity**: client programs and distributed file servers can run on different types of hardware and operating systems.
+   * **Concurrency transparency**: if several client programs access the same file in the distributed file system, the modifications must be visible in a consistent manner.
+   * **Fault transparency**: any client program for a distributed file should be able to continue working even in the presence of network or server failures.
+     * Stateful servers: when a file is opened, the server stores the work session information and returns a unique identifier for that work session to the client for subsequent operations.
+       * V: Shorter operations and opportunities for optimization on the server.
+       * I: The server state must be saved so that it can be recovered in case of failure.
+     * Stateless server: Each operation is self-contained (file name, current working position, etc. is included in each operation).
+       * V: Easier recovery from failures as the server does not retain state.
+       * I: Although open and close are not necessary, the rest of the operations have more fields.
+ * **Replication transparency**: clients do not have to worry about replication on different servers that may be performed by the distributed file system to improve fault tolerance and scalability.
 
-* Un sistema de ficheros distribuido busca que para los programas clientes su comportamiento sea similar a un sistema de ficheros local, ofreciendo "transparencia" en una serie de aspectos:
-   * **Transparencia de acceso**: los programas cliente no conocen que los ficheros están distribuidos en otras máquinas, trabaja con los ficheros como si fueran locales.
-   * **Transparencia de localización**: los programas cliente utilizan nombres de directorios y ficheros que no incluyen la localización explícita de dichos ficheros en el sistema distribuido.
-   * **Heterogeneidad**: los programas cliente y los servidores de ficheros distribuidos pueden ejecutarse en diferentes tipos de hardware y sistemas operativos.
-   * **Transparencia de concurrencia**: si varios programas cliente acceden a un mismo fichero del sistema de ficheros distribuido, las modificaciones se han de ver de alguna forma coherente.
-   * **Transparencia de fallo**: cualquier programa cliente de un fichero distribuido debería de poder trabajar aún en presencia de fallos en la red o en el servidor.
-     * Servidores con estado: cuando se abre un archivo el servidor almacena la información de la sesión de trabajo y devuelve al cliente un identificador único de dicha sesión de trabajo para posteriores operaciones.
-       * V: operaciones más cortas y oportunidades de optimización en el servidor.
-       * I: Es preciso guardar el estado del servidor para en caso de fallo poder recuperarlo.
-     * Servidor sin estado: cada operación es autocontenida (nombre del fichero, posición actual de trabajo, etc. va en cada operación).
-       * V: recuperación ante fallos más sencilla al no conservar estado el servidor.
-       * I: Aunque no son necesarios el open y close, el resto de operaciones tienen más campos.
-   * **Transparencia de replicación**: los clientes no deben de preocuparse por la replicación en distintos servidores que pueda realizarse por parte del sistema de ficheros distribuidos para mejorar la tolerancia a fallos y escalabilidad.
-
-* Habitualmente las capas software usadas se basan en el uso de un patrón proxy a nivel de sistema de ficheros:<br>
+* Typically, the software layers used are based on the use of a proxy pattern at the file system level:<br>
 <html>
 <table>
 <tr>
   <td>
-    Servidor a nivel de usuario
-  </td>
+    User-level server
+</td>
   <td>
-    Servidor integrado en el Kernel
-  </td>
+    Kernel-integrated server
+</td>
 </tr>
 <tr>
   <td>
-     <img alt="Acceso a discos remotos" src="./dfs/dfs_remoto_2.svg">
+     <img alt="Access to remote disks" src="./dfs/dfs_remoto_2.svg">
   </td>
   <td>
-     <img alt="Acceso a discos remotos" src="./dfs/dfs_remoto_3.svg">
+     <img alt="Access to remote disks" src="./dfs/dfs_remoto_3.svg">
   </td>
 </tr>
 </table>
 </html>
 
-* Pero también se puede aplicar el patrón proxy a los tres elementos de la capa inferior de software:<br>
-     * Servicio de directorio (para traducir de nombre lógico a identificador único de i-nodo)
-     * Servicio de bloque o *chunck* (para pedir los bloques del fichero)
-     * Servicio de coherencia de caché (para mantener la coherencia de las caché en los clientes y en los servidores)
+* But the proxy pattern can also be applied to the three elements of the lower software layer:<br>
+  * Directory service (to translate logical names into unique inode identifiers)
+  * Block or *chunk* service (to request file blocks)
+  * Cache consistency service (to maintain cache consistency on clients and servers)
+  
 <html>
 <table>
 <tr>
   <td>
-  <img alt="Acceso bloques, inodos y caché remotos" src="./dfs/dfs_remoto_4.svg">
+  <img alt="Remote block, inode, and cache access" src="./dfs/dfs_remoto_4.svg">
   </td>
 </tr>
 </table>
 </html>
 
 
-### Servicio de directorio
+### Directory service
 
-* Servicio de directorio: se encarga de la traducción de nombres de usuario a Identificadores de ficheros únicos (UFID)
-   * Ej.: En UNIX/Linux de nombre de fichero a identificador de i-nodo
-   * Los UFID permiten obtener los atributos de los ficheros (metadatos)
-   * Directorio: relaciona de forma única nombres de fichero con UFID
-* Dos opciones:
-   * Los directorios son objetos independientes gestionados por un servidor de directorios (SD)
-   * Los directorios son ficheros especiales -> se tiene servidor de ficheros y de directorios combinados
-* Operaciones básicas de un servicio de directorios:
+* Directory service: responsible for translating user names to Unique File Identifiers (UFIDs)
+  * E.g.: In UNIX/Linux, from file name to inode identifier
+  * UFIDs allow file attributes (metadata) to be obtained
+  * Directory: uniquely links file names to UFIDs
+* Two options:
+  * Directories are independent objects managed by a directory server (DS)
+  * Directories are special files -> combined file and directory server
+* Basic operations of a directory service:
   <html>
   <table>
   <tr>
   <td>Lookup(dir, name) -> FileId</td>
-  <td>Busca un nombre en un directorio</td>
+  <td>Searches for a name in a directory</td>
   </tr>
   <tr>
   <td>AddName(dir, name, FileId)</td>
-  <td>Añade un nombre (name, FileId) a un directorio</td>
+  <td>Adds a name (name, FileId) to a directory</td>
   </tr>
   <tr>
   <td>RemoveName(dir, name)</td>
-  <td>Elimina una nombre de un directorio</td>
+  <td>Removes a name from a directory</td>
   </tr>
   <tr>
   <td>GetNames(dir) -> ListName</td>
-  <td>Devuelve los nombre de un directorio</td>
+  <td>Returns the names in a directory</td>
   </tr>
   </table>
   </html>
-* **Resolución de nombres**:
-   * **Dirigida por los clientes**:
-     * Ejemplo: NFS
-   * **Dirigida por los servidores**:
-     * Resolución **iterativa**:
-        * El cliente envía el nombre al SD
-        * El SD realiza la traducción hasta que termina en un componente que pertenece a otro SD
-        * El SD envía el resultado al cliente, el cual si no ha terminado la traducción continúa con el SD correspondiente
-     *  Resolución **transitiva**:
-        * Los SD implicados contactan entre si para llevar a cabo la traducción. El último SD devuelve la traducción al cliente
-        * Rompe el modelo cliente/servidor (no adecuado para RPC)
-     *  Resolución **recursiva**:
-        * El último SD implicado devuelve el resultado al anterior y así sucesivamente hasta que el primero responde al cliente
+* **Name resolution**:
+  * **Client-directed**:
+    * Example: NFS
+  * **Server-directed**:
+    * **Iterative** resolution:
+       * The client sends the name to the SD
+       * The SD performs the translation until it ends up at a component belonging to another SD
+       * The DNS sends the result to the client, which, if it has not finished the translation, continues with the corresponding DNS
+    *  **Transitive** resolution:
+       * The DNSs involved contact each other to carry out the translation. The last DNS returns the translation to the client
+       * Breaks the client/server model (not suitable for RPC)
+    * **Recursive** resolution:
+       * The last SD involved returns the result to the previous one, and so on until the first one responds to the client
 
-### Servicio de ficheros
 
-* Servicio de ficheros: se encarga de la gestión de los ficheros y del acceso a los datos
-* Aspectos relacionados:
-   * Semántica de coutilización
-   * Métodos de acceso
-   * Caché de bloques
-     * El problema de la coherencia de cache
-   * Métodos para mejorar el rendimiento
-* Operaciones básicas de un servicio de ficheros:
+### File service
+
+* File service: responsible for file management and data access
+* Related aspects:
+  * Semantics of co-utilization
+  * Access methods
+  * Block cache
+    * The problem of cache consistency
+  * Methods for improving performance
+* Basic operations of a file service:
   <html>
-   <table>
-   <tr>
-   <td>ReadFile(FileId, pos, n) -> Data</td>
-   <td>Lee n bytes a partir de una determinada posición</td>
-   </tr>
-   <tr>
+  <table>
+  <tr>
+  <td>ReadFile(FileId, pos, n) -> Data</td>
+  <td>Reads n bytes from a given position</td>
+  </tr>
+  <tr>
    <td>WriteFile(FileId, pos, n, Data)</td>
-   <td>Escribe n bytes (Data) a partir de una determinada posición</td>
+   <td>Writes n bytes (Data) starting at a given position</td>
    </tr>
    <tr>
    <td>Create(name) -> FileId</td>
-   <td>Crea un nuevo fichero de longitud 0 bytes</td>
+   <td>Creates a new file with a length of 0 bytes</td>
    </tr>
-   <tr>
+  <tr>
    <td>Delete(FileId)</td>
-   <td>Borra el fichero</td>
+   <td>Deletes the file. </td>
    </tr>
    <tr>
    <td>GetAttributes(FileId) -> Attr</td>
-   <td>Devuelve los atributos de un fichero</td>
+   <td>Returns the attributes of a file. </td>
    </tr>
    <tr>
    <td>SetAttributes(FileId, Attr)</td>
-   <td>Modifica los atributos de un fichero</td>
-   </tr>
-   </table>
+   <td>Modifies the attributes of a file</td>
+  </tr>
+  </table>
   </html>
-* Semánticas de coutilización:
-  * **Sesión**: serie de accesos que realiza un cliente entre un open y un close
-  * La **semántica de coutilización** especifica el efecto de varios procesos accediendo de forma simultánea al mismo fichero
-  * Semánticas más usadas:
-     * Semántica UNIX
-     * Semántica de sesión
-     * Semántica de ficheros inmutables
-     * Semántica de transacciones
+* Usage semantics:
+  * **Session**: series of accesses made by a client between an open and a close
+  * **Usage semantics** specify the effect of several processes simultaneously accessing the same file
+  * Most commonly used semantics:
+    * UNIX semantics
+    * Session semantics
+    * Immutable file semantics
+  * Transaction semantics
 
 
-### Servicio de caché de bloques
+### Block cache service
 
-* Es posible emplear una caché de bloques:
-  * V: el empleo de caché de bloques permite mejorar el rendimiento:
-     * Explota el principio de proximidad de referencias
-       * Proximidad temporal
-       * Proximidad espacial
-     * En lecturas adelantadas: mejora el rendimiento de las operaciones de lectura, sobre todo si son secuenciales
-     * En escrituras diferidas: mejora el rendimiento de las escrituras
-  * I: no es fácil mantener la coherencia si hay multiples modificaciones.
-    * El problema surge cuando se coutiliza un fichero en escritura:
-       * Coutilización en escritura secuencial: típico en entornos y aplicaciones distribuidas.
-         * Si no se actualizan todas las copias al cierre:
-           open (A) + write (A) + close (A) + open (B) + read (B):
-         * Si se actualiza al cierre PERO se usa escritura diferida:
-           open (A) + read (A) + write (A) + close (A) + open (B) + read (B):
-       * Coutilización en escritura concurrente: típico en aplicaciones paralelas.
-         * Si hay escritura concurrente:
-           open (A) + open (B) + read (A) + read (B) + write (A) ... B ya no está actualizado
- * Localización de las caché en un sistema de ficheros distribuido:
-    * Caché en los servidores:
-      * Reducen los accesos a disco en el servidor
-    * Caché en los clientes:
-      * Reducen el tráfico por la red
-      * Reducen la carga en los servidores
-      * Mejora la capacidad de crecimiento
-      * Dos posibles localizaciones dentro del cliente:
-         * En discos locales
-            * V: Más capacidad,
-            * V: No volátil (facilita la recuperación)
-            * I: Más lento
-         * En memoria principal
-            * V: Más rápido
-            * I: Menor capacidad
-            * I: Memoria volátil (se pierde si se apaga la máquina)
- * Soluciones para la coherencia:
-    * No emplear caché en los clientes.
-    * No utilizar caché en los clientes para datos compartidos en escritura (Ej.: Sprite).
-    * Mecanismos de caché sin replicación de datos.
-    * Empleo de protocolos de coherencia de caché.
-       * Aspectos de diseño a considerar en protocolo de coherencia de caché:
-         * Granularidad del protocolo
-         * Mecanismo de validación
-         * Mecanismos de actualización/invalidación
-         * Localización de las copias en las caches de los clientes
- * Ejemplo de coherencia en Sprite:
-   * Características:
-      * Sistema de ficheros desarrollador en Berkeley a finales de 1980
-      * Implementa consistencia secuencial
-      * Solo se almacena en caché los datos, no los metadatos
-   * Para identificar los bloques obsoletos se utiliza dos elementos:
-     * Número de versión para el fichero
-     * Identificador del último escritor
-   * Funcionamiento general:
-     * Compartición con lectores concurrentes (CLC)
-       * Escenario:
-         * Un fichero se abre por varios clientes para lecturas
-         * Ocurren lecturas concurrentes
-       * Acciones:
-         * El servidor detecta CLC -> mantiene lista de tuplas {cliente ID, Lectura}
-         * El servidor notifica a cada cliente al abrir que use cache
-         * El servidor también utiliza cache
-         * Cuando un cliente cierra el fichero, se mantiene cache
-     * Compartición con escrituras concurrentes (CEC)
-       * Escenario:
-         * Un fichero se abre por varios clientes
-         * Al menos un cliente abre para escritura
-         * Ocurren escrituras concurrentes
-       * Acciones:
-         * El servidor detecta CEC al abrir para escritura
-         * El servidor notifica a todos los clientes que no usen cache -> todos los accesos se hacen directamente en el servidor
-         * El servidor serializa las peticiones de los clientes
-         * Cuando no haya clientes escritores -> se notifica de usar caché de nuevo
-     * Compartición con escrituras secuenciales (CES)
-       * Escenario 1:
-         * Un fichero se abre por un cliente 1, se escribe y se cierra
-           * En cache cliente 1 los datos más recientes (no en servidor)
-         * A continuación se abre por un cliente 2
-           * El cliente 2 copia los datos antiguos desde el servidor -> problema 1
-       * Escenario 2:
-         * Un fichero se abre por un cliente 1, se escribe y se cierra
-         * Un fichero se abre por un cliente 2, se escribe y se cierra
-         * A continuación se abre por un cliente 3
-           * El servidor no tiene las últimas escrituras -> problema 2
-       * Acciones:
-         * El servidor detecta CES al abrir para escritura
-           * El servidor lleva la pista de el último escritor: "lastWriter"
-           * El servidor lleva la pista de la última versión:  "version"
-         * Se incrementa "version" cada apertura para escritura en cliente
-         * El servidor pide al último escritor que le mande la última versión
+* It is possible to use a block cache:
+  * V: the use of a block cache improves performance:
+    * It exploits the principle of reference proximity
+       * Temporal proximity
+       * Spatial proximity
+    * In advance reads: improves the performance of read operations, especially if they are sequential
+    * In deferred writes: improves the performance of writes
+  * I: it is not easy to maintain consistency if there are multiple modifications.
+    * The problem arises when a file is co-used in writing:
+      * Co-use in sequential writing: typical in distributed environments and applications.
+        * If not all copies are updated upon closing:
+          open (A) + write (A) + close (A) + open (B) + read (B):
+        * If updated on close BUT deferred writing is used:
+          open (A) + read (A) + write (A) + close (A) + open (B) + read (B):
+      * Concurrent write co-utilization: typical in parallel applications.
+         * If there is concurrent writing: 
+           open (A) + open (B) + read (A) + read (B) + write (A) ... B is no longer updated
+* Cache location in a distributed file system:
+  * Cache on servers:
+    * Reduces disk access on the server
+  * Cache on clients:
+    * Reduces network traffic
+    * Reduces load on servers
+    * Improves growth capacity
+    * Two possible locations within the client:
+       * On local disks
+         * V: More capacity
+         * V: Non-volatile (facilitates recovery)
+         * I: Slower
+       * In main memory
+         * V: Faster
+         * I: Less capacity
+         * I: Volatile memory (lost if the machine is turned off)
+ * Solutions for consistency:
+    * Do not use cache on clients.
+    * Do not use cache on clients for shared write data (e.g., Sprite).
+    * Cache mechanisms without data replication.
+    * Use of cache consistency protocols.
+       * Design aspects to consider in cache consistency protocol:
+         * Protocol granularity
+         * Validation mechanism
+         * Update/invalidation mechanisms
+         * Location of copies in client caches
+ * Example of consistency in Sprite:
+   * Features:
+     * File system developed at Berkeley in the late 1980s
+     * Implements sequential consistency
+     * Only data is cached, not metadata
+   * Two elements are used to identify obsolete blocks:
+     * Version number for the file
+     * Identifier of the last writer
+   * General operation:
+     * Sharing with concurrent readers (CLC)
+       * Scenario:
+         * A file is opened by several clients for reading
+         * Concurrent reads occur
+       * Actions:
+         * The server detects CLC -> maintains a list of tuples {client ID, Read}
+         * The server notifies each client to use the cache when opening
+         * The server also uses cache
+         * When a client closes the file, cache is maintained
+     * Sharing with concurrent writes (CEC)
+       * Scenario:
+         * A file is opened by several clients
+         * At least one client opens for writing
+         * Concurrent writes occur
+       * Actions:
+         * The server detects CEC when opening for writing
+         * The server notifies all clients not to use cache -> all accesses are made directly on the server
+         * The server serializes client requests
+         * When there are no writing clients -> notification to use cache again
+      * Concurrent sequential writing (CES)
+        * Scenario 1:
+          * A file is opened by client 1, written to, and closed
+            * The most recent data is in client 1's cache (not on the server)
+          * It is then opened by client 2
+            * Client 2 copies the old data from the server -> problem 1
+        * Scenario 2:
+          * A file is opened by client 1, written to, and closed
+          * A file is opened by client 2, written to, and closed
+          * Then it is opened by client 3
+            * The server does not have the latest writes -> problem 2
+        * Actions:
+          * The server detects CES when opening for writing
+            * The server keeps track of the last writer: "lastWriter"
+            * The server keeps track of the latest version:  "version"
+          * "version" is incremented each time a client opens for writing
+          * The server asks the last writer to send the latest version
 
-#### Para más información:
- * Puede repasar el artículo ["scale and performance in distributed file systems"](https://www.slideserve.com/penelope-herman/caching-in-the-sprite-network-file-system-scale-and-performance-in-a-distributed-file-system)
+#### For more information:
+* You can review the article [“scale and performance in distributed file systems”](https://www.slideserve.com/penelope-herman/caching-in-the-sprite-network-file-system-scale-and-performance-in-a-distributed-file-system)
  
 
-## Sistema de ficheros paralelo
+## Parallel file system
 
-* Se añade paralelismo a la forma de trabajar el sistema de ficheros distribuido.
-   * Paralelismo en el servidor:
-      * Ej.: Una aplicación de un proceso puede acceder a los datos de distintos servidores en paralelo.
-   * Paralelismo en clientes:
-      * Ej.: Varias aplicaciones de un proceso cada una pueden acceder cada una a sus datos en paralelo.
-   * Paralelismo tanto en cliente como en servidor:
-      * Varias aplicaciones ejecutando en paralelo acceden cada una de ellas en paralelo a los datos guardados en varios servidores.
-      * En una aplicación paralela formada por varios procesos se puede desde cada proceso acceder en paralelo a los datos guardados en distintos servidores.
-* Múltiples nodos de E/S -> Incrementa el ancho de banda
-* Fichero distribuido entre diferentes nodos de E/S con acceso paralelo:
-     * A diferentes ficheros
-     * Al mismo fichero
-* Se añade interfaces de E/S paralela
+* Parallelism is added to the way the distributed file system works.
+   * Parallelism on the server:
+      * E.g.: A single-process application can access data from different servers in parallel.
+   * Parallelism on clients:
+      * E.g.: Several applications in a process can each access their data in parallel.
+   * Parallelism on both client and server:
+      * Several applications running in parallel each access the data stored on several servers in parallel.
+      * In a parallel application consisting of several processes, each process can access data stored on different servers in parallel.
+* Multiple I/O nodes -> Increases bandwidth
+* File distributed among different I/O nodes with parallel access:
+   * To different files
+   * To the same file
+* Parallel I/O interfaces are added
    * MPI-IO
-* Optimizaciones:
-   * E/S colectiva
-   * Acceso a datos no contiguos
-* Ejemplos:
-  * GPFS
-  * OrangeFS
+* Optimizations:
+   * Collective I/O
+   * Access to non-contiguous data
+* Examples:
+   * GPFS
+   * OrangeFS
  
