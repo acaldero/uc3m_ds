@@ -11,15 +11,15 @@
   * REST and SOAP examples:
     * [Python - REST: Simple example of a web service  (server and client)](#simple-example-of-a-rest-web-service-server-and-client-in-python)
     * [Python - REST: Simple example with OpenAPI (server and client)](#openapi)  
-    * [Python - SOAP: Web service example  (client)](#simple-web-service-example-soap-client-in-python)
-    * [Python - SOAP: Simple web service example (client and server) ](#simple-example-of-soap-web-service-client-and-server-in-python)
+    * [Python - SOAP: Web service example (client)](#simple-example-of-a-soap-web-service-python-client)
+    * [Python - SOAP: Simple web service example (client and server) ](#simple-example-of-a-soap-web-service-client-and-server-in-python)
     * [C - SOAP: Using a distributed service based on gSOAP/XML (client only)](#using-a-distributed-service-based-on-gsoapxml-client-only-in-c)
-    * [C - SOAP: Creating a distributed service based on gSOAP/XML (client and server)](#creating-a -distributed-service-based-on-gsoapxml-client-and-server-in-c)
+    * [C - SOAP: Creating a distributed service based on gSOAP/XML (client and server)](#creating-a-distributed-service-based-on-gsoapxml-client-and-server-in-c)
   * [Other technologies besides REST and SOAP](#other-technologies-besides-rest-and-soap)
   * Examples of other technologies:
-    * [Simple example of a web service based on server-sent events (SSE)](#simple-example-of-a-web-service-based-on-sse-in-bash)
+    * [Simple example of a web service based on server-sent events (SSE)](#simple-example-of-an-sse-based-web-service-in-python)
     * [Creating a distributed service based on Apache Thrift (client and server, in Python)](#creating-a-distributed-service-based-on-apache-thrift-client-and-server-in-python)
-    * [Creating a distributed service based on gRPC (client and server, in Python)](#creating-a-distributed-service-based-on-grcp-client-and-server-in-python) -based-on-grpc-client-and-server-in-python)
+    * [Creating a distributed service based on gRPC (client and server, in Python)](#creating-a-distributed-service-based-on-grpc-client-and-server-in-python)
     * [Example of JSON-RPC over HTTP: simple calculator MCP server (client and server, in Python)](#example-of-json-rpc-over-http-simple-calculator-mcp-server-client-and-server-in-python)
 
 
@@ -27,7 +27,7 @@
 
 Web services are at the level of a network service and one level above the remote procedure paradigm:
 
-   ![Paradigms by level](materials/topic-ws/web-services/ssdd_web-services-drawio_4.svg)
+   ![Paradigms by level](/materials/topic-ws/web-services/ssdd_web-services-drawio_4.svg)
                           
 Web services (and network services) are an extension to the remote procedure invocation paradigm in which a directory service is added that provides references to available services:
 
@@ -651,10 +651,8 @@ The following example implements a small key-value storage service:
    ```bash
    firefox http://127.0.0.1:8000/docs
    ```
-    
-This interface allows you to view the automatically generated documentation and interact with the service:
+   This interface allows you to view the automatically generated documentation and interact with the service:
    ![Swagger interface for ws-openapi](/materials/topic-ws/ssdd_web-services/ws-openapi-ui.png)
-
    You can see that there is a link to http://127.0. 0.1:8000/openapi.json
    This web page allows you to access the OpenAPI description of the implemented service.
 
@@ -789,16 +787,16 @@ The following example implements an echo client (repeat what is sent) based on S
            return a-b
 
    application = Application(services=[Calculator],
-                             tns=‘http://tests.python-zeep.org/’,
-                             in_protocol=Soap11(validator=‘lxml’),
+                             tns='http://tests.python-zeep.org/',
+                             in_protocol=Soap11(validator='lxml'),
                              out_protocol=Soap11())
    application = WsgiApplication(application)
 
    if __name__ == ' __main__':
        logging.basicConfig(level=logging.DEBUG)
-       logging.getLogger(‘spyne.protocol.xml’).setLevel(logging.DEBUG)
+       logging.getLogger('spyne.protocol.xml').setLevel(logging.DEBUG)
        logging.info("listening to http:// 127.0.0.1:8000; wsdl is at: http://localhost:8000/?wsdl ")
-       server = make_server(‘127.0.0.1’, 8000, application)
+       server = make_server('127.0.0.1', 8000, application)
        server.serve_forever ()
    ```
 
@@ -822,14 +820,14 @@ The following example implements an echo client (repeat what is sent) based on S
    ```python
    import zeep
 
-   wsdl = “http://localhost:8000/?wsdl”
+   wsdl = "http://localhost:8000/?wsdl"
    client = zeep.Client(wsdl=wsdl)
 
    r = client.service.add(5, 2)
-   print(‘ 5+2 = ’ + str(r))
+   print(' 5+2 = ' + str(r))
 
    r = client.service.sub(5, 3)
-   print (‘ 5-3 = ’ + str(r))
+   print(' 5-3 = ' + str(r))
    ```
 
 6. To run the service client:
@@ -919,22 +917,22 @@ In the process of creating a distributed service based on gSOAP/XML that allows 
    ```bash
    soapcpp2 -cL calc.h
    ```
-   
-Thanks to the soapcpp2 command, much of the work has been generated, as can be seen in the following figure: <br/>
+   Thanks to the soapcpp2 command, much of the work has been generated, as can be seen in the following figure: <br/>
    <img src="https://www.genivia.com/images/flowchart.png" style="max-height:512" /><br/><br/>
 3. The part that implements the service must be created, for example in the file **`lib-server.c`**:
    ```c
-   #include “soapH.h”
-   #include “calc.nsmap”
+   #include "soapH.h"
+   #include "calc.nsmap"
 
-   int main(int argc, char **argv)
+   int main ( int argc, char **argv )
    {
       struct soap soap;
 
       if (argc < 2) {
-          printf(“Usage: %s <port>\n”, argv[0]) ;
+          printf("Usage: %s <port>\n", argv[0]) ;
           exit(-1);
       }
+
       soap_init(&soap);
       soap_bind(&soap, NULL, atoi(argv[1]), 100);
       while(1)
@@ -971,12 +969,12 @@ Thanks to the soapcpp2 command, much of the work has been generated, as can be s
        // env SERVER_IP=localhost:12345 ./app-d
        char *host = getenv("SERVER_IP") ;
        if (NULL == host) {
-           printf("ERROR: missing ‘export SERVER_IP=<ip>:<port>’\n") ;
+           printf("ERROR: missing 'export SERVER_IP=<ip>:<port>'\n") ;
            return -1 ;
        }
        
        soap_init(&soap);
-       soap_call_ns__add(&soap, host, “”, a, b, r);
+       soap_call_ns__add(&soap, host, "", a, b, r);
        if (soap.error) {
            soap_print_fault(&soap, stderr);
            return -1 ;
@@ -1026,16 +1024,16 @@ Thanks to the soapcpp2 command, much of the work has been generated, as can be s
 REST and SOAP have evolved, and new technologies have emerged.
 The following image summarizes the evolution over time and compares the main technologies:
 
- ![Evolution of Web Technologies](/materials/topic-ws/web-services/web-services-api-timeline.svg) <br/ >
+ ![Evolution of Web Technologies](/materials/topic-ws/web-services/ssdd_web-services-api-timeline.svg) <br/ >
 
 The following table summarizes the main aspects of some of the main technologies:
 
-|                 | SOAP        | REST           | JSON-RPC   | gRPC | GraphQL | Thrift |
-|-----------------|-------------|----------------|------------|------|---------|--------|
-| Introduced      | late 1990s   | 2000           | mid-2000s | 2015 | 2015    | 2007   |
-| Format         | XML         | JSON, XML, ... | JSON       | Protobuf, JSON, ... | JSON | JSON or binary |
-| Advantages        | Well-known    | Flexible and simple exchange format | Simple to implement | Allows any type of function | Flexible data structuring | Adaptable to many use cases |
-| Use cases    | Payments, " legacy," ...   | Public API |        | HPC microservices | Mobile API |  |
+|                 | SOAP         | REST           | JSON-RPC   | gRPC | GraphQL | Thrift |
+|-----------------|--------------|----------------|------------|------|---------|--------|
+| Introduced      | late 1990s   | 2000           | mid-2000s | 2015 | 2015     | 2007   |
+| Format          | XML          | JSON, XML, ... | JSON      | Protobuf, JSON, ... | JSON | JSON or binary |
+| Advantages      | Well-known   | Flexible and simple exchange format | Simple to implement | Allows any type of function | Flexible data structuring | Adaptable to many use cases |
+| Use cases       | Payments, "legacy", ...   | Public API |        | HPC microservices | Mobile API |  |
 | Organization    | Packaged messages | Meet 6 restrictions |        | Procedure call | Typed system |  |
 
 Two of these technologies are particularly noteworthy:
@@ -1055,7 +1053,7 @@ Some examples of interaction models other than *request/response* are:
 * **Event**. This model is a variant of the *request/response* model in which there is no request, but rather a sequence of  responses, which are response messages associated with asynchronous events. For example, if a customer wants to subscribe to comments made during a sports broadcast.
 
 
-# # Examples of other technologies
+## Examples of other technologies
 
 The following are examples of other technologies:
 * Python - SSE: Simple example of an SSE-based web service
@@ -1078,18 +1076,18 @@ This example consists of two files:
    app = Flask(__name__)
    CORS(app)
    
-   @app.route(“/”)
+   @app.route("/")
    def publish_data():
        def stream():
            while True:
                ts  = datetime.datetime.now()
-               msg = f“data: ” + str(ts) + “\n\n”
+               msg = f"data: " + str(ts) + "\n\n"
                yield msg
                time.sleep(1)
 
        return Response(stream(), mimetype="text/event-stream")
 
-   if __name__ == “__main__”:
+   if __name__ == "__main__":
         app.run(debug=True, port=5000)
    ```
 * The **`demo-client.html`** web page: displays the information as it arrives in real time.
@@ -1101,11 +1099,11 @@ This example consists of two files:
      <div id="msg1"></div><br>
      <div id="msg2" style="overflow-y: scroll;height: 300px; width: 360px;"></div><br>
      <script>
-       var s = new EventSource(‘http://localhost:5000’);
+       var s = new EventSource('http://localhost:5000');
            s.onmessage = function(e) {
-               document.getElementById(“msg1”).innerHTML = e.data ;
-               var old_msg2 = document.getElementById(“msg2”).innerHTML ;
-               document.getElementById(“msg2”).innerHTML = e.data + ‘<br>’ + old_msg2 ;
+               document.getElementById("msg1").innerHTML = e.data ;
+               var old_msg2 = document.getElementById("msg2").innerHTML ;
+               document.getElementById("msg2").innerHTML = e.data + '<br>' + old_msg2 ;
            };
      </script>
      </body>
@@ -1135,56 +1133,50 @@ Server-sent events (SSE) is a technology that allows notifications/messages/even
 
 This example is available at [ws-rest-sse-bash](/ws-rest-sse-bash/README.md) and consists of three files:
 * The **`demo-server.sh`** script: sends the output of the **`demo.sh`** script to the **nc** (*net cat*) command listening on port 8080.
-   
-```bash
+   ```bash
    #!/bin/bash
    set -x
    ./demo.sh | nc -l -p 8080
    ```
 * The **`demo.sh`** script: sends the response headers from a web server, and then sends the time stamp in a JSON every second.
-```bash
+   ```bash
    #!/bin/bash
    
-# (1) headers
-   echo “HTTP/1.1 200 OK”
-   echo “Access-Control-Allow-Origin: *”
-   echo “Content-Type: text/event-stream”
-   echo “Cache-Control: no-cache”
-   echo ‘’
-   # (2) every second it sends “data: {‘timestamp’: <instant>}”
+   # (1) headers
+   echo "HTTP/1.1 200 OK"
+   echo "Access-Control-Allow-Origin: *"
+   echo "Content-Type: text/event-stream"
+   echo "Cache-Control: no-cache"
+   echo ""
+   # (2) every second it sends "data: {'timestamp': <instant>}"
    
-while [ 1 ]; do
+   while [ 1 ]; do
      T=$(date +%H:%M:%S)
-     echo “data: {‘timestamp’: $T}”
-     echo ‘’
-     echo “”
+     echo "data: {'timestamp': $T}"
+     echo ""
+     echo ""
      sleep 1
    done
    ```
 * The **`demo-client.html`** web page: displays the information as it arrives in real time.
-```html
-   
-<!DOCTYPE html>
+  ```html
+  <!DOCTYPE html>
    <html>
      <head><meta charset="utf-8" /></head>
      <body>
      <div id="msg1"></div><br>
      <div id="msg2" style="overflow-y: scroll;height: 300px; width: 360px;"></div><br>
-     
-<script>
-       var s = new EventSource(‘http://localhost:8080’);
+     <script>
+       var s = new EventSource('http://localhost:8080');
            s.onmessage = function(e) {
-               document.getElementById(“msg1”).innerHTML = e.data ;
-               var old_msg2 = document.getElementById(“msg2”).innerHTML ;
-               
-document.getElementById(“msg2”).innerHTML = e.data + ‘<br>’ + old_msg2 ;
+               document.getElementById("msg1").innerHTML = e.data ;
+               var old_msg2 = document.getElementById("msg2").innerHTML ;
+               document.getElementById("msg2").innerHTML = e.data + '<br>' + old_msg2 ;
            };
      </script>
      </body>
-   
-</html>
+   </html>
    ```
-
 
 The steps for typical execution are:
 * Run the server:
@@ -1341,7 +1333,7 @@ When creating a distributed service based on gRPC that allows addition and subtr
    
    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
    calc_pb2_grpc.add_CalculatorServicer_to_server(CalculatorServicer(), server)
-   server.add_insecure_port(‘[::]:50051’)
+   server.add_insecure_port('[::]:50051')
    server.start ()
    server.wait_for_termination()
    ```
@@ -1351,16 +1343,15 @@ When creating a distributed service based on gRPC that allows addition and subtr
    import calc_pb2
    import calc_pb2_grpc
 
-   with grpc.insecure_channel(‘localhost:50051’) as channel:
+   with grpc.insecure_channel('localhost:50051') as channel:
        stub = calc_pb2_grpc.CalculatorStub(channel)
        response = stub.Add(calc_pb2.AddRequest(num1=1, num2=2))
-   print(f“Result: {response.result}”)
+   print(f"Result: {response.result}")
    ```
 5. You can run the server and client as follows:
    ```bash
    $ python3 ./server.py &
    $ python3 ./client.py
-   
    Result: 3
    ```
 
@@ -1368,10 +1359,10 @@ When creating a distributed service based on gRPC that allows addition and subtr
 ## Example of JSON-RPC over HTTP: simple calculator MCP server (client and server, in Python)
 
 * A **MCP-based service mainly offers four types of functions**:
-* *Tools*: utilities are functions that the client can invoke to perform actions or access external systems.
+  * *Tools*: utilities are functions that the client can invoke to perform actions or access external systems.
   * *Resources*: resources expose data sources that the client can read.
   * *Resource templates*: resource templates are parameterized resources that allow the client to request specific data.
-* *Prompts*: prompts are reusable message templates to guide an LLM.
+  * *Prompts*: prompts are reusable message templates to guide an LLM.
 
 * To work with the MCP protocol, uvicorn and the ```FastMCP``` and ```FastAPI``` libraries will be used:
   ```bash
@@ -1380,90 +1371,92 @@ When creating a distributed service based on gRPC that allows addition and subtr
   ```
 
 * An example consisting of two files is available at [ws-jsonrpc-mcp](/materials/lab-mcp-jsonrpc/README.md):
-* The **```mcp_server_calc.py```** server in Python for a simple calculator:
+  * The **```mcp_server_calc.py```** server in Python for a simple calculator:
   ```python
     from fastapi import FastAPI
     from fastmcp import FastMCP
     import uvicorn
       
     # A. Initialize FastMCP
-    mcp = FastMCP(“calculator”)
+    mcp = FastMCP("calculator")
+  
     ## A.1. Utilities (*tools*)
     @mcp.tool()
     def add(a: int, b: int) -> int:
-    ‘’“Add two numbers and return the result.”“”
-    return a + b
+        """Add two numbers and return the result."""
+        return a + b
       
     @mcp.tool()
     def sub(a: int, b: int) -> int:
-        “”“Subtract two numbers and return the result.”“”
+        """Subtract two numbers and return the result."""
         return a - b
+  
     @mcp.tool()
     def mul(a: int, b: int) -> int:
-        “”“Multiply two numbers and return the result.”‘’
+        """Multiply two numbers and return the result."""
         return a * b
+  
     @mcp.tool()
     def div(a: int, b: int) -> int:
-        “”“Divide two numbers and return the result.”“”
+        """Divide two numbers and return the result."""
         return a / b
   
     # A.2. Inputs (*prompts*)
     @mcp.prompt()
     def calculator_prompt(a: float, b: float, operation: str) -> str:
-        if operation == “add”:
-            return f“The result of adding {a} and {b} is {add(a, b)}”
-        elif operation == “subtract”:
-            return f“The result of subtracting {b} from {a} is {sub(a, b)}”
-        elif operation == ‘multiply’:
-            return f"The result of multiplying {a} and {b} is {mul(a, b)}“
-        elif operation == ‘divide’:
+        if operation == "add":
+            return f"The result of adding {a} and {b} is {add(a, b)}"
+        elif operation == "subtract":
+            return f"The result of subtracting {b} from {a} is {sub(a, b)}"
+        elif operation == "multiply":
+            return f"The result of multiplying {a} and {b} is {mul(a, b)}"
+        elif operation == "divide":
             try:
-                return f”The result of dividing {a} by {b} is {div(a, b)}"
+                return f"The result of dividing {a} by {b} is {div(a, b)}"
             except ValueError as e:
                 return str(e)
         else:
-            return “Invalid operation. Please choose add, subtract, multiply, or divide.”
+            return "Invalid operation. Please choose add, subtract, multiply, or divide."
   
     # B. Initialize FastAPI
-    mcp_app = mcp.http_app(path=“/”)
+    mcp_app = mcp.http_app(path="/")
     api = FastAPI(lifespan=mcp_app.lifespan)
       
     ## B.1. Get status
-    @api.get(“/api/status”)
+    @api.get("/api/status")
     def status():
-        return {“status”: ‘ok’}
-    # C. Mount MCP on FastAPI at “/mcp”  and run on (IP=ANY, port=8000)
-    api.mount(“/mcp”, mcp_app)
+        return {"status": "ok"}
+  
+    # C. Mount MCP on FastAPI at "/mcp"  and run on (IP=ANY, port=8000)
+    api.mount("/mcp", mcp_app)
       
-    if __name__ == “__main__”:
+    if __name__ == "__main__":
         uvicorn.run(api, host="0.0.0.0", port=8000)
     ```
 * The Python client **```mcp_client_calc.py```** provides a simple calculator:
   ```python
     import asyncio
-    
     from fastmcp import Client
 
     async def main():
-    # Connect to the MCP server via HTTP
-    client = Client(“http://127.0.0.1:8000/mcp/”)
+      # Connect to the MCP server via HTTP
+      client = Client("http://127.0.0.1:8000/mcp/")
 
-    # Open session
-    async with client:
-    # List available tools
-          
-    tools = await client.list_tools()
-    print(“Available tools:”)
-    for tool in tools:
-        print(“-”, tool.name)
-        print(“\n”)
-          
-    # Call add(1,2)
-    result = await client.call_tool(“add”, {“a”: 1, ‘b’: 2})
-    print(“Result of add(1,2):”)
-    print (result)
+      # Open session
+      async with client:
+         # List available tools
+         tools = await client.list_tools()
+         print("Available tools:")
+         for tool in tools:
+             print("-", tool.name)
+             print("\n")
+  
+         # Call add(1,2)
+         result = await client.call_tool("add", {"a": 1, 'b': 2})
+         print("Result of add(1,2):")
+         print (result)
 
-    if __name__ == “__main__”:
+    if __name__ == "__main__":
        asyncio.run(main())
   ```
 
@@ -1506,12 +1499,11 @@ Available tools:
   - div
 
 Result of add(1,2):
-CallToolResult(content=[TextContent(type=‘text’,
-                                   text=‘3’,
+CallToolResult(content=[TextContent(type='text',
+                                   text='3',
                                    annotations=None,
                                    meta=None)],
-                 
-structured_content={‘result’: 3},
+                 structured_content={'result': 3},
                  meta=None, data=3,
                  is_error=False)
 ...
@@ -1522,12 +1514,12 @@ structured_content={‘result’: 3},
 
 ```bash
 ...
-INFO: 127.0.0.1:48316 - “POST /mcp/ HTTP/1.1” 200 OK
-INFO: 127.0.0.1:48320 - “POST /mcp/ HTTP/1.1” 202 Accepted
-INFO: 127.0.0.1:48336 - “GET /mcp/ HTTP/1.1” 200 OK
-INFO: 127.0.0.1:48342 - “POST /mcp/ HTTP/1.1” 200 OK
-INFO: 127.0.0.1:48358 - “POST /mcp/ HTTP/1.1” 200 OK
-INFO: 127.0.0.1:48364 - “DELETE /mcp/ HTTP/1.1” 200 OK
+INFO: 127.0.0.1:48316 - "POST /mcp/ HTTP/1.1" 200 OK
+INFO: 127.0.0.1:48320 - "POST /mcp/ HTTP/1.1" 202 Accepted
+INFO: 127.0.0.1:48336 - "GET /mcp/ HTTP/1.1" 200 OK
+INFO: 127.0.0.1:48342 - "POST /mcp/ HTTP/1.1" 200 OK
+INFO: 127.0.0.1:48358 - "POST /mcp/ HTTP/1.1" 200 OK
+INFO: 127.0.0.1:48364 - "DELETE /mcp/ HTTP/1.1" 200 OK
 ...
 ```
 
