@@ -89,12 +89,12 @@ B --- C("Disk<br>(b1, b2, ...)")
   * Regarding name management, it offers a transparent translation between the file name used by string-based programs (a more convenient representation for humans) and the internal numerical representation based on the inode identifier where the file details are stored internally.
 
 * **Basic organization**:
- * A **device** allows blocks of data to be stored.
-   * You can run ```lsblk``` to see all block devices.
- * Such a device can have one or more **partitions** or **volumes**. Partitions or volumes allow a physical device to be logically divided into storage spaces to work with.
-   * You can run ```cat /proc/partitions``` to see all recognized partitions.
- * Each **partition** or **volume** is formatted with a **disk file system**, which are the data structures required on disk to locate information.
- * Each **disk file system** allows you to work with **files** and **directories**.
+  * A **device** allows blocks of data to be stored.
+    * You can run ```lsblk``` to see all block devices.
+  * Such a device can have one or more **partitions** or **volumes**. Partitions or volumes allow a physical device to be logically divided into storage spaces to work with.
+    * You can run ```cat /proc/partitions``` to see all recognized partitions.
+  * Each **partition** or **volume** is formatted with a **disk file system**, which are the data structures required on disk to locate information.
+  * Each **disk file system** allows you to work with **files** and **directories**.
      * A file is an abstraction in which the contents of a file are treated as a sequence of bytes.
      * A directory is a collection of files grouped together according to some criterion chosen by the user.
        * Important: in UNIX/Linux, a directory allows the inode number to be associated with a file name.
@@ -113,7 +113,7 @@ B --- C("Disk<br>(b1, b2, ...)")
 <table>
 <tr>
 <td>
-<img src="/materials/topic-dfs/dfs/dfs_intro_1.svg">
+<img src="/materials/topic-dfs/dfs/ssdd_sfd_intro_1.svg">
 </td>
 <td>
 <ul>
@@ -144,14 +144,14 @@ B --- C("Disk<br>(b1, b2, ...)")
 
 * In this general architecture, the software is organized in layers, so that the upper layers use the functionality of the lower layers to implement their functionality.
   The main software layers are:
-  ![Basic software architecture in a Unix file system](./dfs/dfs_intro_2.svg)
+  ![Basic software architecture in a Unix file system](/materials/topic-dfs/dfs/ssdd_sfd_intro_2.svg)
   * The block cache typically has the following operations:
     * **getblk**: searches for/reserves a block in the cache (based on a given v-node, offset, and size).
     * **brelse**: frees a block and passes it to the free list.
     * **bwrite**: writes a block from the cache to disk.
     * **bread**: reads a block from disk to cache.
     * **breada**: reads a block (and the next one) from disk to cache.
-* The low-level algorithms are:
+  * The low-level algorithms are:
     * **namei**: converts a path to the associated inode.
     * **iget**: returns an inode from the inode table and, if it is not there, reads it from secondary memory, adds it to the inode table, and returns it.
     * **iput**: frees an inode from the inode table and, if necessary, updates it in secondary memory.
@@ -160,7 +160,7 @@ B --- C("Disk<br>(b1, b2, ...)")
     * **bmap**: calculates the disk block associated with a file offset. Translates logical addresses (file *offset*) to physical addresses (disk block).
     * **alloc**: assigns a block to a file.
     * **free**: frees a block previously assigned to a file.
-* File system calls are the usual ones in the POSIX standard:
+  * File system calls are the usual ones in the POSIX standard:
     * **open**
     * **write**
     * **read**
@@ -195,7 +195,7 @@ B --- C("Disk<br>(b1, b2, ...)")
     Remote access to block devices on other machines
   </td>
   <td>
-     <img alt="Access to remote disks" src="./dfs/dfs_remoto_1.svg">
+     <img alt="Access to remote disks" src="/materials/topic-dfs/dfs/ssdd_sfd_remoto_1.svg">
   </td>
   <td>
      <a href="https://en.wikipedia.org/wiki/Distributed_Replicated_Block_Device">DRBD</a>
@@ -206,7 +206,7 @@ B --- C("Disk<br>(b1, b2, ...)")
     Remote access to operating system file system services on another machine
   </td>
   <td>
-     <img alt="Access to remote disks" src="./dfs/dfs_remoto_2.svg">
+     <img alt="Access to remote disks" src="/materials/topic-dfs/dfs/ssdd_sfd_remoto_2.svg">
   </td>
   <td>
     <a href="https://es.wikipedia.org/wiki/Network_File_System">NFS</a>
@@ -217,7 +217,7 @@ B --- C("Disk<br>(b1, b2, ...)")
     Remote access to directory service (i-nodes), block service, and cache coherence service
   </td>
   <td>
-    <img alt="Remote block, inode, and cache access" src="./dfs/dfs_remoto_4.svg">
+    <img alt="Remote block, inode, and cache access" src="/materials/topic-dfs/dfs/ssdd_sfd_remoto_4.svg">
   </td>
   <td>
     <a href="https://www.researchgate.net/publication/4658185_The_Sprite_Network_Operating_System">Sprite</a>
@@ -237,18 +237,18 @@ B --- C("Disk<br>(b1, b2, ...)")
     * Single image of the file system
   * Efficiency.
     * An SFD has additional overheads: communication network, protocols, possible need to make more copies, etc.
- * Fault tolerance:
+  * Fault tolerance:
     * Replication, degraded operation, etc.
-* Ease of growth (scalability)
+  * Ease of growth (scalability)
     * Eliminate bottlenecks
-* Consistency
-* Concurrent updates
-* Security
+  * Consistency
+  * Concurrent updates
+  * Security
 
 * A distributed file system seeks to make its behavior similar to a local file system for client programs, offering “transparency” in a number of aspects:
    * **Access transparency**: client programs are unaware that the files are distributed across other machines; they work with the files as if they were local.
    * **Location transparency**: client programs use directory and file names that do not include the explicit location of those files in the distributed system.
-   * * *Heterogeneity**: client programs and distributed file servers can run on different types of hardware and operating systems.
+   * **Heterogeneity**: client programs and distributed file servers can run on different types of hardware and operating systems.
    * **Concurrency transparency**: if several client programs access the same file in the distributed file system, the modifications must be visible in a consistent manner.
    * **Fault transparency**: any client program for a distributed file should be able to continue working even in the presence of network or server failures.
      * Stateful servers: when a file is opened, the server stores the work session information and returns a unique identifier for that work session to the client for subsequent operations.
@@ -257,7 +257,7 @@ B --- C("Disk<br>(b1, b2, ...)")
      * Stateless server: Each operation is self-contained (file name, current working position, etc. is included in each operation).
        * V: Easier recovery from failures as the server does not retain state.
        * I: Although open and close are not necessary, the rest of the operations have more fields.
- * **Replication transparency**: clients do not have to worry about replication on different servers that may be performed by the distributed file system to improve fault tolerance and scalability.
+   * **Replication transparency**: clients do not have to worry about replication on different servers that may be performed by the distributed file system to improve fault tolerance and scalability.
 
 * Typically, the software layers used are based on the use of a proxy pattern at the file system level:<br>
 <html>
@@ -272,10 +272,10 @@ B --- C("Disk<br>(b1, b2, ...)")
 </tr>
 <tr>
   <td>
-     <img alt="Access to remote disks" src="./dfs/dfs_remoto_2.svg">
+     <img alt="Access to remote disks" src="/materials/topic-dfs/dfs/ssdd_sfd_remoto_2.svg">
   </td>
   <td>
-     <img alt="Access to remote disks" src="./dfs/dfs_remoto_3.svg">
+     <img alt="Access to remote disks" src="/materials/topic-dfs/dfs/ssdd_sfd_remoto_3.svg">
   </td>
 </tr>
 </table>
@@ -290,7 +290,7 @@ B --- C("Disk<br>(b1, b2, ...)")
 <table>
 <tr>
   <td>
-  <img alt="Remote block, inode, and cache access" src="./dfs/dfs_remoto_4.svg">
+  <img alt="Remote block, inode, and cache access" src="/materials/topic-dfs/dfs/ssdd_sfd_remoto_4.svg">
   </td>
 </tr>
 </table>
@@ -387,7 +387,7 @@ B --- C("Disk<br>(b1, b2, ...)")
     * UNIX semantics
     * Session semantics
     * Immutable file semantics
-  * Transaction semantics
+    * Transaction semantics
 
 
 ### Block cache service
