@@ -1,199 +1,204 @@
-
-# Comunicación con MPI
+# Communication with MPI
 + **Felix García Carballeira and Alejandro Calderón Mateos** @ arcos.inf.uc3m.es
 + [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://github.com/acaldero/uc3m_ds/blob/main/LICENSE)
 
 
-## Contenidos
+## Contents
 
- * Introducción a MPI:
-     * [Definir MPI](#introducción-a-mpi)
-     * [Características principales](#características-principales)
-     * [Ejemplo en C: Hola mundo](#ejemplo-en-c-hola-mundo)
- * Comunicación punto a punto y comunicación colectiva:
-    * [API de MPI](#comunicación-punto-a-punto)
-    * [Ejemplo en C: send y receive](#ejemplo-en-c-send-y-receive)
-    * [Comunicación colectiva](#comunicación-colectiva)
-    * [Ejemplo en C: broadcast y barrier](#ejemplo-en-c-broadcast-y-barrier)
-  * Escalabilidad:
-    * [Ejemplo en C: cálculo de π con MPI](#ejemplo-en-c-cálculo-de-π-con-mpi)
-    * [Ejemplo en C: cálculo de π con OpenMP](#ejemplo-en-c-c%C3%A1lculo-de-%CF%80-con-openmp)
- 
-
-### Introducción a MPI
-
-- "MPI es una **interfaz**  de paso de mensaje que representa un esfuerzo prometedor de mejorar la disponibilidad de un software **altamente  eficiente** y **portable** para satisfacer las necesidades actuales en la **computación de alto rendimiento** a través de la definición de un estándar de paso de mensajes universal."
-   * William D. Gropp et al.
-
-- MPI son las iniciales de *Message Passing Interface*:
-  - Es una interfaz estándar de paso de mensajes para el desarrollo de aplicaciones paralelas <br> que ejecutan en computadores que no comparten memoria (memoria distribuida).
-
-- No es una implementación sino la especificación que tiene que cumplir las implementaciones de MPI. <br>
-  Las más conocidas son:
-  - OpenMPI 4.1.6 (30/9/2023) –[http://www.open-mpi.org/](http://www.open-mpi.org/)
-  - MPICH 4.1.2 (8/6/2023)       –[http://www.mpich.org/](http://www.mpich.org/)
-
- 
- 
-### Características principales
-
-  - **Portabilidad**: 
-     - Definido independiente de plataforma paralela
-     - Útil en arquitecturas paralelas heterogéneas
-  - **Eficiencia**: 
-    - Definido para aplicaciones multihilo
-    - Sobre una comunicación fiable y eficiente
-    - Busca el máximo de cada plataforma
-  - **Funcionalidad**:
-    - Fácil de usar por cualquier programador que ya haya usado cualquier biblioteca de paso de mensajes
+* Introduction to MPI:
+    * [Defining MPI](#introduction-to-mpi)
+    * [Main features](#main-features)
+    * [Example in C: Hello world](#example-in-c-hello-world)
+ * Point-to-point communication and collective communication:
+    * [MPI API](#point-to-point-communication)
+    * [Example in C: send and receive](#example-in-c-send-and-receive)
+    * [Collective communication](#collective-communication)
+    * [Example in C: broadcast and barrier](#example-in-c-broadcast-and-barrier)
+  * Scalability:
+    * [Example in C: calculating π with MPI](#example-in-c-calculating-π-with-mpi)
+    * [Example in C: calculation of π with OpenMP](#example-in-c-calculating-%CF%80-with-mpi)
 
 
-### Modelo de MPI
+### Introduction to MPI
 
--   Los procesos ejecutan el mismo programa
--   Todas las estructuras de datos y variables son locales a cada proceso
-    -   Los procesos ejecutan en espacios de direcciones distintos (máquinas distintas)
-    -   Los procesos no comparten memoria
-    -   Los procesos intercambian datos mediante paso de mensajes
+* "MPI is a message passing interface that represents a promising effort to improve the availability of highly efficient and portable software to meet current needs in high-performance computing through the definition of a universal message passing standard."
+  * William D. Gropp et al.
+
+* MPI stands for Message Passing Interface:
+  * It is a standard message passing interface for developing parallel applications that run on computers that do not share memory (distributed memory).
+
+* It is not an implementation but rather the specification that MPI implementations must comply with.
+  The best known are:
+  * OpenMPI 4.1.6 (9/30/2023) – http://www.open-mpi.org/
+  * MPICH 4.1.2 (6/8/2023) – http://www.mpich.org/
 
 
-### Ejemplo en C: Hola mundo
+### Key features
 
-* **mpi_hola.c**
-   ```c
-    #include <stdio.h>
-    #include "mpi.h"
+- **Portability**:
+    - Defined independently of parallel platforms
+    - Useful in heterogeneous parallel architectures
+- **Efficiency**:
+    - Defined for multithreaded applications
+    - Based on reliable and efficient communication
+    - Seeks to maximize each platform
+- **Functionality**:
+    - Easy to use for any programmer who has already used any message passing library
 
-    int main ( int argc, char **argv )
-    {
+
+### MPI model
+
+- Processes execute the same program
+- All data structures and variables are local to each process
+    - Processes execute in different address spaces (different machines)
+    - Processes do not share memory
+    - Processes exchange data by passing messages
+
+
+### Example in C: Hello world
+
+* **mpi_hello.c**
+  ```c
+  #include <stdio.h>
+  #include “mpi.h”
+
+  int main ( int argc, char **argv )
+  {
        int comm_size, my_rank;
        int  tam = 255;
        char name[255];
        
-       /* Inicializar MPI, lo primero en el programa (puede modificar argc y argv) */
+       /* Initialize MPI, the first thing in the program (can modify argc and argv) */
        MPI_Init(&argc, &argv);
        
-       MPI_Comm_size(MPI_COMM_WORLD, &comm_size); /* size <- cuántos procesos somos */
-       MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);   /* node <- mi identificador, de 0 a (size-1) */
+       MPI_Comm_size(MPI_COMM_WORLD, &comm_size); /* size <- how many processes there are */
+       MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);   /* node <- my identifier, from 0 to (size-1) */
        
        MPI_Get_processor_name(name, &tam);
-       printf("El proceso %d de %d procesos (%s)\n", my_rank, comm_size, name);
+       printf("Process %d of %d processes (%s)\n", my_rank, comm_size, name);
        
-       /* Finalizar MPI, no se puede inicializar de nuevo luego */
+       /* Finalize MPI, cannot be initialized again later */
        MPI_Finalize();
        return 0;
-    }
-   ```
+  }
+  ```
 
-* Se puede compilar usando `mpicc` de la siguiente forma:
-  ``` bash
+
+* It can be compiled using `mpicc` as follows:
+  ```bash
   mpicc -g -Wall -c mpi_hola.c -o mpi_hola.o
   mpicc -g -Wall -o mpi_hola mpi_hola.o
   ```
 
-* Se puede ejecutar en la máquina local usando `mpirun`:
-  1. Primero hay que crear un archivo `machines` con la lista de máquinas (una por línea) que van a ser usadas para ejecutar:
-    ``` bash
-    cat <<EOF > machines
-    localhost
-    localhost
-    EOF
-    ```
-  2. Luego se ha de usar `mpirun`:
-    ``` bash
-    mpirun -np 2 -machinefile machines ./mpi_hola
-    ```
+* It can be executed on the local machine using `mpirun`:
+  1. First, create a `machines` file with the list of machines (one per line) that will be used for execution:
+     ```bash
+     cat <<EOF > machines
+     localhost
+     localhost
+     EOF
+     ```
+  2. Then use `mpirun`:
+     ```bash
+     mpirun -np 2 -machinefile machines ./mpi_hola
+     ```
 
-* La salida sería similar a:
-  ``` bash
-  El proceso 0 de 2 procesos (kiwi)
-  El proceso 1 de 2 procesos (kiwi)
+* The output would be similar to:
+  ```bash
+  Process 0 of 2 processes (kiwi)
+  Process 1 of 2 processes (kiwi)
   ```
 
 
-### Comunicación punto a punto
+### Point-to-point communication
 
-El API de MPI incluye:
- - Estructuras de datos:
-    * Tipos de datos (básicos, vectores, compuestos, …)
-    * Grupo de procesos (grupos, comunicadores, …)
- - Paso de mensajes:
-    * Llamadas punto a punto (bloqueantes, asíncronas)
-    * Llamadas colectivas (bcast, scatter, gather, …)
- - Entrada y salida:
-    * Gestión de ficheros (apertura, cierre, …)
-    * Gestión de contenidos (vistas, punteros, …)
- - Procesos:
-    * Gestión de procesos (creación, …)
-    * *Profiling*
+The MPI API includes:
+ - Data structures:
+   * Data types (basic, vectors, composite, etc.)
+   * Process groups (groups, communicators, etc.)
+ - Message passing:
+   * Point-to-point calls (blocking, asynchronous)
+   * Collective calls (bcast, scatter, gather, etc.)
+ - Input and output:
+   * File management (opening, closing, etc.)
+   * Content management (views, pointers, etc.)
+ - Processes:
+   * Process management (creation, etc.)
+   * Profiling
 
 
-### Ejemplo en C: send y receive
+### Example in C: send and receive
 
-**mpi_p2p.c**
-```c
-#include <stdio.h>
-#include "mpi.h"
+* **mpi_p2p.c**
+  ```c
+  #include <stdio.h>
+  #include “mpi.h”
 
-int main ( int argc, char **argv )
-{
-    int comm_size, my_rank;
-    int num = 0;
+  int main ( int argc, char **argv )
+  {
+     int comm_size, my_rank;
+     int num = 0;
     
-    /* Inicializar MPI, lo primero en el programa (puede modificar argc y argv) */
-    MPI_Init(&argc, &argv);
+     /* Initialize MPI, the first thing in the program (can modify argc and argv) */
+     MPI_Init(&argc, &argv);
     
-    MPI_Comm_size(MPI_COMM_WORLD, &comm_size); /* size <- cuántos procesos somos */
-    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);   /* node <- mi identificador, de 0 a (size-1) */
+     MPI_Comm_size(MPI_COMM_WORLD, &comm_size); /* size <- how many processes there are */
+     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);   /* node <- my identifier, from 0 to (size-1) */
 
-    if (my_rank == 0) {
-        /* Envía (MPI_Send) desde una dirección de memoria (&num)
-           un (1) entero (MPI_INT) al proceso con rank 1 (1)
-           en mensaje con etiqueta 0 por el comunicador MPI_COMM_WORD */
+     if (my_rank == 0)
+     {
+        /*
+           Send (MPI_Send) from a memory address (&num)
+           one (1) integer (MPI_INT) to the process with rank 1 (1)
+           in a message with label 0 by the MPI_COMM_WORD communicator 
+        */
         num = 10 ;
         MPI_Send(&num, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
-    }
-    else {
-        /* Recibe (MPI_Recv) en una dirección de memoria (&num)
-           un (1) entero (MPI_INT) desde el proceso con rank 0 (0)
-           en mensaje con etiqueta 0 por el comunicador MPI_COMM_WORD */
+     }
+     else
+     {
+        /* 
+           Receive (MPI_Recv) at a memory address (&num)
+           an (1) integer (MPI_INT) from the process with rank 0 (0)
+           in a message with label 0 by the communicator MPI_COMM_WORD
+        */
         MPI_Recv(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         printf("[0 -> %d] num: %d\n", my_rank, num) ;
-    }
+     }
     
-    /* Finalizar MPI, no se puede inicializar de nuevo luego */
-    MPI_Finalize();
-    return 0;
-}
-```
+     /* Finalize MPI, cannot be initialized again afterwards */
+     MPI_Finalize();
+     return 0;
+  }
+  ```
 
-* Se puede compilar usando `mpicc`:
-   ``` bash
+* It can be compiled using `mpicc`:
+  ```bash
   mpicc -Wall -g mpi_p2p.c -o mpi_p2p
-   ```
+  ```
 
-* Se puede ejecutar en la máquina local usando `mpirun`:
-  1. Primero hay que crear un archivo `machines` con la lista de máquinas (una por línea) que van a ser usadas para ejecutar:
-    ``` bash
-    cat <<EOF > machines
-    localhost
-    localhost
-    EOF
-    ```
-  2. Luego se ha de usar `mpirun`:
-    ``` bash
-    mpirun -np 2 ./mpi_p2p
-    ```
+* It can be run on the local machine using `mpirun`:
+  1. First, create a `machines` file with the list of machines (one per line) that will be used for execution:
+     ```bash
+     cat <<EOF > machines
+     localhost
+     localhost
+     EOF
+     ```
+  2. Then use `mpirun`:
+     ```bash
+     mpirun -np 2 ./mpi_p2p
+     ```
 
-* La salida sería similar a:
-  ``` bash
+* The output would be similar to:
+  ```bash
   [0 -> 1] num: 10
   ```
 
 
-### Comunicación colectiva
+### Collective communication
 
-Principales primitivas de comunicación colectiva:
+Main primitives of collective communication:
 * MPI_Barrier y MPI_Bcast:
   <html>
     <table border="0">
@@ -236,76 +241,76 @@ Principales primitivas de comunicación colectiva:
   </html>
 
 
-### Ejemplo en C: broadcast y barrier
+### Example in C: broadcast and barrier
 
-**mpi_coll.c**
-```c
-#include <stdio.h>
-#include "mpi.h"
+* **mpi_coll.c**
+  ```c
+  #include <stdio.h>
+  #include "mpi.h"
 
-int main ( int argc, char **argv )
-{
-    int comm_size, my_rank;
-    int num = 0;
+  int main ( int argc, char **argv )
+  {
+      int comm_size, my_rank;
+      int num = 0;
     
-    /* Inicializar MPI, lo primero en el programa (puede modificar argc y argv) */
-    MPI_Init(&argc, &argv);
+      /* Initialize MPI, first thing in the program (may modify argc and argv) */
+      MPI_Init(&argc, &argv);
     
-    MPI_Comm_size(MPI_COMM_WORLD, &comm_size); /* size <- cuántos procesos somos */
-    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);   /* node <- mi identificador, de 0 a (size-1) */
+      MPI_Comm_size(MPI_COMM_WORLD, &comm_size); /* size <- how many processes there are */
+      MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);   /* node <- my identifier, from 0 to (size-1) */
     
-    if (0 == my_rank)
-         num = 5;  /* solo el proceso 0 tiene num el valor 5 */
-    else num = 0 ; /* el resto de procesos tiene num el valor 0 */
+      if (0 == my_rank)
+           num = 5;  /* only process 0 has num with the value 5 */
+      else num = 0 ; /* the rest of the processes have num with the value 0 */
     
-    MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Barrier(MPI_COMM_WORLD);
-    printf("El proceso %d tiene num: %d\n", my_rank, num);
+      MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Barrier(MPI_COMM_WORLD);
+      printf("Process %d has num: %d\n", my_rank, num);
     
-    /* Finalizar MPI, no se puede inicializar de nuevo luego */
-    MPI_Finalize();
-    return 0;
-}
-```
+      /* Finalize MPI, cannot be initialized again later */
+      MPI_Finalize();
+      return 0;
+  }
+  ```
 
-* Se puede compilar usando `mpicc`:
-   ``` bash
+* It can be compiled using `mpicc`:
+  ```bash
   mpicc -Wall -g mpi_coll.c -o mpi_coll
-   ```
+  ```
 
-* Se puede ejecutar en la máquina local usando `mpirun`:
-  1. Primero hay que crear un archivo `machines` con la lista de máquinas (una por línea) que van a ser usadas para ejecutar:
-    ``` bash
-    cat <<EOF > machines
-    localhost
-    localhost
-    EOF
-    ```
-  2. Luego se ha de usar `mpirun`:
-    ``` bash
-    mpirun -np 2 ./mpi_coll
-    ```
+* It can be run on the local machine using `mpirun`:
+  1. First, create a `machines` file with the list of machines (one per line) that will be used for execution:
+     ```bash
+     cat <<EOF > machines
+     localhost
+     localhost
+     EOF
+     ```
+  2. Then use `mpirun`:
+     ```bash
+     mpirun -np 2 ./mpi_coll
+     ```
 
-* La salida sería similar a:
-  ``` bash
-  El proceso 0 tiene num: 5
-  El proceso 1 tiene num: 5
+* The output would be similar to:
+  ```bash
+  Process 0 has num: 5
+  Process 1 has num: 5
   ```
 
 
-### Ejemplo en C: cálculo de π con MPI
+### Example in C: calculating π with MPI
 
-**pi_mpi.c**
-```c
-#include <math.h>
-#include <stdio.h>
-#include <mpi.h>
+* **pi_mpi.c**
+  ```c
+  #include <math.h>
+  #include <stdio.h>
+  #include <mpi.h>
 
-#define N 1E9
-#define d 1E-9
+  #define N 1E9
+  #define d 1E-9
 
-int main(int argc, char* argv[])
-{
+  int main(int argc, char* argv[])
+  {
     int rank, size;
     double pi = 0.0, result = 0.0, sum = 0.0, s = 0, x = 0;
     MPI_Init(&argc, &argv);
@@ -327,49 +332,49 @@ int main(int argc, char* argv[])
 
     MPI_Finalize();
     return 0;
-}
-```
+  }
+  ```
 
-* Se puede compilar usando `mpicc`:
-  ``` bash
+* It can be compiled using `mpicc`:
+  ```bash
   mpicc -Wall -g pi_mpi.c -lm -o pi_mpi
   ```
 
-* Se puede ejecutar en la máquina local usando `mpirun`:
-  * Primero hay que crear un archivo `machines` con la lista de máquinas (una por línea) que van a ser usadas para ejecutar:
-    ``` bash
+* It can be run on the local machine using `mpirun`:
+  * First, create a `machines` file with the list of machines (one per line) that will be used for execution:
+    ```bash
     cat <<EOF > machines
     localhost
     localhost
     EOF
     ```
-  * Luego se ha de usar `mpirun`:
-    ``` bash
+  * Then use `mpirun`:
+    ```bash
     mpirun -np 2 -machinefile machines ./pi_mpi
     ```
 
-* La salida sería similar a:
-  ``` bash
+* The output would be similar to:
+  ```bash
   np =  2; PI = 3.141593
   ```
 
 
-### Ejemplo en C: cálculo de π con OpenMP
+### Example in C: calculating π with OpenMP
 
-**pi_omp.c**
-```c
-#include <stdlib.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/time.h>
-#include <omp.h>
+* **pi_omp.c**
+  ```c
+  #include <stdlib.h>
+  #include <math.h>
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include <sys/time.h>
+  #include <omp.h>
 
-#define N 1000000000
-#define d 1E-9
+  #define N 1000000000
+  #define d 1E-9
 
-int main ( int argc, char* argv[] )
-{
+  int main ( int argc, char* argv[] )
+  {
     long long i;
     double PI = 0.0, result = 0.0;
 
@@ -383,27 +388,27 @@ int main ( int argc, char* argv[] )
     printf("PI = %f\n", PI);
 
     return 0;
-}
-```
+  }
+  ```
 
-* Se puede compilar usando:
-  ``` bash
+* It can be compiled using:
+  ```bash
   gcc -o pi_omp -fopenmp pi_omp.c -lm
   ```
-  * Se precisa la librería de OpenMP `libopenmp.a` y la librería matemática `libm.a`
+* The OpenMP library `libopenmp.a` and the math library `libm.a` are required.
 
-* Se puede ejecutar mediante:
-   ``` bash
+* It can be executed using:
+  ```bash
   user$ ./pi_omp
-   ```
+  ```
 
-* La salida sería similar a:
-  ``` bash
+* The output would be similar to:
+  ```bash
   PI = 3.141593
   ```
 
 
-### Lecturas adicionales
+### Further reading
 
 * https://mpitutorial.com/tutorials/mpi-scatter-gather-and-allgather/
 * http://hustcat.github.io/collective-communication-in-mpi/
