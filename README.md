@@ -18,7 +18,7 @@
  <table>
   <tr><th>Topic</th><th>Lesson</th><th>Study materials</th></tr>
   <tr>
-      <td rowspan="2">1</td>
+      <td rowspan="1">0</td>
       <td>C and make for distributed systems</td>
       <td>
         <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-candmake/ssdd_c.md">C aspects for distributed systems</a></li>
@@ -26,7 +26,15 @@
       </td>
   </tr>
   <tr>
-      <td>Concurrenty on distributed systems</td>
+      <td rowspan="1">1</td>
+      <td>Introduction</td>
+      <td>
+        <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-intro/intro.md">Introduction to distributed systems</a></li>
+      </td>
+  </tr>
+  <tr>
+      <td rowspan="1">2</td>
+      <td>Communication and synchronization</td>
       <td>
         <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-concurrency/ssdd_threads_posix.md">Concurrency based on POSIX</a></li>
         <li> <a href="https://github.com/acaldero/uc3m_ds/blob/main/materials/topic-concurrency/ssdd_threads_c.md">Concurrency base on C<sub>11</sub></a></li>
