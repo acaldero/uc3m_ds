@@ -8,7 +8,6 @@
 
  * [Support materials](#support-materials)
  * [Practical use cases](#practical-use-cases)
- * [Exercises](#exercises)
 
 
 ## Support materials
@@ -116,16 +115,60 @@
 
 ## Practical use cases
 
-  * [Example of transforming a monolithic application into a distributed application: key-value storage](/materials/pc-keyvalue/#readme)
-    * [Example of centralized monolithic key-value storage](/materials/pc-keyvalue/kv-centralized-monolithic#readme)
-    * [Example of distributed key-value storage based on POSIX queues](/materials/pc-keyvalue/kv-distributed-mqueue#readme)
-    * [Example of distributed key-value storage based on sockets](/materials/pc-keyvalue/kv-distributed-sockets#readme)
-    * [Example of distributed key-value storage based on RPC](/materials/pc-keyvalue/kv-distributed-rpc#readme)
+### Transforming a monolithic application into a distributed application:
 
-  * [Example of transforming a monolithic application into a distributed application: calculator](/materials/pc-calculator/#readme)
-    * [Example of a centralized monolithic calculator](/materials/pc-calculator/cal-centralized-monolithic#readme)
-    * [Example of a distributed calculator based on POSIX queues](/materials/pc-calculator/cal-distributed-mqueue#readme)
-    * [Example of a distributed calculator based on sockets](/materials/pc-calculator/cal-distributed-sockets#readme)
-    * [Example of a distributed calculator based on RPC](/materials/pc-calculator/cal-distributed-rpc#readme)
-    * [Example of a distributed calculator based on GSOAP](/materials/pc-calculator/cal-distributed-gsoap-standalone#readme)
+<html>
+<ul><small>
+<table width="100%">
+<tr><th>Storage <br>key-value</th>
+<td>
+</html>
+
+ [Key steps for transforming](/materials/pc-keyvalue/#readme) a storage application (key-value) from <br> a monolithic architecture to a distributed architecture:
+ ```mermaid
+  %%{init: {"flowchart": {"diagramPadding": 80}}}%%
+  flowchart LR
+    A[<a href='https://github.com/acaldero/uc3m_ds/tree/main/materials/pc-keyvalue/kv-centralized-monolithic#readme'>monolithic</a>]
+    B[<a href='https://github.com/acaldero/uc3m_ds/tree/main/materials/pc-keyvalue/kv-centralized-library#readme'>monolithic with<br> library</a>]
+    C{proxy <br>pattern <br>with...}
+    D[<a href='https://github.com/acaldero/uc3m_ds/tree/main/materials/pc-keyvalue/kv-distributed-mqueue#readme'>POSIX queues</a>]
+    E[<a href='https://github.com/acaldero/uc3m_ds/tree/main/materials/pc-keyvalue/kv-distributed-sockets#readme'>sockets</a>]
+    F[<a href='https://github.com/acaldero/uc3m_ds/tree/main/materials/pc-keyvalue/kv-distributed-rpc#readme'>RPC</a>]
+    A --> B
+    B --> C
+    C -- mqueue  --> D
+    C -- sockets --> E
+    C -- RPC     --> F
+  ```
+
+<html>
+</td></tr>
+<tr><th>Calculator</th>
+<td>
+</html>
+
+ [Key steps for transforming](/materials/pc-calculator/#readme) a computational application (calculator) from <br> a monolithic architecture to a distributed architecture:
+ ```mermaid
+  %%{init: {"flowchart": {"diagramPadding": 80}}}%%
+  flowchart LR
+    A[<a href='https://github.com/acaldero/uc3m_ds/tree/main/materials/pc-calculator/cal-centralized-monolitico#readme'>monolithic</a>]
+    B[<a href='https://github.com/acaldero/uc3m_ds/tree/main/materials/pc-calculator/cal-centralized-library#readme'>monolithic with<br> library</a>]
+    C{proxy <br>pattern <br>with...}
+    D[<a href='https://github.com/acaldero/uc3m_ds/tree/main/materials/pc-calculator/cal-distributed-mqueue#readme'>POSIX queues</a>]
+    E[<a href='https://github.com/acaldero/uc3m_ds/tree/main/materials/pc-calculator/cal-distributed-sockets#readme'>sockets</a>]
+    F[<a href='https://github.com/acaldero/uc3m_ds/tree/main/materials/pc-calculator/cal-distributed-rpc#readme'>RPC</a>]
+    G[<a href='https://github.com/acaldero/uc3m_ds/tree/main/materials/pc-calculator/cal-distributed-gsoap-standalone#readme'>gSOAP</a>]
+    A --> B
+    B --> C
+    C -- mqueue  --> D
+    C -- sockets --> E
+    C -- RPC     --> F
+    C -- gSOAP   --> G
+  ```
+
+<html>
+</td></tr>
+</table>
+</small></ul>
+</html>
 
